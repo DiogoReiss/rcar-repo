@@ -1,0 +1,26 @@
+// Layout
+$sidebar-width: 260px;
+$sidebar-collapsed-width: 64px;
+$header-height: 64px;
+// Colors (base tokens — will be extended with PrimeNG theming)
+$color-primary: #1a73e8;
+$color-primary-dark: #1557b0;
+$color-accent: #f9a825;
+$color-danger: #d32f2f;
+$color-success: #388e3c;
+$color-warning: #f57c00;
+$color-info: #0288d1;
+// Typography
+$font-family-base: 'Inter', sans-serif;
+$font-size-base: 1rem;
+// Spacing
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+// Breakpoints
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
