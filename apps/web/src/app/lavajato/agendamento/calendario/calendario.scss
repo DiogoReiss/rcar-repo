@@ -2,29 +2,59 @@
 @use 'variables' as *;
 
 :host { display: block; }
-.header-actions { display: flex; gap: $spacing-sm; align-items: center; }
+.header-actions { display: flex; gap: $spacing-sm; align-items: center; flex-wrap: wrap; }
 .date-picker { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; font-size: $font-size-base; }
 
-.schedule-list { display: flex; flex-direction: column; gap: $spacing-sm; }
+// KPI bar
+.kpi-row { display: flex; gap: $spacing-md; padding: $spacing-md $spacing-lg; flex-wrap: wrap; }
+.kpi-card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 100px; padding: $spacing-md $spacing-lg; border-radius: 10px; background: #fff;
+  border: 1px solid $color-neutral-200; gap: 2px;
+
+  .kpi-value { font-size: 1.5rem; font-weight: 700; }
+  .kpi-label { font-size: 0.75rem; color: $color-neutral-500; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  &--pending { border-left: 4px solid $color-warning; }
+  &--active  { border-left: 4px solid $color-info; }
+  &--done    { border-left: 4px solid $color-success; }
+}
+
+// Form grid inside dialog
+.form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-md;
+  input, select { width: 100%; padding: $spacing-sm; border: 1px solid $color-neutral-300; border-radius: 6px; font-size: $font-size-base; background: #fff; &:focus { outline: none; border-color: $color-primary; } }
+  lync-form-field[ng-reflect-full='true'] { grid-column: 1 / -1; }
+}
+
+// Schedule list
+.schedule-list { display: flex; flex-direction: column; gap: $spacing-sm; padding: 0 $spacing-lg $spacing-lg; }
 
 .schedule-card {
   display: flex; gap: $spacing-md; align-items: flex-start;
   background: #fff; border-radius: 10px; padding: $spacing-md;
   box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-left: 4px solid #e2e8f0;
+  transition: box-shadow 0.15s;
+  &:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
 
-  &--agendado    { border-left-color: $color-warning; }
+  &--agendado       { border-left-color: $color-warning; }
   &--em_atendimento { border-left-color: $color-info; }
-  &--concluido   { border-left-color: $color-success; opacity: 0.75; }
-  &--cancelado   { border-left-color: #cbd5e1; opacity: 0.55; }
+  &--concluido      { border-left-color: $color-success; opacity: 0.75; }
+  &--cancelado      { border-left-color: #cbd5e1; opacity: 0.55; }
 }
+
 .schedule-time { font-size: 1.25rem; font-weight: 700; color: $color-primary; min-width: 56px; }
-.schedule-info { flex: 1; display: flex; flex-direction: column; gap: 2px; strong { font-size: 0.95rem; } span { font-size: 0.85rem; color: #475569; } small { color: #94a3b8; font-size: 0.78rem; } }
+.schedule-info {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  strong { font-size: 0.95rem; }
+  span   { font-size: 0.85rem; color: #475569; }
+  small  { color: #94a3b8; font-size: 0.78rem; }
+  .schedule-phone { color: $color-neutral-500; }
+}
 .schedule-right { display: flex; flex-direction: column; align-items: flex-end; gap: $spacing-xs; }
-.schedule-actions { display: flex; gap: $spacing-xs; }
+.schedule-actions { display: flex; gap: $spacing-xs; flex-wrap: wrap; justify-content: flex-end; }
 
-.payment-bar { display: flex; gap: $spacing-sm; align-items: center; padding: $spacing-sm $spacing-md; background: #f0fdf4; border-radius: 8px; select { padding: $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; } }
-
-.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; }
-
+.btn-success { background: $color-success; color: #fff; &:hover { background: $color-success-dark; } }
 .badge--operador { background: #dbeafe; color: #1e40af; }
 
+.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; margin: 0 $spacing-lg; }
