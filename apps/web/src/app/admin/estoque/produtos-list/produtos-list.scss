@@ -1,8 +1,14 @@
+@use 'admin' as *;
 @use 'variables' as *;
 
 :host {
   display: block;
   padding: $spacing-lg;
+}
+
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
 }
 
 .page-header {
@@ -31,4 +37,21 @@
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: $spacing-lg;
+}
+
+.alert-low-stock {
+  background: #fef9c3;
+  border: 1px solid $color-warning;
+  color: #854d0e;
+  border-radius: 8px;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.low-stock-row {
+  td {
+    background: #fffbeb;
+  }
 }

@@ -1,0 +1,45 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Usuários</h1>
+    <a class="btn-primary" routerLink="/admin/usuarios/novo">+ Novo Usuário</a>
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Perfil</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.nome }}</td>
+              <td>{{ user.email }}</td>
+              <td><span class="badge" [class]="'badge--' + user.role.toLowerCase()">{{ roleLabel(user.role) }}</span></td>
+              <td><span class="badge" [class]="user.ativo ? 'badge--success' : 'badge--inactive'">{{ user.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+              <td class="actions">
+                <a [routerLink]="['/admin/usuarios', user.id, 'editar']" class="btn-sm">Editar</a>
+                <button class="btn-sm btn-danger" (click)="onRemove(user)" [disabled]="removing() === user.id">
+                  {{ removing() === user.id ? '...' : 'Desativar' }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty">Nenhum usuário encontrado.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+

@@ -1,0 +1,68 @@
+<section class="page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? 'Editar Cliente' : 'Novo Cliente' }}</h1>
+    <a class="btn-secondary" routerLink="/admin/clientes">← Voltar</a>
+  </header>
+
+  @if (error()) { <div class="error">{{ error() }}</div> }
+
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-field">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" [ngModel]="tipo()" (ngModelChange)="tipo.set($event)" name="tipo" [disabled]="isEdit()">
+          <option value="PF">Pessoa Física</option>
+          <option value="PJ">Pessoa Jurídica</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="nome">Nome / Razão Social</label>
+        <input id="nome" [ngModel]="nome()" (ngModelChange)="nome.set($event)" name="nome" required />
+      </div>
+
+      <div class="form-field">
+        <label for="cpfCnpj">{{ tipo() === 'PF' ? 'CPF' : 'CNPJ' }}</label>
+        <input id="cpfCnpj" [ngModel]="cpfCnpj()" (ngModelChange)="cpfCnpj.set($event)" name="cpfCnpj" required [disabled]="isEdit()" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="telefone">Telefone</label>
+        <input id="telefone" [ngModel]="telefone()" (ngModelChange)="telefone.set($event)" name="telefone" />
+      </div>
+
+      @if (tipo() === 'PF') {
+        <div class="form-field">
+          <label for="cnh">CNH</label>
+          <input id="cnh" [ngModel]="cnh()" (ngModelChange)="cnh.set($event)" name="cnh" />
+        </div>
+        <div class="form-field">
+          <label for="cnhValidade">Validade CNH</label>
+          <input id="cnhValidade" type="date" [ngModel]="cnhValidade()" (ngModelChange)="cnhValidade.set($event)" name="cnhValidade" />
+        </div>
+      }
+
+      @if (tipo() === 'PJ') {
+        <div class="form-field">
+          <label for="razaoSocial">Razão Social</label>
+          <input id="razaoSocial" [ngModel]="razaoSocial()" (ngModelChange)="razaoSocial.set($event)" name="razaoSocial" />
+        </div>
+        <div class="form-field">
+          <label for="responsavel">Responsável</label>
+          <input id="responsavel" [ngModel]="responsavel()" (ngModelChange)="responsavel.set($event)" name="responsavel" />
+        </div>
+      }
+
+      <div class="form-actions full">
+        <button type="submit" class="btn-primary" [disabled]="loading()">{{ loading() ? 'Salvando...' : 'Salvar' }}</button>
+        <a class="btn-secondary" routerLink="/admin/clientes">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+

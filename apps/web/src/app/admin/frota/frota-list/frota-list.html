@@ -1,0 +1,46 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Frota</h1>
+    <a class="btn-primary" routerLink="/admin/frota/novo">+ Novo Veículo</a>
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Modelo</th>
+            <th>Ano</th>
+            <th>Categoria</th>
+            <th>Status</th>
+            <th>KM</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (v of veiculos(); track v.id) {
+            <tr>
+              <td><strong>{{ v.placa }}</strong></td>
+              <td>{{ v.modelo }} — {{ v.cor }}</td>
+              <td>{{ v.ano }}</td>
+              <td>{{ catLabel(v.categoria) }}</td>
+              <td><span class="badge" [class]="statusClass(v.status)">{{ statusLabel(v.status) }}</span></td>
+              <td>{{ v.kmAtual.toLocaleString('pt-BR') }}</td>
+              <td class="actions">
+                <a [routerLink]="['/admin/frota', v.id, 'editar']" class="btn-sm">Editar</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="empty">Nenhum veículo cadastrado.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+

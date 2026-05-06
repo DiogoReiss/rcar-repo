@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page-header">
+    <h1>{{ isEdit() ? 'Editar Veículo' : 'Novo Veículo' }}</h1>
+    <a class="btn-secondary" routerLink="/admin/frota">← Voltar</a>
+  </header>
+
+  @if (error()) { <div class="error">{{ error() }}</div> }
+
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-field">
+        <label for="placa">Placa</label>
+        <input id="placa" [ngModel]="placa()" (ngModelChange)="placa.set($event)" name="placa" placeholder="ABC-1234" required [disabled]="isEdit()" />
+      </div>
+      <div class="form-field">
+        <label for="modelo">Modelo</label>
+        <input id="modelo" [ngModel]="modelo()" (ngModelChange)="modelo.set($event)" name="modelo" required />
+      </div>
+      <div class="form-field">
+        <label for="cor">Cor</label>
+        <input id="cor" [ngModel]="cor()" (ngModelChange)="cor.set($event)" name="cor" required />
+      </div>
+      <div class="form-field">
+        <label for="ano">Ano</label>
+        <input id="ano" type="number" [ngModel]="ano()" (ngModelChange)="ano.set(+$event)" name="ano" min="2000" required />
+      </div>
+      <div class="form-field">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" [ngModel]="categoria()" (ngModelChange)="categoria.set($event)" name="categoria">
+          @for (cat of categorias; track cat) { <option [value]="cat">{{ cat }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="status">Status</label>
+        <select id="status" [ngModel]="status()" (ngModelChange)="status.set($event)" name="status">
+          @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="km">KM Atual</label>
+        <input id="km" type="number" [ngModel]="kmAtual()" (ngModelChange)="kmAtual.set(+$event)" name="km" min="0" />
+      </div>
+      <div class="form-actions full">
+        <button type="submit" class="btn-primary" [disabled]="loading()">{{ loading() ? 'Salvando...' : 'Salvar' }}</button>
+        <a class="btn-secondary" routerLink="/admin/frota">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+

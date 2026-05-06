@@ -1,11 +1,59 @@
-<section class="produtos-list">
+<section class="page">
   <header class="page-header">
     <h1>Estoque — Produtos</h1>
-    <p>Gerencie os produtos e insumos utilizados nos serviços do lavajato.</p>
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Movimentações</a>
+      <a class="btn-primary" routerLink="/admin/estoque/novo">+ Novo Produto</a>
+    </div>
   </header>
 
-  <div class="placeholder-content">
-    <p>Listagem de produtos será implementada na Phase 3.</p>
-  </div>
-</section>
+  @if (lowStockCount() > 0) {
+    <div class="alert-low-stock">
+      ⚠️ {{ lowStockCount() }} produto(s) com estoque abaixo do mínimo
+    </div>
+  }
 
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Unidade</th>
+            <th>Qtd Atual</th>
+            <th>Estoque Mínimo</th>
+            <th>Custo Unit.</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of products(); track p.id) {
+            <tr [class.low-stock-row]="isLow(p)">
+              <td>
+                <strong>{{ p.nome }}</strong>
+                @if (p.descricao) { <br><small>{{ p.descricao }}</small> }
+                @if (isLow(p)) { <span class="badge badge--danger" style="margin-left:6px">Estoque baixo</span> }
+              </td>
+              <td>{{ p.unidade }}</td>
+              <td>{{ p.quantidadeAtual }}</td>
+              <td>{{ p.estoqueMinimo }}</td>
+              <td>{{ p.custoUnitario != null ? ('R$ ' + p.custoUnitario) : '—' }}</td>
+              <td><span class="badge" [class]="p.ativo ? 'badge--success' : 'badge--inactive'">{{ p.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+              <td class="actions">
+                <a [routerLink]="['/admin/estoque', p.id, 'editar']" class="btn-sm">Editar</a>
+                <a [routerLink]="['/admin/estoque/movimentacoes']" [queryParams]="{ productId: p.id }" class="btn-sm">Histórico</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,11 +1,42 @@
-<section class="produto-form">
+<section class="page">
   <header class="page-header">
-    <h1>Cadastro de Produto</h1>
-    <p>Adicione ou edite um produto do estoque do lavajato.</p>
+    <h1>{{ isEdit() ? 'Editar Produto' : 'Novo Produto' }}</h1>
+    <a class="btn-secondary" routerLink="/admin/estoque">← Voltar</a>
   </header>
 
-  <div class="placeholder-content">
-    <p>Formulário de produto será implementado na Phase 3.</p>
+  @if (error()) { <div class="error">{{ error() }}</div> }
+
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-field full">
+        <label for="nome">Nome</label>
+        <input id="nome" [ngModel]="nome()" (ngModelChange)="nome.set($event)" name="nome" required />
+      </div>
+      <div class="form-field full">
+        <label for="descricao">Descrição (opcional)</label>
+        <textarea id="descricao" [ngModel]="descricao()" (ngModelChange)="descricao.set($event)" name="descricao"></textarea>
+      </div>
+      <div class="form-field">
+        <label for="unidade">Unidade</label>
+        <input id="unidade" [ngModel]="unidade()" (ngModelChange)="unidade.set($event)" name="unidade" placeholder="litro, unidade, kg..." required />
+      </div>
+      <div class="form-field">
+        <label for="custoUnitario">Custo Unitário (R$)</label>
+        <input id="custoUnitario" type="number" min="0" step="0.01" [ngModel]="custoUnitario()" (ngModelChange)="custoUnitario.set(+$event || undefined)" name="custoUnitario" />
+      </div>
+      <div class="form-field">
+        <label for="quantidadeAtual">Quantidade Inicial</label>
+        <input id="quantidadeAtual" type="number" min="0" step="0.001" [ngModel]="quantidadeAtual()" (ngModelChange)="quantidadeAtual.set(+$event)" name="quantidadeAtual" [disabled]="isEdit()" />
+      </div>
+      <div class="form-field">
+        <label for="estoqueMinimo">Estoque Mínimo</label>
+        <input id="estoqueMinimo" type="number" min="0" step="0.001" [ngModel]="estoqueMinimo()" (ngModelChange)="estoqueMinimo.set(+$event)" name="estoqueMinimo" />
+      </div>
+      <div class="form-actions full">
+        <button type="submit" class="btn-primary" [disabled]="loading()">{{ loading() ? 'Salvando...' : 'Salvar' }}</button>
+        <a class="btn-secondary" routerLink="/admin/estoque">Cancelar</a>
+      </div>
+    </form>
   </div>
 </section>
 

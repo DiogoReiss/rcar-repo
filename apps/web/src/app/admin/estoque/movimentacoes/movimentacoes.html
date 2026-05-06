@@ -1,11 +1,76 @@
-<section class="movimentacoes">
+<section class="page">
   <header class="page-header">
     <h1>Movimentações de Estoque</h1>
-    <p>Histórico de entradas, saídas e ajustes de estoque.</p>
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/admin/estoque">← Produtos</a>
+      <button class="btn-primary" (click)="showForm.set(true)">+ Nova Movimentação</button>
+    </div>
   </header>
 
-  <div class="placeholder-content">
-    <p>Histórico de movimentações será implementado na Phase 3.</p>
-  </div>
+  @if (showForm()) {
+    <div class="form-card" style="margin-bottom:1.5rem">
+      <h3 style="margin:0 0 1rem;font-size:1rem">Registrar Movimentação</h3>
+      @if (formError()) { <div class="error">{{ formError() }}</div> }
+      <form (ngSubmit)="onSubmitMovement()" class="form-grid">
+        <div class="form-field">
+          <label for="pid">ID do Produto</label>
+          <input id="pid" [ngModel]="productId()" (ngModelChange)="productId.set($event)" name="pid" placeholder="UUID do produto" required />
+        </div>
+        <div class="form-field">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" [ngModel]="tipo()" (ngModelChange)="tipo.set($event)" name="tipo">
+            <option value="ENTRADA">Entrada</option>
+            <option value="SAIDA">Saída</option>
+            <option value="AJUSTE">Ajuste</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="qty">Quantidade</label>
+          <input id="qty" type="number" min="0.001" step="0.001" [ngModel]="quantidade()" (ngModelChange)="quantidade.set(+$event)" name="qty" required />
+        </div>
+        <div class="form-field">
+          <label for="motivo">Motivo (opcional)</label>
+          <input id="motivo" [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo" placeholder="Ex: Compra de fornecedor" />
+        </div>
+        <div class="form-actions full">
+          <button type="submit" class="btn-primary" [disabled]="formLoading()">{{ formLoading() ? 'Salvando...' : 'Registrar' }}</button>
+          <button type="button" class="btn-secondary" (click)="showForm.set(false)">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Produto</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of movements(); track m.id) {
+            <tr>
+              <td>{{ formatDate(m.createdAt) }}</td>
+              <td>{{ m.product?.nome ?? m.productId }}</td>
+              <td><span class="badge" [class]="tipoClass(m.tipo)">{{ tipoLabel(m.tipo) }}</span></td>
+              <td>{{ m.quantidade }} {{ m.product?.unidade ?? '' }}</td>
+              <td>{{ m.motivo ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty">Nenhuma movimentação encontrada.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </section>
 

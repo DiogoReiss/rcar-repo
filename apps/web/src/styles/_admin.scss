@@ -1,0 +1,229 @@
+@use 'variables' as *;
+
+// ─── Page layout ────────────────────────────────────────────────────────────
+.page {
+  display: block;
+  padding: $spacing-lg;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    font-family: $font-family-base;
+  }
+}
+
+// ─── Buttons ────────────────────────────────────────────────────────────────
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: $color-primary-dark; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  color: $color-primary;
+  border: 1px solid $color-primary;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: rgba($color-primary, 0.06); }
+}
+
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px $spacing-sm;
+  background: transparent;
+  color: $color-primary;
+  border: 1px solid $color-primary;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+
+  &:hover { background: rgba($color-primary, 0.06); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-danger {
+  color: $color-danger;
+  border-color: $color-danger;
+  &:hover { background: rgba($color-danger, 0.06); }
+}
+
+// ─── Table ──────────────────────────────────────────────────────────────────
+.table-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background: #f8fafc;
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td {
+    padding: $spacing-sm $spacing-md;
+    font-size: 0.875rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  .actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  .empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: $spacing-xl;
+  }
+}
+
+// ─── Badges ─────────────────────────────────────────────────────────────────
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--success, &--DISPONIVEL { background: #dcfce7; color: #166534; }
+  &--inactive, &--INATIVO   { background: #f1f5f9; color: #64748b; }
+  &--warning, &--MANUTENCAO { background: #fef9c3; color: #854d0e; }
+  &--danger,  &--ALUGADO    { background: #fee2e2; color: #991b1b; }
+  &--gestor_geral { background: #ede9fe; color: #5b21b6; }
+  &--operador     { background: #dbeafe; color: #1e40af; }
+  &--GESTOR_GERAL { background: #ede9fe; color: #5b21b6; }
+  &--OPERADOR     { background: #dbeafe; color: #1e40af; }
+  &--pf { background: #e0f2fe; color: #0369a1; }
+  &--pj { background: #fce7f3; color: #9d174d; }
+  &--PF { background: #e0f2fe; color: #0369a1; }
+  &--PJ { background: #fce7f3; color: #9d174d; }
+}
+
+// ─── Form ────────────────────────────────────────────────────────────────────
+.form-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: $spacing-xl;
+  max-width: 600px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+
+  .full { grid-column: 1 / -1; }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  input, select, textarea {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+    background: #fff;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+  }
+
+  textarea { min-height: 80px; resize: vertical; }
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-lg;
+}
+
+// ─── State messages ──────────────────────────────────────────────────────────
+.loading { color: #64748b; padding: $spacing-xl; text-align: center; }
+.error   { color: $color-danger; background: #fef2f2; border: 1px solid $color-danger; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
+.success { color: $color-success; background: #f0fdf4; border: 1px solid $color-success; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
+
+// ─── Search bar ─────────────────────────────────────────────────────────────
+.search-bar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+
+  input {
+    flex: 1;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+  }
+}
+

@@ -1,8 +1,13 @@
 @use 'variables' as *;
+@use 'admin' as *;
 
 :host {
   display: block;
-  padding: $spacing-lg;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .page-header {
