@@ -300,18 +300,22 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ message: 'Pagamento registrado (mock).' });
   }
   if (method === 'PATCH' && url.match(/\/lavajato\/schedules\/[^/]+\/status/)) {
-    return ok({});
+    const body = req.body as Record<string, unknown>;
+    return ok({ ...MOCK_SCHEDULES[0], status: body['status'] ?? 'EM_ATENDIMENTO' });
+  }
+  if (method === 'DELETE' && url.match(/\/lavajato\/schedules\/[^/]+/)) {
+    return ok({ ...MOCK_SCHEDULES[0], status: 'CANCELADO' });
   }
   if (method === 'POST' && url.startsWith('/lavajato/schedules')) {
     const body = req.body as Record<string, unknown>;
-    return ok({ ...body, id: `sch-${Date.now()}`, status: 'AGENDADO' });
+    return ok({ ...body, id: `sch-${Date.now()}`, status: 'AGENDADO', service: MOCK_WASH_SERVICES[0] });
   }
 
   // ── Lavajato atendimentos ────────────────────────────────────────────────
   if (method === 'GET' && url.startsWith('/lavajato/atendimentos')) {
     return ok({
-      agendados: MOCK_SCHEDULES,
-      walkins: MOCK_QUEUE,
+      schedules: MOCK_SCHEDULES,
+      queues: MOCK_QUEUE,
     });
   }
 
