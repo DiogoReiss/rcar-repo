@@ -98,10 +98,10 @@
 | 🟢 | 7.4 | Criar `src/app/shared/components/app-button/` — `AppButtonComponent` (`lync-btn`) dumb button com variants (primary/secondary/danger) e loading state |
 | 🟢 | 7.5 | Criar `src/app/shared/components/page-header/` — `PageHeaderComponent` (título + slot de ações) |
 | 🟢 | 7.6 | Criar `src/app/shared/components/pagination/` — `PaginationComponent` |
-| 🔴 | 7.7 | Criar `src/app/shared/components/file-upload/` (wrapper PrimeNG FileUpload para S3) |
-| 🔴 | 7.8 | Criar `src/app/shared/pipes/currency-brl.pipe.ts` (formatar para R$) |
-| 🔴 | 7.9 | Criar `src/app/shared/pipes/date-br.pipe.ts` (formatar datas pt-BR) |
-| 🔴 | 7.10 | Criar `src/app/shared/directives/has-role.directive.ts` (mostrar/esconder por role) |
+| 🟢 | 7.7 | Criar `src/app/shared/components/file-upload/` (wrapper PrimeNG FileUpload para S3) |
+| 🟢 | 7.8 | Criar `src/app/shared/pipes/currency-brl.pipe.ts` (formatar para R$) |
+| 🟢 | 7.9 | Criar `src/app/shared/pipes/date-br.pipe.ts` (formatar datas pt-BR) |
+| 🟢 | 7.10 | Criar `src/app/shared/directives/has-role.directive.ts` (mostrar/esconder por role) |
 
 ---
 
@@ -109,10 +109,10 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 8.1 | Criar `src/app/core/auth/pages/login/login.ts` (formulário com email + senha, PrimeNG InputText + Password + Button) |
-| 🔴 | 8.2 | Criar `src/app/core/auth/pages/forgot-password/forgot-password.ts` |
-| 🔴 | 8.3 | Criar `src/app/core/auth/pages/reset-password/reset-password.ts` |
-| 🔴 | 8.4 | Implementar lógica de login no auth.service (chamar API, guardar tokens, emitir user signal) |
+| 🟢 | 8.1 | Criar `src/app/core/auth/pages/login/login.ts` (formulário com email + senha, PrimeNG InputText + Password + Button) |
+| 🟢 | 8.2 | Criar `src/app/core/auth/pages/forgot-password/forgot-password.ts` |
+| 🟢 | 8.3 | Criar `src/app/core/auth/pages/reset-password/reset-password.ts` |
+| 🟢 | 8.4 | Implementar lógica de login no auth.service (chamar API, guardar tokens, emitir user signal) |
 | 🔴 | 8.5 | Testes unitários para auth.service, auth.guard, role.guard |
 
 ---
@@ -147,7 +147,7 @@
 |--------|------|-----------|
 | 🟢 | 11.1 | Criar `src/app/admin/frota/frota-list/frota-list.ts` (tabela com filtro por status/categoria) |
 | 🟢 | 11.2 | Formulário criar/editar integrado como dialog inline (substituiu a rota `/frota/novo` e `/:id/editar`) |
-| 🔴 | 11.3 | Criar `src/app/admin/frota/veiculo-detail/veiculo-detail.ts` (detalhe com histórico de contratos e manutenções) |
+| 🟢 | 11.3 | Criar `src/app/admin/frota/veiculo-detail/veiculo-detail.ts` (detalhe com histórico de contratos e manutenções) |
 | 🟢 | 11.4 | Criar service `FrotaService` com signals |
 | 🔴 | 11.5 | Testes unitários |
 
@@ -159,7 +159,7 @@
 |--------|------|-----------|
 | 🟢 | 12.1 | Criar `src/app/admin/clientes/clientes-list/clientes-list.ts` (tabela com filtro PF/PJ e busca) |
 | 🟢 | 12.2 | Formulário criar/editar integrado como dialog inline (substituiu a rota `/clientes/novo` e `/:id/editar`) |
-| 🔴 | 12.3 | Criar `src/app/admin/clientes/cliente-detail/cliente-detail.ts` (detalhe com histórico unificado) |
+| 🟢 | 12.3 | Criar `src/app/admin/clientes/cliente-detail/cliente-detail.ts` (detalhe com histórico unificado) |
 | 🟢 | 12.4 | Criar service `ClientesService` com signals |
 | 🟢 | 12.5 | Adicionar controles de paginação à lista de clientes (A13) |
 
@@ -169,10 +169,10 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 13.1 | Criar `src/app/lavajato/agendamento/calendario/calendario.ts` (PrimeNG Calendar com horários disponíveis) |
+| 🟢 | 13.1 | Criar `src/app/lavajato/agendamento/calendario/calendario.ts` (PrimeNG Calendar com horários disponíveis) |
 | 🔴 | 13.2 | Criar `src/app/lavajato/agendamento/agendamento-form/agendamento-form.ts` (cliente + serviço + data/hora) |
-| 🔴 | 13.3 | Criar `src/app/lavajato/atendimentos/atendimentos-dia/atendimentos-dia.ts` (painel do operador com agendamentos do dia) |
-| 🔴 | 13.4 | Implementar controle de status do agendamento (AGENDADO → EM_ATENDIMENTO → CONCLUIDO/CANCELADO) |
+| 🟢 | 13.3 | Criar `src/app/lavajato/atendimentos/atendimentos-dia/atendimentos-dia.ts` (painel do operador com agendamentos do dia) |
+| 🟢 | 13.4 | Implementar controle de status do agendamento (AGENDADO → EM_ATENDIMENTO → CONCLUIDO/CANCELADO) |
 | 🔴 | 13.5 | Criar service `AgendamentoService` com signals |
 | 🔴 | 13.6 | Testes unitários |
 
@@ -185,8 +185,8 @@
 | 🟢 | 14.1 | Criar `src/app/lavajato/fila/fila-painel/fila-painel.ts` (painel real-time via SSE com lista ordenada por posição) |
 | 🔴 | 14.2 | Criar `src/app/lavajato/fila/fila-adicionar/fila-adicionar.ts` (formulário: cliente/nome avulso + serviço + placa) |
 | 🟢 | 14.3 | Implementar controles de status (AGUARDANDO → EM_ATENDIMENTO → CONCLUIDO) |
-| 🔴 | 14.4 | Criar `src/app/core/services/sse.service.ts` (serviço genérico de conexão SSE nativa) |
-| 🔴 | 14.5 | Criar service `FilaService` com signals + integração SSE |
+| 🟢 | 14.4 | Criar `src/app/core/services/sse.service.ts` (serviço genérico de conexão SSE nativa) |
+| 🟢 | 14.5 | Criar service `FilaService` com signals + integração SSE |
 | 🔴 | 14.6 | Testes unitários |
 
 ---
@@ -206,7 +206,7 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 16.1 | Criar `src/app/aluguel/reserva/disponibilidade/disponibilidade.ts` (seleção de categoria + período + exibição de veículos disponíveis) |
+| 🟢 | 16.1 | Criar `src/app/aluguel/reserva/disponibilidade/disponibilidade.ts` (seleção de categoria + período + exibição de veículos disponíveis) |
 | 🔴 | 16.2 | Criar `src/app/aluguel/reserva/reserva-form/reserva-form.ts` (cliente + veículo + datas + cálculo de preço) |
 | 🔴 | 16.3 | Criar `src/app/aluguel/reserva/reserva-confirmacao/reserva-confirmacao.ts` (resumo + botão confirmar) |
 | 🔴 | 16.4 | Criar service `ReservaService` com signals |
@@ -218,10 +218,10 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 17.1 | Criar `src/app/aluguel/contratos/contrato-list/contrato-list.ts` (tabela com filtro por status) |
+| 🟢 | 17.1 | Criar `src/app/aluguel/contratos/contrato-list/contrato-list.ts` (tabela com filtro por status) |
 | 🔴 | 17.2 | Criar `src/app/aluguel/contratos/contrato-abertura/contrato-abertura.ts` (vincular reserva ou criar direto, vistoria de saída) |
 | 🔴 | 17.3 | Criar `src/app/aluguel/contratos/contrato-abertura/vistoria-saida/vistoria-saida.ts` (checklist + upload fotos) |
-| 🔴 | 17.4 | Criar `src/app/aluguel/contratos/contrato-detail/contrato-detail.ts` (detalhe completo + timeline) |
+| 🟢 | 17.4 | Criar `src/app/aluguel/contratos/contrato-detail/contrato-detail.ts` (detalhe completo + timeline) |
 | 🔴 | 17.5 | Criar service `ContratoService` com signals |
 | 🔴 | 17.6 | Testes unitários |
 
@@ -231,7 +231,7 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 18.1 | Criar `src/app/aluguel/devolucao/vistoria-chegada/vistoria-chegada.ts` (checklist comparativo saída vs. chegada + fotos) |
+| 🟢 | 18.1 | Criar `src/app/aluguel/devolucao/vistoria-chegada/vistoria-chegada.ts` (checklist comparativo saída vs. chegada + fotos) |
 | 🔴 | 18.2 | Criar `src/app/aluguel/devolucao/fechamento/fechamento.ts` (extras: km excedente, combustível, avarias + valor final) |
 | 🔴 | 18.3 | Integrar com registro de pagamento |
 | 🔴 | 18.4 | Testes unitários |
@@ -299,5 +299,5 @@
 | 🟢 | 23.5 | **FormFieldComponent**: wrapper consistente de label + input + error/hint aplicado em todos os formulários de dialog |
 | 🟢 | 23.6 | **Rotas de formulário removidas**: `/admin/*/novo` e `/admin/*/:id/editar` eliminadas; estado de form vive no list component |
 | 🔴 | 23.7 | Migrar inputs de lavajato/agendamento e aluguel/reserva para `FormFieldComponent` |
-| 🔴 | 23.8 | Implementar `SuccessToastService` ou usar `MessageService` diretamente para toasts de sucesso em ações CRUD |
+| 🟢 | 23.8 | Implementar `SuccessToastService` ou usar `MessageService` diretamente para toasts de sucesso em ações CRUD |
 | 🔴 | 23.9 | Adicionar `ToastModule` ao mock mode para validar sem API real |
