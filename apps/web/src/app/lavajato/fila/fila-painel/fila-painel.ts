@@ -1,110 +1,84 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ApiService } from '@core/services/api.service';
-import { firstValueFrom } from 'rxjs';
-import { WashQueueEntry, WashService } from '@shared/models/entities.model';
-import { environment } from '@env/environment';
+import { ChangeDetectionStrategy, Component, inject, signal, OnDestroy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { MessageService } from 'primeng/api';
+import { FilaService } from '../fila.service';
+import { PaymentMethod } from '@shared/models/entities.model';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
+import AppButtonComponent from '@shared/components/app-button/app-button';
+import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
 
 @Component({
   selector: 'lync-fila-painel',
-  imports: [FormsModule],
+  imports: [RouterLink, PageHeaderComponent, AppButtonComponent, PaymentDialogComponent],
   templateUrl: './fila-painel.html',
   styleUrl: './fila-painel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class FilaPainelComponent implements OnInit, OnDestroy {
-  private readonly api = inject(ApiService);
-  private sse: EventSource | null = null;
+export default class FilaPainelComponent implements OnDestroy {
+  private readonly filaService = inject(FilaService);
+  private readonly toast = inject(MessageService);
+  private sseSub?: Subscription;
 
-  readonly queue = signal<WashQueueEntry[]>([]);
-  readonly services = signal<WashService[]>([]);
-  readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
+  readonly queue      = this.filaService.queue;
+  readonly services   = this.filaService.services;
+  readonly loading    = this.filaService.loading;
+
   readonly lastUpdate = signal('');
+  readonly sseError   = signal(false);
 
-  readonly showForm = signal(false);
-  readonly formLoading = signal(false);
-  readonly formError = signal<string | null>(null);
-  readonly formNome = signal('');
-  readonly formServiceId = signal('');
-  readonly formPlaca = signal('');
+  // Payment dialog
+  readonly payingId   = signal<string | null>(null);
+  readonly payLoading = signal(false);
 
-  readonly payingId = signal<string | null>(null);
-  readonly payMethod = signal('PIX');
+  readonly statusLabel: Record<string, string> = {
+    AGUARDANDO: 'Aguardando', EM_ATENDIMENTO: 'Em Atendimento', CONCLUIDO: 'Concluído',
+  };
 
-  readonly statusLabel: Record<string, string> = { AGUARDANDO: 'Aguardando', EM_ATENDIMENTO: 'Em Atendimento', CONCLUIDO: 'Concluído' };
-  readonly statusClass: Record<string, string> = { AGUARDANDO: 'badge--warning', EM_ATENDIMENTO: 'badge--operador', CONCLUIDO: 'badge--success' };
+  readonly aguardando    = () => this.queue().filter(q => q.status === 'AGUARDANDO');
+  readonly emAtendimento = () => this.queue().filter(q => q.status === 'EM_ATENDIMENTO');
 
-  ngOnInit() {
-    this.loadServices();
-    this.loadQueue();
+  constructor() {
+    this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe();
+    this.filaService.loadQueue().pipe(takeUntilDestroyed()).subscribe();
     this.connectSSE();
   }
 
-  ngOnDestroy() { this.sse?.close(); }
+  ngOnDestroy() { this.sseSub?.unsubscribe(); }
 
   private connectSSE() {
-    // A9: EventSource can't send Authorization headers, so we pass token as query param
-    // The server's JWT strategy accepts ?token= for SSE endpoints
-    const token = localStorage.getItem('rcar_access_token') ?? '';
-    const url = token
-      ? `${environment.apiUrl}/lavajato/queue/stream?token=${encodeURIComponent(token)}`
-      : `${environment.apiUrl}/lavajato/queue/stream`;
-    this.sse = new EventSource(url);
-    this.sse.onmessage = () => {
-      this.lastUpdate.set(new Date().toLocaleTimeString('pt-BR'));
-      this.loadQueue();
-    };
-    this.sse.onerror = () => {
-      // Reconnect handled automatically by EventSource, but update error state
-      this.error.set('SSE connection lost. Reconnecting...');
-    };
-  }
-
-  async loadServices() {
-    try {
-      const res = await firstValueFrom(this.api.get<WashService[]>('/wash/services'));
-      this.services.set(res);
-      if (res.length) this.formServiceId.set(res[0].id);
-    } catch { /* silent */ }
-  }
-
-  async loadQueue() {
-    this.loading.set(true);
-    try {
-      const res = await firstValueFrom(this.api.get<WashQueueEntry[]>('/lavajato/queue'));
-      this.queue.set(res);
-    } catch (e: any) { this.error.set('Erro ao carregar fila.'); }
-    finally { this.loading.set(false); }
-  }
-
-  async onAddToQueue() {
-    this.formLoading.set(true); this.formError.set(null);
-    try {
-      await firstValueFrom(this.api.post('/lavajato/queue', {
-        nomeAvulso: this.formNome(), serviceId: this.formServiceId(),
-        veiculoPlaca: this.formPlaca() || undefined,
-      }));
-      this.showForm.set(false);
-      this.formNome.set(''); this.formPlaca.set('');
-      await this.loadQueue();
-    } catch (e: any) {
-      this.formError.set(e?.error?.message ?? 'Erro ao entrar na fila.');
-    } finally { this.formLoading.set(false); }
+    this.sseSub = this.filaService.connectStream().subscribe({
+      next: (payload) => {
+        if (payload?.queue) {
+          this.filaService.queue.set(payload.queue);
+        } else {
+          this.filaService.loadQueue().pipe(takeUntilDestroyed()).subscribe();
+        }
+        this.lastUpdate.set(new Date().toLocaleTimeString('pt-BR'));
+        this.sseError.set(false);
+      },
+      error: () => this.sseError.set(true),
+    });
   }
 
   async onAdvance(id: string) {
-    await firstValueFrom(this.api.patch(`/lavajato/queue/${id}/advance`, {}));
-    await this.loadQueue();
+    await firstValueFrom(this.filaService.advance(id));
+    await firstValueFrom(this.filaService.loadQueue());
+    this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
   }
 
-  async onPay(id: string) {
-    await firstValueFrom(this.api.post(`/lavajato/queue/${id}/payment`, { metodo: this.payMethod() }));
-    this.payingId.set(null);
-    await this.loadQueue();
+  async onPay(metodo: PaymentMethod) {
+    const id = this.payingId();
+    if (!id) return;
+    this.payLoading.set(true);
+    try {
+      await firstValueFrom(this.filaService.pay(id, metodo));
+      this.payingId.set(null);
+      this.toast.add({ severity: 'success', summary: 'Pagamento registrado', life: 3000 });
+      await firstValueFrom(this.filaService.loadQueue());
+    } finally {
+      this.payLoading.set(false);
+    }
   }
-
-  readonly aguardando = () => this.queue().filter(q => q.status === 'AGUARDANDO');
-  readonly emAtendimento = () => this.queue().filter(q => q.status === 'EM_ATENDIMENTO');
-  formatPrice(v: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
 }

@@ -1,0 +1,74 @@
+<lync-page-header title="Entrar na Fila">
+  <a routerLink="/lavajato/fila" class="btn-secondary">← Voltar</a>
+</lync-page-header>
+
+<div class="form-container">
+  <div class="mode-tabs" role="tablist">
+    <button
+      role="tab"
+      [class.active]="mode() === 'avulso'"
+      (click)="mode.set('avulso')"
+      [attr.aria-selected]="mode() === 'avulso'"
+    >
+      Walk-in (avulso)
+    </button>
+    <button
+      role="tab"
+      [class.active]="mode() === 'cadastrado'"
+      (click)="mode.set('cadastrado')"
+      [attr.aria-selected]="mode() === 'cadastrado'"
+    >
+      Cliente cadastrado
+    </button>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="add-form">
+    @if (mode() === 'avulso') {
+      <lync-form-field label="Nome do Cliente" [required]="true">
+        <input
+          name="nome"
+          [ngModel]="fNome()"
+          (ngModelChange)="fNome.set($event)"
+          placeholder="Nome ou apelido"
+          required
+        />
+      </lync-form-field>
+    } @else {
+      <lync-form-field label="Cliente" [required]="true">
+        <select name="cliente" [ngModel]="fClienteId()" (ngModelChange)="fClienteId.set($event)" required>
+          <option value="">— Selecione —</option>
+          @for (c of customers(); track c.id) {
+            <option [value]="c.id">{{ c.nome }} · {{ c.cpfCnpj }}</option>
+          }
+        </select>
+      </lync-form-field>
+    }
+
+    <lync-form-field label="Serviço" [required]="true">
+      <select name="service" [ngModel]="fServiceId()" (ngModelChange)="fServiceId.set($event)" required>
+        @for (s of services(); track s.id) {
+          <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }}</option>
+        }
+      </select>
+    </lync-form-field>
+
+    <lync-form-field label="Placa do Veículo">
+      <input
+        name="placa"
+        [ngModel]="fPlaca()"
+        (ngModelChange)="fPlaca.set($event)"
+        placeholder="ABC-1234 (opcional)"
+      />
+    </lync-form-field>
+
+    <div class="form-actions">
+      <lync-btn
+        label="Entrar na Fila"
+        [loading]="saving()"
+        [disabled]="!fServiceId() || (mode() === 'avulso' && !fNome()) || (mode() === 'cadastrado' && !fClienteId())"
+        type="submit"
+      />
+    </div>
+  </form>
+</div>
+

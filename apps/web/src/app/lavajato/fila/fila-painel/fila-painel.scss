@@ -2,10 +2,12 @@
 @use 'variables' as *;
 
 :host { display: block; }
-.header-actions { display: flex; gap: $spacing-sm; align-items: center; }
+.header-actions { display: flex; gap: $spacing-sm; align-items: center; flex-wrap: wrap; }
 .last-update { font-size: 0.8rem; color: #94a3b8; }
+.sse-error { font-size: 0.8rem; color: $color-warning; font-weight: 500; }
+.loading-state { padding: $spacing-lg $spacing-xl; text-align: center; color: $color-neutral-400; }
 
-.fila-columns { display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-lg; }
+.fila-columns { display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-lg; padding: 0 $spacing-lg $spacing-lg; }
 
 .fila-col { display: flex; flex-direction: column; gap: $spacing-sm; }
 
@@ -19,14 +21,22 @@
 .queue-card {
   display: flex; gap: $spacing-sm; align-items: center; background: #fff;
   border-radius: 10px; padding: $spacing-md; box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  transition: box-shadow 0.15s;
+  &:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
   &--active { border-left: 4px solid $color-info; }
 }
+
 .queue-pos { font-size: 1.25rem; font-weight: 800; color: #94a3b8; min-width: 40px; text-align: center; }
-.queue-info { flex: 1; display: flex; flex-direction: column; gap: 2px; strong { font-size: 0.95rem; } span { font-size: 0.82rem; color: #475569; } small { color: #94a3b8; font-size: 0.78rem; } }
+.queue-info {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  strong { font-size: 0.95rem; }
+  span   { font-size: 0.82rem; color: #475569; }
+  small  { color: #94a3b8; font-size: 0.78rem; }
+}
+.queue-card-actions { display: flex; flex-direction: column; gap: $spacing-xs; align-items: flex-end; }
 
 .no-entries { color: #94a3b8; text-align: center; padding: $spacing-md; margin: 0; }
 
 .payment-bar { display: flex; gap: $spacing-sm; align-items: center; padding: $spacing-sm $spacing-md; background: #f0fdf4; border-radius: 8px; margin-top: -$spacing-xs; select { padding: $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; } }
 
 .badge--operador { background: #dbeafe; color: #1e40af; }
-
