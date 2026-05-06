@@ -1,0 +1,67 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Devolução — Vistoria de Chegada</h1>
+    <a class="btn-secondary" routerLink="/aluguel/contratos">← Contratos</a>
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando contrato...</div>
+  } @else if (success()) {
+    <div class="success">✅ Devolução registrada! Redirecionando...</div>
+  } @else if (contract()) {
+    <div class="contract-summary">
+      <div class="summary-item"><span>Cliente</span><strong>{{ contract()!.customer?.nome }}</strong></div>
+      <div class="summary-item"><span>Veículo</span><strong>{{ contract()!.vehicle?.placa }} {{ contract()!.vehicle?.modelo }}</strong></div>
+      <div class="summary-item"><span>Retirada</span><strong>{{ formatDate(contract()!.dataRetirada) }}</strong></div>
+      <div class="summary-item"><span>Prev. Devolução</span><strong>{{ formatDate(contract()!.dataDevolucao) }}</strong></div>
+      <div class="summary-item"><span>KM Saída</span><strong>{{ contract()!.kmRetirada ?? '—' }}</strong></div>
+      <div class="summary-item"><span>Valor Estimado</span><strong>{{ formatPrice(contract()!.valorTotal) }}</strong></div>
+    </div>
+
+    @if (error()) { <div class="error">{{ error() }}</div> }
+
+    <div class="form-card" style="margin-top:1.5rem">
+      <form (ngSubmit)="onSubmit()" class="form-grid">
+        <div class="form-field">
+          <label for="kmDev">KM na Devolução</label>
+          <input id="kmDev" type="number" min="0" [ngModel]="kmDevolucao()" (ngModelChange)="kmDevolucao.set(+$event)" name="km" required />
+        </div>
+        <div class="form-field">
+          <label for="comb">Combustível na Chegada</label>
+          <select id="comb" [ngModel]="combustivelChegada()" (ngModelChange)="combustivelChegada.set($event)" name="comb">
+            <option value="CHEIO">Cheio</option>
+            <option value="3/4">3/4</option>
+            <option value="1/2">1/2</option>
+            <option value="1/4">1/4</option>
+            <option value="VAZIO">Vazio</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <h3 class="checklist-title">Checklist de Vistoria</h3>
+          <div class="checklist-grid">
+            @for (item of checklistItems; track item) {
+              <label class="checklist-item" [class.ok]="checklist()[item]" [class.nok]="!checklist()[item]">
+                <input type="checkbox" [ngModel]="checklist()[item]" (ngModelChange)="toggleItem(item)" [name]="item" />
+                {{ item }}
+                <span class="item-status">{{ checklist()[item] ? '✓ OK' : '✗ Avaria' }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="form-field full">
+          <label for="obs">Observações</label>
+          <textarea id="obs" [ngModel]="obs()" (ngModelChange)="obs.set($event)" name="obs"></textarea>
+        </div>
+        <div class="form-actions full">
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Registrando...' : 'Confirmar Devolução' }}
+          </button>
+          <a class="btn-secondary" routerLink="/aluguel/contratos">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  }
+</section>
+

@@ -104,3 +104,52 @@ export interface WashQueueEntry {
   customer?: { id: string; nome: string };
 }
 
+export type RentalModality = 'DIARIA' | 'SEMANAL' | 'MENSAL';
+export type ContractStatus = 'RESERVADO' | 'ATIVO' | 'ENCERRADO' | 'CANCELADO';
+
+export interface RentalContract {
+  id: string;
+  customerId: string;
+  vehicleId: string;
+  modalidade: RentalModality;
+  dataRetirada: string;
+  dataDevolucao: string;
+  dataDevReal?: string;
+  valorDiaria: number;
+  valorTotal: number;
+  valorTotalReal?: number;
+  seguro: boolean;
+  valorSeguro?: number;
+  status: ContractStatus;
+  kmRetirada?: number;
+  kmDevolucao?: number;
+  kmLimite?: number;
+  combustivelSaida?: string;
+  combustivelChegada?: string;
+  observacoes?: string;
+  createdAt: string;
+  customer?: { id: string; nome: string; cpfCnpj: string };
+  vehicle?: { id: string; placa: string; modelo: string };
+  inspections?: Inspection[];
+  payments?: Payment[];
+}
+
+export interface Inspection {
+  id: string;
+  contractId: string;
+  tipo: 'SAIDA' | 'CHEGADA';
+  checklist: Record<string, unknown>;
+  fotos: string[];
+  observacoes?: string;
+  createdAt: string;
+}
+
+export interface Payment {
+  id: string;
+  refType: string;
+  valor: number;
+  metodo: string;
+  status: string;
+  createdAt: string;
+}
+

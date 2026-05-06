@@ -1,0 +1,91 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Contratos de Aluguel</h1>
+    <div class="header-actions">
+      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); load()" name="sf" class="filter-select">
+        <option value="">Todos</option>
+        <option value="RESERVADO">Reservado</option>
+        <option value="ATIVO">Ativo</option>
+        <option value="ENCERRADO">Encerrado</option>
+        <option value="CANCELADO">Cancelado</option>
+      </select>
+      <a class="btn-primary" routerLink="/aluguel/reserva">+ Nova Reserva</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr><th>Cliente</th><th>Veículo</th><th>Retirada</th><th>Devolução</th><th>Valor</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          @for (c of contracts(); track c.id) {
+            <tr>
+              <td>{{ c.customer?.nome }}</td>
+              <td>{{ c.vehicle?.placa }} — {{ c.vehicle?.modelo }}</td>
+              <td>{{ formatDate(c.dataRetirada) }}</td>
+              <td>{{ formatDate(c.dataDevolucao) }}</td>
+              <td>{{ formatPrice(c.valorTotalReal ?? c.valorTotal) }}</td>
+              <td><span class="badge" [class]="statusClass[c.status]">{{ statusLabel[c.status] }}</span></td>
+              <td class="actions">
+                @if (c.status === 'RESERVADO') {
+                  <button class="btn-sm" (click)="openingId.set(c.id); kmRetirada.set(0)">Abertura</button>
+                  <button class="btn-sm btn-danger" (click)="onCancel(c.id)">Cancelar</button>
+                }
+                @if (c.status === 'ATIVO') {
+                  <a [routerLink]="['/aluguel/devolucao', c.id]" class="btn-sm">Devolução</a>
+                  <button class="btn-sm" (click)="payingId.set(c.id)">Pagar</button>
+                }
+              </td>
+            </tr>
+
+            @if (openingId() === c.id) {
+              <tr class="inline-form-row">
+                <td colspan="7">
+                  <div class="inline-form">
+                    <div class="form-field">
+                      <label>KM Retirada</label>
+                      <input type="number" [ngModel]="kmRetirada()" (ngModelChange)="kmRetirada.set(+$event)" name="km" min="0" />
+                    </div>
+                    <div class="form-field">
+                      <label>Combustível</label>
+                      <select [ngModel]="combustivelSaida()" (ngModelChange)="combustivelSaida.set($event)" name="comb">
+                        <option value="CHEIO">Cheio</option><option value="3/4">3/4</option>
+                        <option value="1/2">1/2</option><option value="1/4">1/4</option>
+                      </select>
+                    </div>
+                    <button class="btn-primary" (click)="onOpenContract(c.id)">Confirmar Abertura</button>
+                    <button class="btn-secondary" (click)="openingId.set(null)">Cancelar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+
+            @if (payingId() === c.id) {
+              <tr class="inline-form-row">
+                <td colspan="7">
+                  <div class="inline-form">
+                    <select [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" name="pay">
+                      <option value="PIX">PIX</option><option value="DINHEIRO">Dinheiro</option>
+                      <option value="CARTAO_CREDITO">Cartão Crédito</option><option value="CARTAO_DEBITO">Cartão Débito</option>
+                    </select>
+                    <button class="btn-primary" (click)="onPay(c.id)">Confirmar Pagamento</button>
+                    <button class="btn-secondary" (click)="payingId.set(null)">Cancelar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          } @empty {
+            <tr><td colspan="7" class="empty">Nenhum contrato encontrado.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+

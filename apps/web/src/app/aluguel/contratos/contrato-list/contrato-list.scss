@@ -1,0 +1,12 @@
+@use 'admin' as *;
+@use 'variables' as *;
+
+:host { display: block; }
+.header-actions { display: flex; gap: $spacing-sm; align-items: center; }
+.filter-select { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; }
+
+.inline-form-row td { background: #f8fafc; padding: $spacing-sm $spacing-md; }
+.inline-form { display: flex; gap: $spacing-sm; align-items: flex-end; flex-wrap: wrap;
+  .form-field { display: flex; flex-direction: column; gap: 4px; label { font-size: 0.8rem; font-weight: 500; } input, select { padding: $spacing-xs $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; font-family: $font-family-base; } }
+}
+

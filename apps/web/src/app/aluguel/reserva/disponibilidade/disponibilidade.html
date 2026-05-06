@@ -1,0 +1,99 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Nova Reserva</h1>
+  </header>
+
+  <!-- Step 1: Search availability -->
+  <div class="form-card step-card">
+    <h2 class="step-title">1. Período da Locação</h2>
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="dateFrom">Retirada</label>
+        <input id="dateFrom" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" name="df" />
+      </div>
+      <div class="form-field">
+        <label for="dateTo">Devolução</label>
+        <input id="dateTo" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" name="dt" />
+      </div>
+      <div class="form-actions full">
+        <button class="btn-primary" (click)="onSearch()" [disabled]="searching()">
+          {{ searching() ? 'Buscando...' : 'Verificar Disponibilidade' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Vehicle selection -->
+  @if (searched()) {
+    <div class="step-card">
+      <h2 class="step-title">2. Veículos Disponíveis ({{ available().length }})</h2>
+      @if (!available().length) {
+        <div class="empty-state">Nenhum veículo disponível para o período selecionado.</div>
+      } @else {
+        <div class="vehicle-grid">
+          @for (v of available(); track v.id) {
+            <div class="vehicle-card" [class.selected]="selectedVehicle()?.id === v.id" (click)="selectVehicle(v)">
+              <div class="vehicle-plate">{{ v.placa }}</div>
+              <div class="vehicle-model">{{ v.modelo }}</div>
+              <div class="vehicle-meta">{{ v.ano }} · {{ v.cor }} · {{ catLabel(v.categoria) }}</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 3: Reservation details -->
+  @if (selectedVehicle()) {
+    <div class="form-card step-card">
+      <h2 class="step-title">3. Dados da Reserva — {{ selectedVehicle()!.placa }} {{ selectedVehicle()!.modelo }}</h2>
+      @if (error()) { <div class="error">{{ error() }}</div> }
+      <form (ngSubmit)="onCreateReservation()" class="form-grid">
+        <div class="form-field">
+          <label for="cliente">Cliente</label>
+          <select id="cliente" [ngModel]="customerId()" (ngModelChange)="customerId.set($event)" name="cli" required>
+            <option value="">Selecione...</option>
+            @for (c of customers(); track c.id) { <option [value]="c.id">{{ c.nome }} ({{ c.cpfCnpj }})</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="modalidade">Modalidade</label>
+          <select id="modalidade" [ngModel]="modalidade()" (ngModelChange)="modalidade.set($event)" name="mod">
+            @for (m of modalidades; track m) { <option [value]="m">{{ m }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="diaria">Valor Diária (R$)</label>
+          <input id="diaria" type="number" min="0" step="0.01" [ngModel]="valorDiaria()" (ngModelChange)="valorDiaria.set(+$event)" name="vd" required />
+        </div>
+        <div class="form-field">
+          <label for="km">Limite de KM</label>
+          <input id="km" type="number" min="0" [ngModel]="kmLimite()" (ngModelChange)="kmLimite.set(+$event || undefined)" name="km" />
+        </div>
+        <div class="form-field full">
+          <label class="checkbox-label">
+            <input type="checkbox" [ngModel]="seguro()" (ngModelChange)="seguro.set($event)" name="seg" />
+            Incluir Seguro
+          </label>
+        </div>
+        @if (seguro()) {
+          <div class="form-field">
+            <label for="vseg">Valor do Seguro (R$)</label>
+            <input id="vseg" type="number" min="0" step="0.01" [ngModel]="valorSeguro()" (ngModelChange)="valorSeguro.set(+$event)" name="vseg" />
+          </div>
+        }
+        <div class="form-field full">
+          <label for="obs">Observações</label>
+          <textarea id="obs" [ngModel]="obs()" (ngModelChange)="obs.set($event)" name="obs"></textarea>
+        </div>
+        <div class="form-actions full">
+          <button type="submit" class="btn-primary" [disabled]="saving() || !customerId()">
+            {{ saving() ? 'Criando...' : 'Criar Reserva' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="selectedVehicle.set(null)">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  }
+</section>
+
