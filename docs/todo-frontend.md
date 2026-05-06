@@ -170,9 +170,10 @@
 | Status | Step | Descrição |
 |--------|------|-----------|
 | 🟢 | 13.1 | Criar `src/app/lavajato/agendamento/calendario/calendario.ts` (PrimeNG Calendar com horários disponíveis) |
-| 🔴 | 13.2 | Criar `src/app/lavajato/agendamento/agendamento-form/agendamento-form.ts` (cliente + serviço + data/hora) |
+| 🟢 | 13.2 | Criar `src/app/lavajato/agendamento/agendamento-form/agendamento-form.ts` (cliente + serviço + data/hora) |
 | 🟢 | 13.3 | Criar `src/app/lavajato/atendimentos/atendimentos-dia/atendimentos-dia.ts` (painel do operador com agendamentos do dia) |
 | 🟢 | 13.4 | Implementar controle de status do agendamento (AGENDADO → EM_ATENDIMENTO → CONCLUIDO/CANCELADO) |
+| 🟢 | 13.5 | Criar service `AgendamentoService` com signals |
 | 🔴 | 13.5 | Criar service `AgendamentoService` com signals |
 | 🔴 | 13.6 | Testes unitários |
 
@@ -183,7 +184,7 @@
 | Status | Step | Descrição |
 |--------|------|-----------|
 | 🟢 | 14.1 | Criar `src/app/lavajato/fila/fila-painel/fila-painel.ts` (painel real-time via SSE com lista ordenada por posição) |
-| 🔴 | 14.2 | Criar `src/app/lavajato/fila/fila-adicionar/fila-adicionar.ts` (formulário: cliente/nome avulso + serviço + placa) |
+| 🟢 | 14.2 | Criar `src/app/lavajato/fila/fila-adicionar/fila-adicionar.ts` (formulário: cliente/nome avulso + serviço + placa) |
 | 🟢 | 14.3 | Implementar controles de status (AGUARDANDO → EM_ATENDIMENTO → CONCLUIDO) |
 | 🟢 | 14.4 | Criar `src/app/core/services/sse.service.ts` (serviço genérico de conexão SSE nativa) |
 | 🟢 | 14.5 | Criar service `FilaService` com signals + integração SSE |
@@ -195,9 +196,9 @@
 
 | Status | Step | Descrição |
 |--------|------|-----------|
-| 🔴 | 15.1 | Criar modal/dialog de registro de pagamento (PrimeNG Dialog) |
-| 🔴 | 15.2 | Implementar seleção de método (DINHEIRO, PIX, CARTAO_CREDITO, CARTAO_DEBITO) |
-| 🔴 | 15.3 | Integrar com confirmação de agendamento/fila |
+| 🟢 | 15.1 | Criar modal/dialog de registro de pagamento (PrimeNG Dialog) |
+| 🟢 | 15.2 | Implementar seleção de método (DINHEIRO, PIX, CARTAO_CREDITO, CARTAO_DEBITO) |
+| 🟢 | 15.3 | Integrar com confirmação de agendamento/fila |
 | 🔴 | 15.4 | Testes unitários |
 
 ---
