@@ -1,0 +1,14 @@
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+
+<rcar-header
+  [collapsed]="sidebarCollapsed()"
+  (toggleSidebar)="toggleSidebar()" />
+
+<div class="shell-container">
+  <rcar-sidebar [collapsed]="sidebarCollapsed()" />
+
+  <main id="main-content" class="shell-content" role="main">
+    <router-outlet />
+  </main>
+</div>
+

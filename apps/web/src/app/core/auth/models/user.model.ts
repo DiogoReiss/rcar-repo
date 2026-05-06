@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'OPERADOR' | 'CLIENTE';
+export type UserRole = 'GESTOR_GERAL' | 'OPERADOR' | 'CLIENTE';
 
 export interface User {
   id: string;
@@ -17,4 +17,3 @@ export interface LoginCredentials {
   email: string;
   senha: string;
 }
-

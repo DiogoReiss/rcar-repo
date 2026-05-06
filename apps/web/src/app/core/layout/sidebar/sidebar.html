@@ -1,0 +1,15 @@
+<nav aria-label="Menu de navegação">
+  <ul class="sidebar-menu">
+    @for (item of menuItems; track item.route) {
+      <li class="sidebar-item">
+        <a [routerLink]="item.route" routerLinkActive="active" class="sidebar-link">
+          <i [class]="item.icon"></i>
+          @if (!collapsed()) {
+            <span class="sidebar-label">{{ item.label }}</span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
+

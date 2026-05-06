@@ -1,0 +1,61 @@
+<section class="login-page">
+  <div class="login-card">
+    <header class="login-header">
+      <h1>RCar</h1>
+      <p>Entre com suas credenciais para acessar o sistema</p>
+    </header>
+
+    @if (error()) {
+      <div class="login-error" role="alert">
+        {{ error() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-field">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="seu@email.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="senha">Senha</label>
+        <input
+          id="senha"
+          type="password"
+          [ngModel]="senha()"
+          (ngModelChange)="senha.set($event)"
+          name="senha"
+          placeholder="••••••"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn-login"
+        [disabled]="loading() || !email() || !senha()"
+      >
+        @if (loading()) {
+          Entrando...
+        } @else {
+          Entrar
+        }
+      </button>
+
+      <a class="forgot-link" routerLink="/auth/forgot-password">
+        Esqueci minha senha
+      </a>
+    </form>
+  </div>
+</section>
+

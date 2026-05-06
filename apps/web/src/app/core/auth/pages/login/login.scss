@@ -1,0 +1,118 @@
+@use 'variables' as *;
+
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: $spacing-xl;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-family: $font-family-base;
+    font-size: 2rem;
+    font-weight: 700;
+    color: $color-primary;
+    margin: 0 0 $spacing-xs;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.login-error {
+  background: #fef2f2;
+  border: 1px solid $color-danger;
+  color: $color-danger;
+  border-radius: 8px;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+  font-size: 0.875rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  input {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+    transition: border-color 0.15s;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+.btn-login {
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: $font-size-base;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: $spacing-sm;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-dark;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.forgot-link {
+  text-align: center;
+  font-size: 0.875rem;
+  color: $color-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+

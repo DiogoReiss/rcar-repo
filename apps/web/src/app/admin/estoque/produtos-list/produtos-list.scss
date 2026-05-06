@@ -1,0 +1,34 @@
+@use 'variables' as *;
+
+:host {
+  display: block;
+  padding: $spacing-lg;
+}
+
+.page-header {
+  margin-bottom: $spacing-md;
+
+  h1 {
+    font-family: $font-family-base;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 $spacing-xs;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.placeholder-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: $spacing-lg;
+}

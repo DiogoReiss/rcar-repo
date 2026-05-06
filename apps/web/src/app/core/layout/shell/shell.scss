@@ -1,0 +1,36 @@
+@use 'variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: $color-primary;
+  color: #fff;
+  padding: $spacing-sm $spacing-md;
+  z-index: 1000;
+  transition: top 0.2s;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+.shell-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  margin-top: $header-height;
+}
+
+.shell-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-lg;
+}
+

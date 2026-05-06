@@ -1,0 +1,416 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ──────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  GESTOR_GERAL
+  OPERADOR
+  CLIENTE
+}
+
+enum CustomerType {
+  PF
+  PJ
+}
+
+enum VehicleStatus {
+  DISPONIVEL
+  ALUGADO
+  MANUTENCAO
+  INATIVO
+}
+
+enum VehicleCategory {
+  ECONOMICO
+  INTERMEDIARIO
+  SUV
+  EXECUTIVO
+  UTILITARIO
+}
+
+enum WashScheduleStatus {
+  AGENDADO
+  EM_ATENDIMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+enum WashQueueStatus {
+  AGUARDANDO
+  EM_ATENDIMENTO
+  CONCLUIDO
+}
+
+enum RentalModality {
+  DIARIA
+  SEMANAL
+  MENSAL
+}
+
+enum ContractStatus {
+  RESERVADO
+  ATIVO
+  ENCERRADO
+  CANCELADO
+}
+
+enum InspectionType {
+  SAIDA
+  CHEGADA
+}
+
+enum IncidentType {
+  AVARIA
+  MULTA
+  KM_EXCEDENTE
+  COMBUSTIVEL
+  OUTRO
+}
+
+enum PaymentRefType {
+  WASH_SCHEDULE
+  WASH_QUEUE
+  RENTAL_CONTRACT
+}
+
+enum PaymentMethod {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+}
+
+enum PaymentStatus {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+}
+
+enum TemplateType {
+  CONTRATO_LOCACAO
+  RECIBO_LAVAGEM
+  RECIBO_LOCACAO
+}
+
+enum StockMovementType {
+  ENTRADA
+  SAIDA
+  AJUSTE
+}
+
+// ─── MODELS ─────────────────────────────────────────────────────────────────
+
+model User {
+  id         String   @id @default(uuid())
+  nome       String
+  email      String   @unique
+  senhaHash  String   @map("senha_hash")
+  role       UserRole
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  auditLogs  AuditLog[]
+
+  @@map("users")
+}
+
+model Customer {
+  id          String       @id @default(uuid())
+  tipo        CustomerType
+  nome        String
+  cpfCnpj     String       @unique @map("cpf_cnpj")
+  email       String?
+  telefone    String?
+  endereco    Json?
+  // PF fields
+  cnh         String?
+  cnhValidade DateTime?    @map("cnh_validade")
+  cnhUrl      String?      @map("cnh_url")
+  // PJ fields
+  razaoSocial String?      @map("razao_social")
+  inscEstadual String?     @map("insc_estadual")
+  responsavel  String?
+
+  ativo      Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  washSchedules   WashSchedule[]
+  washQueues      WashQueue[]
+  rentalContracts RentalContract[]
+  payments        Payment[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id        String          @id @default(uuid())
+  placa     String          @unique
+  modelo    String
+  ano       Int
+  cor       String
+  categoria VehicleCategory
+  status    VehicleStatus   @default(DISPONIVEL)
+  fotos     String[]
+  kmAtual   Int             @default(0) @map("km_atual")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  deletedAt DateTime?       @map("deleted_at")
+
+  maintenances    VehicleMaintenance[]
+  rentalContracts RentalContract[]
+
+  @@index([status])
+  @@map("vehicles")
+}
+
+model VehicleMaintenance {
+  id        String   @id @default(uuid())
+  vehicleId String   @map("vehicle_id")
+  descricao String
+  custo     Decimal  @db.Decimal(10, 2)
+  data      DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@map("vehicle_maintenances")
+}
+
+model WashService {
+  id          String   @id @default(uuid())
+  nome        String
+  descricao   String?
+  preco       Decimal  @db.Decimal(10, 2)
+  duracaoMin  Int      @map("duracao_min")
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  schedules WashSchedule[]
+  queues    WashQueue[]
+  products  ServiceProduct[]
+
+  @@map("wash_services")
+}
+
+model WashSchedule {
+  id          String             @id @default(uuid())
+  customerId  String?            @map("customer_id")
+  nomeAvulso  String?            @map("nome_avulso")
+  telefone    String?
+  serviceId   String             @map("service_id")
+  dataHora    DateTime           @map("data_hora")
+  status      WashScheduleStatus @default(AGENDADO)
+  observacoes String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  customer Customer?   @relation(fields: [customerId], references: [id])
+  service  WashService @relation(fields: [serviceId], references: [id])
+  payment  Payment?
+
+  @@index([dataHora, status])
+  @@map("wash_schedules")
+}
+
+model WashQueue {
+  id           String          @id @default(uuid())
+  customerId   String?         @map("customer_id")
+  nomeAvulso   String?         @map("nome_avulso")
+  serviceId    String          @map("service_id")
+  veiculoPlaca String?         @map("veiculo_placa")
+  status       WashQueueStatus @default(AGUARDANDO)
+  posicao      Int
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  concluidoAt  DateTime?       @map("concluido_at")
+
+  customer Customer?   @relation(fields: [customerId], references: [id])
+  service  WashService @relation(fields: [serviceId], references: [id])
+  payment  Payment?
+
+  @@index([posicao])
+  @@map("wash_queues")
+}
+
+model RentalContract {
+  id              String         @id @default(uuid())
+  customerId      String         @map("customer_id")
+  vehicleId       String         @map("vehicle_id")
+  modalidade      RentalModality
+  dataRetirada    DateTime       @map("data_retirada")
+  dataDevolucao   DateTime       @map("data_devolucao")
+  dataDevReal     DateTime?      @map("data_dev_real")
+  valorDiaria     Decimal        @db.Decimal(10, 2) @map("valor_diaria")
+  valorTotal      Decimal        @db.Decimal(10, 2) @map("valor_total")
+  valorTotalReal  Decimal?       @db.Decimal(10, 2) @map("valor_total_real")
+  seguro          Boolean        @default(false)
+  valorSeguro     Decimal?       @db.Decimal(10, 2) @map("valor_seguro")
+  status          ContractStatus @default(RESERVADO)
+  kmRetirada      Int?           @map("km_retirada")
+  kmDevolucao     Int?           @map("km_devolucao")
+  kmLimite        Int?           @map("km_limite")
+  combustivelSaida   String?     @map("combustivel_saida")
+  combustivelChegada String?     @map("combustivel_chegada")
+  observacoes     String?
+  pdfUrl          String?        @map("pdf_url")
+  d4signId        String?        @map("d4sign_id")
+  d4signStatus    String?        @map("d4sign_status")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  customer    Customer          @relation(fields: [customerId], references: [id])
+  vehicle     Vehicle           @relation(fields: [vehicleId], references: [id])
+  inspections Inspection[]
+  incidents   ContractIncident[]
+  payments    Payment[]
+
+  @@index([status, customerId])
+  @@map("rental_contracts")
+}
+
+model Inspection {
+  id          String         @id @default(uuid())
+  contractId  String         @map("contract_id")
+  tipo        InspectionType
+  checklist   Json
+  fotos       String[]
+  observacoes String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  contract RentalContract @relation(fields: [contractId], references: [id])
+
+  @@map("inspections")
+}
+
+model ContractIncident {
+  id          String       @id @default(uuid())
+  contractId  String       @map("contract_id")
+  tipo        IncidentType
+  descricao   String
+  valor       Decimal      @db.Decimal(10, 2)
+  fotos       String[]
+  data        DateTime
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  contract RentalContract @relation(fields: [contractId], references: [id])
+
+  @@map("contract_incidents")
+}
+
+model Payment {
+  id          String         @id @default(uuid())
+  refType     PaymentRefType @map("ref_type")
+  scheduleId  String?        @unique @map("schedule_id")
+  queueId     String?        @unique @map("queue_id")
+  contractId  String?        @map("contract_id")
+  customerId  String?        @map("customer_id")
+  valor       Decimal        @db.Decimal(10, 2)
+  metodo      PaymentMethod
+  status      PaymentStatus  @default(PENDENTE)
+  pagarmeTxId String?        @map("pagarme_tx_id")
+  observacoes String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  schedule WashSchedule?  @relation(fields: [scheduleId], references: [id])
+  queue    WashQueue?     @relation(fields: [queueId], references: [id])
+  contract RentalContract? @relation(fields: [contractId], references: [id])
+  customer Customer?      @relation(fields: [customerId], references: [id])
+
+  @@index([refType])
+  @@map("payments")
+}
+
+model Template {
+  id           String       @id @default(uuid())
+  nome         String
+  tipo         TemplateType
+  conteudoHtml String       @map("conteudo_html") @db.Text
+  variaveis    String[]
+  ativo        Boolean      @default(true)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@map("templates")
+}
+
+// ─── ESTOQUE (INVENTÁRIO LAVAJATO) ─────────────────────────────────────────
+
+model Product {
+  id              String    @id @default(uuid())
+  nome            String
+  descricao       String?
+  unidade         String
+  quantidadeAtual Decimal   @default(0) @db.Decimal(10, 3) @map("quantidade_atual")
+  estoqueMinimo   Decimal   @default(0) @db.Decimal(10, 3) @map("estoque_minimo")
+  custoUnitario   Decimal?  @db.Decimal(10, 2) @map("custo_unitario")
+  ativo           Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  movements StockMovement[]
+  services  ServiceProduct[]
+
+  @@map("products")
+}
+
+model StockMovement {
+  id         String            @id @default(uuid())
+  productId  String            @map("product_id")
+  tipo       StockMovementType
+  quantidade Decimal           @db.Decimal(10, 3)
+  motivo     String?
+  userId     String?           @map("user_id")
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId, createdAt])
+  @@map("stock_movements")
+}
+
+model ServiceProduct {
+  id               String  @id @default(uuid())
+  serviceId        String  @map("service_id")
+  productId        String  @map("product_id")
+  quantidadePorUso Decimal @db.Decimal(10, 3) @map("quantidade_por_uso")
+
+  service WashService @relation(fields: [serviceId], references: [id])
+  product Product     @relation(fields: [productId], references: [id])
+
+  @@unique([serviceId, productId])
+  @@map("service_products")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  acao       String
+  entidade   String
+  entidadeId String?  @map("entidade_id")
+  detalhes   Json?
+  ip         String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}

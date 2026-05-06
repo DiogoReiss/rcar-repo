@@ -15,7 +15,11 @@ export class AuthService {
 
   private readonly _currentUser = signal<User | null>(null);
   readonly currentUser = this._currentUser.asReadonly();
-  readonly isAuthenticated = computed(() => this._currentUser() !== null);
+  readonly isAuthenticated = computed(() => this._currentUser() !== null || this.getAccessToken() !== null);
+
+  constructor() {
+    this.tryRestoreUser();
+  }
 
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -25,11 +29,11 @@ export class AuthService {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
 
-  login(credentials: LoginCredentials): Observable<{ user: User; tokens: AuthTokens }> {
-    return this.api.post<{ user: User; tokens: AuthTokens }>('/auth/login', credentials).pipe(
-      tap((response) => {
-        this.storeTokens(response.tokens);
-        this._currentUser.set(response.user);
+  login(credentials: LoginCredentials): Observable<AuthTokens> {
+    return this.api.post<AuthTokens>('/auth/login', credentials).pipe(
+      tap((tokens) => {
+        this.storeTokens(tokens);
+        this.decodeAndSetUser(tokens.accessToken);
       }),
     );
   }
@@ -44,17 +48,45 @@ export class AuthService {
   refreshToken(): Observable<AuthTokens> {
     const refreshToken = this.getRefreshToken();
     return this.api.post<AuthTokens>('/auth/refresh', { refreshToken }).pipe(
-      tap((tokens) => this.storeTokens(tokens)),
+      tap((tokens) => {
+        this.storeTokens(tokens);
+        this.decodeAndSetUser(tokens.accessToken);
+      }),
     );
   }
 
-  setCurrentUser(user: User): void {
-    this._currentUser.set(user);
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, novaSenha: string): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>('/auth/reset-password', { token, novaSenha });
   }
 
   private storeTokens(tokens: AuthTokens): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
   }
-}
 
+  private tryRestoreUser(): void {
+    const token = this.getAccessToken();
+    if (token) {
+      this.decodeAndSetUser(token);
+    }
+  }
+
+  private decodeAndSetUser(token: string): void {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      this._currentUser.set({
+        id: payload.sub,
+        nome: payload.nome ?? payload.email,
+        email: payload.email,
+        role: payload.role,
+        ativo: true,
+      });
+    } catch {
+      this._currentUser.set(null);
+    }
+  }
+}
