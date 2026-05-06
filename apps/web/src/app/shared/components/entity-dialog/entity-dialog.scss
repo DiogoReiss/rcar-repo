@@ -1,12 +1,17 @@
 @use 'variables' as *;
 
 .dialog-body {
-  padding: 0.25rem 0;
+  padding: $spacing-md 0 $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-neutral-200;
+  margin-top: $spacing-sm;
 }
-
