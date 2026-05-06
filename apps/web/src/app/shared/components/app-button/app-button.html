@@ -1,0 +1,15 @@
+<button
+  [type]="type()"
+  [class]="cssClass()"
+  [disabled]="disabled() || loading()"
+  (click)="!disabled() && !loading() && clicked.emit()"
+>
+  @if (icon() && !loading()) {
+    <i [class]="icon()" aria-hidden="true"></i>
+  }
+  @if (loading()) {
+    <span class="btn-spinner" aria-hidden="true"></span>
+  }
+  {{ label() }}
+</button>
+
