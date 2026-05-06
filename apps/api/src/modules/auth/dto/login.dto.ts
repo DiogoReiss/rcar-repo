@@ -8,7 +8,7 @@ export class LoginDto {
 
   @ApiProperty({ example: 'mudar123' })
   @IsString()
-  @MinLength(6)
+  @MinLength(8) // S10: NIST SP 800-63B minimum 8 chars
   senha: string;
 }
 

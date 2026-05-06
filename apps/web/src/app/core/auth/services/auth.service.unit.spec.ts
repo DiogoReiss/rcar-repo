@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
@@ -52,7 +52,7 @@ describe('AuthService', () => {
   });
 
   it('logout should clear user and redirect', () => {
-    const router = TestBed.inject(require('@angular/router').Router);
+    const router = TestBed.inject(Router);
     const navigateSpy = vi.spyOn(router, 'navigate');
 
     service.logout();

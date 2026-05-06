@@ -11,9 +11,9 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'senha123', minLength: 6 })
+  @ApiProperty({ example: 'senha123', minLength: 8 })
   @IsString()
-  @MinLength(6)
+  @MinLength(8) // S10: NIST SP 800-63B minimum 8 chars
   senha: string;
 
   @ApiProperty({ enum: UserRole, example: 'OPERADOR' })

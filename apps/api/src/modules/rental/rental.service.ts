@@ -150,6 +150,8 @@ export class RentalService {
   async closeContract(id: string, dto: CloseContractDto) {
     const contract = await this.prisma.rentalContract.findUnique({ where: { id } });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
+    // D7: Guard against double-close — idempotent retry safety (must come before status check)
+    if (contract.status === 'ENCERRADO') return this.findOne(id);
     if (contract.status !== 'ATIVO') throw new BadRequestException('Contrato não está ATIVO');
 
     const now = new Date();
@@ -200,13 +202,20 @@ export class RentalService {
   async registerPayment(contractId: string, metodo: PaymentMethod) {
     const contract = await this.prisma.rentalContract.findUnique({ where: { id: contractId } });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
+
+    // D6: Idempotency — return existing payment if already registered (client retry safety)
+    const existing = await this.prisma.payment.findFirst({
+      where: { contractId, status: 'CONFIRMADO' },
+    });
+    if (existing) return existing;
+
     return this.prisma.payment.create({
       data: {
         refType: 'RENTAL_CONTRACT',
         contractId,
         customerId: contract.customerId,
         valor: contract.valorTotalReal ?? contract.valorTotal,
-        metodo: metodo,
+        metodo,
         status: 'CONFIRMADO',
       },
     });

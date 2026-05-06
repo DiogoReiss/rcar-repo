@@ -70,7 +70,7 @@ export class RentalController {
   @Post('contracts/:id/payment')
   @ApiOperation({ summary: 'Registra pagamento do contrato' })
   pay(@Param('id') id: string, @Body() dto: { metodo: string }) {
-    return this.rentalService.registerPayment(id, dto.metodo);
+    return this.rentalService.registerPayment(id, dto.metodo as import('@prisma/client').PaymentMethod);
   }
 }
 

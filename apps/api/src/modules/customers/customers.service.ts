@@ -11,6 +11,7 @@ export class CustomersService {
 
   async findAll(search?: string, pagination?: PaginationDto) {
     const { page = 1, perPage = 20 } = pagination ?? {};
+    const safePage = Math.max(1, page); // Q13: prevent page=0 causing negative skip
     const where: Prisma.CustomerWhereInput = {
       ativo: true,   // D4: consistently filter both ativo AND deletedAt
       deletedAt: null,
@@ -26,18 +27,17 @@ export class CustomersService {
       this.prisma.customer.findMany({
         where,
         orderBy: { nome: 'asc' },
-        skip: (page - 1) * perPage,
+        skip: (safePage - 1) * perPage,
         take: perPage,
       }),
       this.prisma.customer.count({ where }),
     ]);
-    return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
+    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
   }
 
   async findOne(id: string) {
     const c = await this.prisma.customer.findUnique({ where: { id } });
     if (!c || c.deletedAt) throw new NotFoundException('Cliente não encontrado');
-    if (!c) throw new NotFoundException('Cliente não encontrado');
     return c;
   }
 

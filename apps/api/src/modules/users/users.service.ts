@@ -34,7 +34,7 @@ export class UsersService {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('E-mail já cadastrado');
 
-    const senhaHash = await bcrypt.hash(dto.senha, 10);
+    const senhaHash = await bcrypt.hash(dto.senha, 12); // S8: consistent 12 rounds
     return this.prisma.user.create({
       data: { nome: dto.nome, email: dto.email, senhaHash, role: dto.role },
       select: this.select,
@@ -45,7 +45,7 @@ export class UsersService {
     await this.findOne(id);
     const data: Record<string, unknown> = { ...dto };
     if (dto.senha) {
-      data.senhaHash = await bcrypt.hash(dto.senha, 10);
+      data.senhaHash = await bcrypt.hash(dto.senha, 12); // S8: consistent 12 rounds
       delete data.senha;
     }
     return this.prisma.user.update({ where: { id }, data, select: this.select });
