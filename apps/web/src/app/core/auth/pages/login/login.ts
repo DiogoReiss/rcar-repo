@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'rcar-login',
+  selector: 'lync-login',
   imports: [FormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',

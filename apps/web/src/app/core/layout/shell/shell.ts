@@ -5,7 +5,7 @@ import SidebarComponent from '../sidebar/sidebar';
 import HeaderComponent from '../header/header';
 
 @Component({
-  selector: 'rcar-shell',
+  selector: 'lync-shell',
   imports: [RouterOutlet, SidebarComponent, HeaderComponent],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',

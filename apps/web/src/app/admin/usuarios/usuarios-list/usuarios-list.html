@@ -13,11 +13,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Perfil</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +25,7 @@
               <td><span class="badge" [class]="user.ativo ? 'badge--success' : 'badge--inactive'">{{ user.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
                 <a [routerLink]="['/admin/usuarios', user.id, 'editar']" class="btn-sm">Editar</a>
-                <button class="btn-sm btn-danger" (click)="onRemove(user)" [disabled]="removing() === user.id">
+                <button class="btn-sm btn-danger" (click)="onRemoveClick(user)" [disabled]="removing() === user.id">
                   {{ removing() === user.id ? '...' : 'Desativar' }}
                 </button>
               </td>
@@ -41,5 +37,13 @@
       </table>
     </div>
   }
+
+  <lync-confirm-dialog
+    [open]="!!confirmTarget()"
+    [message]="'Desativar o usuário ' + (confirmTarget()?.nome ?? '') + '?'"
+    confirmLabel="Desativar"
+    (confirmed)="onConfirmRemove()"
+    (cancelled)="onCancelRemove()"
+  />
 </section>
 

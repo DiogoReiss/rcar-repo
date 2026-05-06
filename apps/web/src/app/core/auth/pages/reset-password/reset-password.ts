@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'rcar-reset-password',
+  selector: 'lync-reset-password',
   imports: [FormsModule, RouterLink],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',

@@ -43,7 +43,8 @@ export default class VistoriaChegadaComponent implements OnInit {
     try {
       const res = await firstValueFrom(this.api.get<RentalContract>(`/rental/contracts/${id}`));
       this.contract.set(res);
-      if (res.vehicle) this.kmDevolucao.set(res.vehicle as any);
+      // Q8: Fix wrong cast — kmAtual is on vehicle, default 0 if not available
+      this.kmDevolucao.set(res.vehicle?.kmAtual ?? 0);
     } finally { this.loading.set(false); }
   }
 

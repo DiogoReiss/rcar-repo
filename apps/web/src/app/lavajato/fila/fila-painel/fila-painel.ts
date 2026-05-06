@@ -44,11 +44,20 @@ export default class FilaPainelComponent implements OnInit, OnDestroy {
   ngOnDestroy() { this.sse?.close(); }
 
   private connectSSE() {
+    // A9: EventSource can't send Authorization headers, so we pass token as query param
+    // The server's JWT strategy accepts ?token= for SSE endpoints
     const token = localStorage.getItem('rcar_access_token') ?? '';
-    this.sse = new EventSource(`${environment.apiUrl}/lavajato/queue/stream`);
+    const url = token
+      ? `${environment.apiUrl}/lavajato/queue/stream?token=${encodeURIComponent(token)}`
+      : `${environment.apiUrl}/lavajato/queue/stream`;
+    this.sse = new EventSource(url);
     this.sse.onmessage = () => {
       this.lastUpdate.set(new Date().toLocaleTimeString('pt-BR'));
       this.loadQueue();
+    };
+    this.sse.onerror = () => {
+      // Reconnect handled automatically by EventSource, but update error state
+      this.error.set('SSE connection lost. Reconnecting...');
     };
   }
 

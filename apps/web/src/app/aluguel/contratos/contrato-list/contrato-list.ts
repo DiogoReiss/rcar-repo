@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { RentalContract } from '@shared/models/entities.model';
+import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'lync-contrato-list',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, ConfirmDialogComponent],
   templateUrl: './contrato-list.html',
   styleUrl: './contrato-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +29,8 @@ export default class ContratoListComponent implements OnInit {
   // Payment
   readonly payingId = signal<string | null>(null);
   readonly payMethod = signal('PIX');
+  // A6: Replace confirm() with accessible dialog
+  readonly cancelTarget = signal<string | null>(null);
 
   readonly statusLabel: Record<string, string> = { RESERVADO: 'Reservado', ATIVO: 'Ativo', ENCERRADO: 'Encerrado', CANCELADO: 'Cancelado' };
   readonly statusClass: Record<string, string> = { RESERVADO: 'badge--warning', ATIVO: 'badge--success', ENCERRADO: 'badge--inactive', CANCELADO: 'badge--danger' };
@@ -54,8 +57,14 @@ export default class ContratoListComponent implements OnInit {
     await this.load();
   }
 
-  async onCancel(id: string) {
-    if (!confirm('Cancelar esta reserva?')) return;
+  onCancelClick(id: string) {
+    this.cancelTarget.set(id);
+  }
+
+  async onConfirmCancel() {
+    const id = this.cancelTarget();
+    if (!id) return;
+    this.cancelTarget.set(null);
     await firstValueFrom(this.api.patch(`/rental/contracts/${id}/cancel`, {}));
     await this.load();
   }

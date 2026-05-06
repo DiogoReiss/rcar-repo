@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'rcar-forgot-password',
+  selector: 'lync-forgot-password',
   imports: [FormsModule, RouterLink],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.scss',

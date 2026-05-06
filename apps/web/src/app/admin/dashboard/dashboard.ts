@@ -1,10 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
-import { firstValueFrom } from 'rxjs';
 import { Product } from '@shared/models/entities.model';
 
-interface KpiCard { label: string; value: string | number; icon: string; route?: string; highlight?: boolean; }
+interface DashboardKpis {
+  usersCount: number;
+  vehiclesCount: number;
+  customersCount: number;
+  servicesCount: number;
+  lowStock: Product[];
+}
 
 @Component({
   selector: 'lync-dashboard',
@@ -22,24 +27,27 @@ export default class DashboardComponent implements OnInit {
   readonly customersCount = signal(0);
   readonly servicesCount = signal(0);
   readonly lowStockProducts = signal<Product[]>([]);
+  readonly error = signal<string | null>(null);
 
   ngOnInit() { this.loadKpis(); }
 
-  async loadKpis() {
+  loadKpis() {
     this.loading.set(true);
-    try {
-      const [users, vehicles, customers, services, lowStock] = await Promise.allSettled([
-        firstValueFrom(this.api.get<unknown[]>('/users')),
-        firstValueFrom(this.api.get<unknown[]>('/fleet')),
-        firstValueFrom(this.api.get<unknown[]>('/customers')),
-        firstValueFrom(this.api.get<unknown[]>('/wash/services')),
-        firstValueFrom(this.api.get<Product[]>('/inventory/products/low-stock')),
-      ]);
-      if (users.status === 'fulfilled') this.usersCount.set((users.value as unknown[]).length);
-      if (vehicles.status === 'fulfilled') this.vehiclesCount.set((vehicles.value as unknown[]).length);
-      if (customers.status === 'fulfilled') this.customersCount.set((customers.value as unknown[]).length);
-      if (services.status === 'fulfilled') this.servicesCount.set((services.value as unknown[]).length);
-      if (lowStock.status === 'fulfilled') this.lowStockProducts.set(lowStock.value);
-    } finally { this.loading.set(false); }
+    this.error.set(null);
+    // A10: Single aggregated request replaces 5 parallel calls. Q6: removed dead `computed` import.
+    this.api.get<DashboardKpis>('/reports/dashboard').subscribe({
+      next: (kpis) => {
+        this.usersCount.set(kpis.usersCount);
+        this.vehiclesCount.set(kpis.vehiclesCount);
+        this.customersCount.set(kpis.customersCount);
+        this.servicesCount.set(kpis.servicesCount);
+        this.lowStockProducts.set(kpis.lowStock);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.message ?? 'Erro ao carregar dashboard.');
+        this.loading.set(false);
+      },
+    });
   }
 }

@@ -30,8 +30,15 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: .
 
+      # Q10: Generate Prisma client before building so types are available
+      - name: Generate Prisma client
+        run: pnpm --filter api prisma generate
+
       - name: Build
         run: pnpm --filter api build
+
+      - name: Unit tests (API)
+        run: pnpm --filter api test
 
   build-web:
     name: Build Web

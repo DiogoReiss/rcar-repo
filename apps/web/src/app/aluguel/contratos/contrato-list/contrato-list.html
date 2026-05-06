@@ -40,7 +40,7 @@
               <td class="actions">
                 @if (c.status === 'RESERVADO') {
                   <button class="btn-sm" (click)="openingId.set(c.id); kmRetirada.set(0)">Abertura</button>
-                  <button class="btn-sm btn-danger" (click)="onCancel(c.id)">Cancelar</button>
+                  <button class="btn-sm btn-danger" (click)="onCancelClick(c.id)">Cancelar</button>
                 }
                 @if (c.status === 'ATIVO') {
                   <a [routerLink]="['/aluguel/devolucao', c.id]" class="btn-sm">Devolução</a>
@@ -93,4 +93,12 @@
     </div>
   }
 </section>
+
+<lync-confirm-dialog
+  [open]="!!cancelTarget()"
+  message="Cancelar esta reserva? Esta ação não pode ser desfeita."
+  confirmLabel="Cancelar reserva"
+  (confirmed)="onConfirmCancel()"
+  (cancelled)="cancelTarget.set(null)"
+/>
 

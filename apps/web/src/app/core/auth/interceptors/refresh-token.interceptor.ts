@@ -9,16 +9,10 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/refresh')) {
+      if (error.status === 401 && !req.url.includes('/auth/refresh') && !req.url.includes('/auth/login')) {
+        // S5: refresh_token cookie sent automatically via withCredentials
         return authService.refreshToken().pipe(
-          switchMap((tokens) => {
-            const cloned = req.clone({
-              setHeaders: {
-                Authorization: `Bearer ${tokens.accessToken}`,
-              },
-            });
-            return next(cloned);
-          }),
+          switchMap(() => next(req)), // retry original request — cookies now refreshed
           catchError((refreshError) => {
             authService.logout();
             return throwError(() => refreshError);
@@ -29,4 +23,3 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
-

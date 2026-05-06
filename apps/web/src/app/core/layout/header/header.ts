@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output } from '@angu
 import { AuthService } from '@core/auth/services/auth.service';
 
 @Component({
-  selector: 'rcar-header',
+  selector: 'lync-header',
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
