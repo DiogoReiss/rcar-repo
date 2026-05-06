@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { ServicosService } from '../servicos.service';
 import { WashService } from '@shared/models/entities.model';
@@ -16,7 +17,7 @@ import FormFieldComponent from '@shared/components/form-field/form-field';
   styleUrl: './servicos-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ServicosListComponent implements OnInit {
+export default class ServicosListComponent {
   private readonly servicosService = inject(ServicosService);
 
   readonly servicos  = this.servicosService.servicos;
@@ -38,7 +39,10 @@ export default class ServicosListComponent implements OnInit {
   readonly isEdit      = computed(() => !!this.editTarget());
   readonly dialogTitle = computed(() => this.isEdit() ? 'Editar Serviço' : 'Novo Serviço');
 
-  ngOnInit() { this.servicosService.load(true); }
+  constructor() {
+    // A16: takeUntilDestroyed in injection context — subscribe so the HTTP request fires
+    this.servicosService.load(true).pipe(takeUntilDestroyed()).subscribe();
+  }
 
   openNew() {
     this.editTarget.set(null);
