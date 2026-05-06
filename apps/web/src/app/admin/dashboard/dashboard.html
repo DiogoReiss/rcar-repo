@@ -1,0 +1,70 @@
+<section class="dashboard">
+  <h1 class="dashboard-title">Dashboard</h1>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else {
+    <div class="kpi-grid">
+      <a routerLink="/admin/usuarios" class="kpi-card">
+        <i class="pi pi-users kpi-icon"></i>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ usersCount() }}</div>
+          <div class="kpi-label">Usuários</div>
+        </div>
+      </a>
+
+      <a routerLink="/admin/clientes" class="kpi-card">
+        <i class="pi pi-id-card kpi-icon"></i>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ customersCount() }}</div>
+          <div class="kpi-label">Clientes</div>
+        </div>
+      </a>
+
+      <a routerLink="/admin/frota" class="kpi-card">
+        <i class="pi pi-car kpi-icon"></i>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ vehiclesCount() }}</div>
+          <div class="kpi-label">Veículos na Frota</div>
+        </div>
+      </a>
+
+      <a routerLink="/admin/servicos" class="kpi-card">
+        <i class="pi pi-list kpi-icon"></i>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ servicesCount() }}</div>
+          <div class="kpi-label">Serviços Ativos</div>
+        </div>
+      </a>
+    </div>
+
+    @if (lowStockProducts().length > 0) {
+      <div class="alert-section">
+        <h2 class="section-title">⚠️ Alertas de Estoque Baixo</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Quantidade Atual</th>
+                <th>Mínimo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of lowStockProducts(); track p.id) {
+                <tr>
+                  <td>{{ p.nome }}</td>
+                  <td>{{ p.quantidadeAtual }} {{ p.unidade }}</td>
+                  <td>{{ p.estoqueMinimo }} {{ p.unidade }}</td>
+                  <td><a [routerLink]="['/admin/estoque', p.id, 'editar']" class="btn-sm">Gerenciar</a></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</section>
+
