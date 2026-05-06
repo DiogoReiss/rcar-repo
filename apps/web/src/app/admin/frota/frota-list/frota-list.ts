@@ -1,16 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { MenuItem, MessageService } from 'primeng/api';
+import { DialogModule } from 'primeng/dialog';
 import { FrotaService } from '../frota.service';
+import { ApiService } from '@core/services/api.service';
 import { Vehicle } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
 import RowMenuComponent from '@shared/components/row-menu/row-menu';
+import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
+import DateBrPipe from '@shared/pipes/date-br.pipe';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const STATUS_LABELS: Record<string, string> = {
   DISPONIVEL: 'Disponível', ALUGADO: 'Alugado',
@@ -21,25 +24,38 @@ const CAT_LABELS: Record<string, string> = {
   SUV: 'SUV', EXECUTIVO: 'Executivo', UTILITARIO: 'Utilitário',
 };
 
+interface VehicleDetail extends Vehicle {
+  maintenances?: Array<{ id: string; descricao: string; custo: number; data: string }>;
+  contracts?: Array<{
+    id: string; status: string;
+    dataRetirada: string; dataDevolucao: string;
+    customer?: { nome: string };
+  }>;
+}
+
 @Component({
   selector: 'lync-frota-list',
-  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent, DialogModule, CurrencyBrlPipe, DateBrPipe],
   templateUrl: './frota-list.html',
   styleUrl: './frota-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FrotaListComponent {
   private readonly frotaService = inject(FrotaService);
+  private readonly api          = inject(ApiService);
   private readonly toast        = inject(MessageService);
-  private readonly router       = inject(Router);
 
   readonly veiculos = this.frotaService.veiculos;
   readonly loading  = this.frotaService.loading;
   readonly saving   = signal(false);
 
-  // Dialog
+  // Edit/create dialog
   readonly dialogVisible = signal(false);
   readonly editTarget    = signal<Vehicle | null>(null);
+
+  // Detail dialog
+  readonly detailVehicle  = signal<VehicleDetail | null>(null);
+  readonly detailLoading  = signal(false);
 
   // Form fields
   readonly fPlaca     = signal('');
@@ -59,6 +75,11 @@ export default class FrotaListComponent {
   readonly statusLabel = (s: string) => STATUS_LABELS[s] ?? s;
   readonly catLabel    = (s: string) => CAT_LABELS[s] ?? s;
   readonly statusClass = (s: string) => `badge--${s}`;
+
+  readonly contractStatusClass: Record<string, string> = {
+    RESERVADO: 'badge--warning', ATIVO: 'badge--success',
+    ENCERRADO: 'badge--inactive', CANCELADO: 'badge--danger',
+  };
 
   constructor() {
     this.frotaService.load().pipe(takeUntilDestroyed()).subscribe();
@@ -82,10 +103,23 @@ export default class FrotaListComponent {
 
   closeDialog() { this.dialogVisible.set(false); }
 
+  async openDetail(v: Vehicle) {
+    this.detailLoading.set(true);
+    this.detailVehicle.set(v as VehicleDetail); // show shell immediately
+    try {
+      const detail = await firstValueFrom(this.api.get<VehicleDetail>(`/fleet/${v.id}`));
+      this.detailVehicle.set(detail);
+    } finally {
+      this.detailLoading.set(false);
+    }
+  }
+
+  closeDetail() { this.detailVehicle.set(null); }
+
   getRowMenuItems(v: Vehicle): MenuItem[] {
     return [
       { label: 'Editar',        icon: 'pi pi-pencil', command: () => this.openEdit(v) },
-      { label: 'Ver Detalhes',  icon: 'pi pi-eye',    command: () => this.router.navigate(['/admin/frota', v.id]) },
+      { label: 'Ver Detalhes',  icon: 'pi pi-eye',    command: () => this.openDetail(v) },
     ];
   }
 

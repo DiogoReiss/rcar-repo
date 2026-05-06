@@ -73,3 +73,83 @@
     </lync-form-field>
   </div>
 </lync-entity-dialog>
+
+<!-- Vehicle detail dialog -->
+@if (detailVehicle(); as v) {
+  <p-dialog
+    [visible]="true"
+    (visibleChange)="!$event && closeDetail()"
+    [header]="v.modelo + ' — ' + v.placa"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '680px', maxWidth: '96vw' }"
+    [breakpoints]="{ '768px': '96vw' }"
+    (onHide)="closeDetail()"
+  >
+    @if (detailLoading()) {
+      <div class="vd-loading"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando...</div>
+    } @else {
+      <div class="vd-grid">
+        <section class="vd-card">
+          <h3 class="vd-section-title">Informações</h3>
+          <dl class="vd-info">
+            <dt>Placa</dt>     <dd><strong>{{ v.placa }}</strong></dd>
+            <dt>Modelo</dt>    <dd>{{ v.modelo }}</dd>
+            <dt>Ano</dt>       <dd>{{ v.ano }}</dd>
+            <dt>Cor</dt>       <dd>{{ v.cor }}</dd>
+            <dt>Categoria</dt> <dd>{{ catLabel(v.categoria) }}</dd>
+            <dt>KM atual</dt>  <dd>{{ v.kmAtual.toLocaleString('pt-BR') }}</dd>
+            <dt>Status</dt>
+            <dd><span class="badge" [class]="statusClass(v.status)">{{ statusLabel(v.status) }}</span></dd>
+          </dl>
+        </section>
+
+        <section class="vd-card">
+          <h3 class="vd-section-title">Histórico de Contratos</h3>
+          @if (!v.contracts?.length) {
+            <p class="vd-empty">Nenhum contrato registrado.</p>
+          } @else {
+            <ul class="vd-history">
+              @for (c of v.contracts!; track c.id) {
+                <li class="vd-history-item">
+                  <div class="vd-history-main">
+                    <span>{{ c.customer?.nome ?? 'Cliente' }}</span>
+                    <span class="badge" [class]="contractStatusClass[c.status]">{{ c.status }}</span>
+                  </div>
+                  <div class="vd-history-sub">{{ c.dataRetirada | dateBr }} → {{ c.dataDevolucao | dateBr }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="vd-card">
+          <h3 class="vd-section-title">Histórico de Manutenções</h3>
+          @if (!v.maintenances?.length) {
+            <p class="vd-empty">Nenhuma manutenção registrada.</p>
+          } @else {
+            <ul class="vd-history">
+              @for (m of v.maintenances!; track m.id) {
+                <li class="vd-history-item">
+                  <div class="vd-history-main">
+                    <span>{{ m.descricao }}</span>
+                    <span class="vd-value">{{ m.custo | currencyBrl }}</span>
+                  </div>
+                  <div class="vd-history-sub">{{ m.data | dateBr }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+    }
+
+    <ng-template pTemplate="footer">
+      <div class="vd-footer">
+        <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
+        <lync-btn label="Editar" icon="pi pi-pencil" (clicked)="closeDetail(); openEdit(v)" />
+      </div>
+    </ng-template>
+  </p-dialog>
+}

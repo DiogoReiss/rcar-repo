@@ -51,7 +51,7 @@ import { MenuModule } from 'primeng/menu';
       outline: 2px solid #ec8609;
       outline-offset: 2px;
     }
-    i { font-size: 0.9rem; pointer-events: none; }
+    .row-menu-btn i { font-size: 0.9rem; pointer-events: none; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: 'display:inline-flex' },
