@@ -20,9 +20,9 @@
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
-        <thead>
-          <tr><th>Cliente</th><th>Veículo</th><th>Retirada</th><th>Devolução</th><th>Valor</th><th>Status</th><th>Ações</th></tr>
-        </thead>
+          <thead>
+            <tr><th>Cliente</th><th>Veículo</th><th>Retirada</th><th>Devolução</th><th>Valor</th><th>Status</th><th>D4Sign</th><th>Ações</th></tr>
+          </thead>
         <tbody>
           @for (c of contracts(); track c.id) {
             <tr>
@@ -32,6 +32,11 @@
               <td>{{ formatDate(c.dataDevolucao) }}</td>
               <td>{{ formatPrice(c.valorTotalReal ?? c.valorTotal) }}</td>
               <td><span class="badge" [class]="statusClass[c.status]">{{ statusLabel[c.status] }}</span></td>
+              <td>
+                @if (c.d4signStatus) {
+                  <span class="badge badge--d4sign" [class]="d4signClass(c.d4signStatus)">{{ c.d4signStatus }}</span>
+                } @else { <span class="text-muted">—</span> }
+              </td>
               <td class="actions">
                 @if (c.status === 'RESERVADO') {
                   <button class="btn-sm" (click)="openingId.set(c.id); kmRetirada.set(0)">Abertura</button>

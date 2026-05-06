@@ -127,6 +127,9 @@ export interface RentalContract {
   combustivelSaida?: string;
   combustivelChegada?: string;
   observacoes?: string;
+  pdfUrl?: string;
+  d4signId?: string;
+  d4signStatus?: string;
   createdAt: string;
   customer?: { id: string; nome: string; cpfCnpj: string };
   vehicle?: { id: string; placa: string; modelo: string };

@@ -68,4 +68,5 @@ export default class ContratoListComponent implements OnInit {
 
   formatDate(d: string) { return new Date(d).toLocaleDateString('pt-BR'); }
   formatPrice(v: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+  d4signClass(s: string) { return s === 'SIGNED' ? 'badge--success' : s === 'PENDING' ? 'badge--warning' : 'badge--inactive'; }
 }

@@ -1,0 +1,78 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Templates de Documentos</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (!editing()) {
+    <!-- Template list -->
+    <div class="template-grid">
+      @for (t of templates(); track t.id) {
+        <div class="template-card">
+          <div class="template-type">{{ tipoLabel[t.tipo] ?? t.tipo }}</div>
+          <div class="template-name">{{ t.nome }}</div>
+          <div class="template-vars">
+          @for (v of t.variaveis; track v) { <span class="var-chip">{{ '{{' + v + '}}' }}</span> }
+          </div>
+          <div class="template-actions">
+            <button class="btn-primary" (click)="startEdit(t)">Editar / Preview</button>
+          </div>
+        </div>
+      }
+      @if (!templates().length) {
+        <div class="empty-state">Nenhum template cadastrado.</div>
+      }
+    </div>
+  } @else {
+    <!-- Editor -->
+    <div class="editor-layout">
+      <div class="editor-panel">
+        <div class="editor-header">
+          <h2>Editar: {{ editing()!.nome }}</h2>
+          <button class="btn-secondary" (click)="editing.set(null)">← Voltar</button>
+        </div>
+
+        @if (saveError()) { <div class="error">{{ saveError() }}</div> }
+
+        <div class="form-field">
+          <label>Nome</label>
+          <input [ngModel]="editName()" (ngModelChange)="editName.set($event)" name="nome" />
+        </div>
+        <div class="form-field" style="margin-top:0.75rem">
+          <label>Variáveis disponíveis (separadas por vírgula)</label>
+          <input [ngModel]="editVars()" (ngModelChange)="editVars.set($event)" name="vars" placeholder="clienteNome, valorTotal, data" />
+        </div>
+        <div class="form-field" style="margin-top:0.75rem">
+          <label>HTML do Template (suporta Handlebars {{ '{{variavel}}' }})</label>
+          <textarea class="html-editor" [ngModel]="editHtml()" (ngModelChange)="editHtml.set($event)" name="html"></textarea>
+        </div>
+
+        <div class="form-actions" style="margin-top:1rem">
+          <button class="btn-primary" (click)="onSave()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar' }}</button>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-header">
+          <h2>Preview</h2>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <input [ngModel]="previewVars()" (ngModelChange)="previewVars.set($event)" name="pvars"
+              placeholder='{"clienteNome":"João"}' class="preview-vars-input" />
+            <button class="btn-secondary" (click)="onPreview()" [disabled]="previewing()">
+              {{ previewing() ? '...' : '▶ Renderizar' }}
+            </button>
+          </div>
+        </div>
+        @if (previewHtml()) {
+          <div class="preview-frame" [innerHTML]="previewHtml()"></div>
+        } @else {
+          <div class="preview-placeholder">Clique em "Renderizar" para ver o preview</div>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+
+
