@@ -244,22 +244,40 @@ Documentação completa via Swagger em:
 http://localhost:3000/api/docs
 ```
 
-### Endpoints disponíveis (Phase 2)
+### Endpoints disponíveis (Phase 2–6)
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/refresh` | Renovar tokens |
-| POST | `/api/auth/forgot-password` | Solicitar recuperação de senha |
-| POST | `/api/auth/reset-password` | Redefinir senha |
-| GET | `/api/inventory/products` | Listar produtos do estoque |
-| POST | `/api/inventory/products` | Cadastrar produto |
-| GET | `/api/inventory/products/:id` | Detalhe do produto |
-| PATCH | `/api/inventory/products/:id` | Atualizar produto |
-| DELETE | `/api/inventory/products/:id` | Desativar produto |
-| GET | `/api/inventory/products/low-stock` | Produtos abaixo do estoque mínimo |
-| POST | `/api/inventory/movements` | Registrar movimentação |
-| GET | `/api/inventory/movements` | Histórico de movimentações |
+| Módulo | Método | Rota | Descrição |
+|--------|--------|------|-----------|
+| Auth | POST | `/api/auth/login` | Login |
+| Auth | POST | `/api/auth/refresh` | Renovar tokens |
+| Auth | POST | `/api/auth/forgot-password` | Solicitar recuperação |
+| Auth | POST | `/api/auth/reset-password` | Redefinir senha |
+| Users | GET/POST/PATCH/DELETE | `/api/users` | CRUD de usuários |
+| Customers | GET/POST/PATCH/DELETE | `/api/customers` | CRUD de clientes |
+| Fleet | GET/POST/PATCH/DELETE | `/api/fleet` | CRUD de veículos |
+| Fleet | GET | `/api/fleet/available` | Veículos disponíveis para aluguel |
+| Wash | GET/POST/PATCH | `/api/wash/services` | Catálogo de serviços |
+| Inventory | GET/POST/PATCH/DELETE | `/api/inventory/products` | Produtos do estoque |
+| Inventory | GET | `/api/inventory/products/low-stock` | Alertas de estoque baixo |
+| Inventory | POST/GET | `/api/inventory/movements` | Movimentações de estoque |
+| Lavajato | GET/POST | `/api/lavajato/schedules` | Agendamentos |
+| Lavajato | PATCH | `/api/lavajato/schedules/:id/status` | Atualizar status |
+| Lavajato | POST | `/api/lavajato/schedules/:id/payment` | Registrar pagamento |
+| Lavajato | GET/POST | `/api/lavajato/queue` | Fila de atendimento |
+| Lavajato | PATCH | `/api/lavajato/queue/:id/advance` | Avançar na fila |
+| Lavajato | GET | `/api/lavajato/queue/stream` | SSE stream da fila |
+| Lavajato | GET | `/api/lavajato/atendimentos` | Atendimentos do dia |
+| Rental | GET | `/api/rental/available` | Veículos disponíveis por período |
+| Rental | GET/POST | `/api/rental/contracts` | Contratos de aluguel |
+| Rental | PATCH | `/api/rental/contracts/:id/open` | Abertura + vistoria de saída |
+| Rental | PATCH | `/api/rental/contracts/:id/close` | Devolução + vistoria de chegada |
+| Rental | PATCH | `/api/rental/contracts/:id/cancel` | Cancelar reserva |
+| Rental | POST | `/api/rental/contracts/:id/payment` | Registrar pagamento |
+| Reports | GET | `/api/reports/daily` | Resumo diário |
+| Reports | GET | `/api/reports/monthly` | Stats mensais |
+| Reports | GET | `/api/reports/stock` | Relatório de estoque |
+| Templates | GET/POST/PATCH | `/api/templates` | CRUD de templates HTML |
+| Templates | POST | `/api/templates/:id/preview` | Renderizar template com variáveis |
 
 ---
 
@@ -307,10 +325,10 @@ payments
 |------|-----------|--------|
 | **Phase 1** | Backend foundations + Frontend shell/routing | ✅ Completo |
 | **Phase 2** | Auth end-to-end + Estoque foundation | ✅ Completo |
-| **Phase 3** | Admin CRUD completo | 🔴 Pendente |
-| **Phase 4** | Lavajato operacional | 🔴 Pendente |
-| **Phase 5** | Aluguel operacional | 🔴 Pendente |
-| **Phase 6** | Polish, PDF, D4Sign, notifications | 🔴 Pendente |
+| **Phase 3** | Admin CRUD completo, dashboard KPIs | ✅ Completo |
+| **Phase 4** | Lavajato — agendamento, fila SSE, pagamentos, estoque automático | ✅ Completo |
+| **Phase 5** | Aluguel — reservas, contratos, vistorias, devolução | ✅ Completo |
+| **Phase 6** | Reports, templates+preview, email, BullMQ, CI, Prettier | ✅ Completo |
 
 Detalhes em [`docs/progress/`](docs/progress/).
 

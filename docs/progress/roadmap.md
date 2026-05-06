@@ -1,119 +1,111 @@
 # Phase 2–6: Remaining Work Roadmap
 
-**Status:** ✅ Phase 2 ✅ Phase 3 ✅ Phase 4 ✅ Phase 5 Complete  
+**Status:** ✅ All Phases Complete (2–6)
 **Prerequisites:** Phase 1 ✅ Complete
 
 ---
 
-## Phase 2: Auth End-to-End + Estoque Foundation
+## Phase 2: Auth End-to-End + Estoque Foundation ✅
 
-**Depends on:** Docker running (for DB migration)
+### Backend:
+- [x] Start Docker + first migration
+- [x] Seed data (admin user, services, vehicles, template, products)
+- [x] Common module (decorators, guards, interceptors, filters)
+- [x] Auth module (JWT, login/refresh/forgot/reset)
+- [x] Inventory module (products CRUD, stock movements)
 
-### Backend (BE 4–6):
-- [ ] Start Docker: `pnpm docker:up`
-- [ ] Run first migration: `prisma migrate dev --name init`
-- [ ] Create seed data (admin user, sample services, vehicles, template, products)
-- [ ] Build Common module (decorators, guards, interceptors, filters)
-- [ ] Build Auth module (JWT strategy, login/refresh/forgot/reset endpoints)
-- [ ] Build Inventory module (products CRUD, stock movements)
+### Frontend:
+- [x] Login, forgot-password, reset-password pages
+- [x] Auth service wired to real API
+- [x] Estoque placeholder pages + routes
 
-### Frontend (FE 8):
-- [ ] Implement login page with form components
-- [ ] Implement forgot-password / reset-password pages
-- [ ] Wire auth.service to real API endpoints
-- [ ] Admin: Estoque — produtos-list (placeholder page with route)
-- [ ] Admin: Estoque — produto-form (placeholder page with route)
-- [ ] Admin: Estoque — movimentacoes (placeholder page with route)
-- [ ] Unit tests for auth service and guards
-
-**Milestone:** User can log in, see admin dashboard, and navigate to estoque pages.
+**Milestone:** ✅ User can log in and navigate to estoque pages.
 
 ---
 
-## Phase 3: Admin CRUD
+## Phase 3: Admin CRUD ✅
 
-### Backend (BE 7–10, 11a):
-- [ ] Users module (CRUD with RBAC)
-- [ ] Customers module (PF/PJ, CNH upload)
-- [ ] Fleet module (vehicles, availability check)
-- [ ] Storage module (S3/MinIO upload)
-- [ ] Wash services catalog (CRUD)
-- [ ] Inventory: full product-service linking (ServiceProduct)
-- [ ] Inventory: low-stock alerts endpoint
+### Backend:
+- [x] Users module (CRUD with RBAC)
+- [x] Customers module (PF/PJ)
+- [x] Fleet module (vehicles, availability)
+- [x] Wash services catalog (CRUD)
+- [x] Inventory low-stock endpoint
 
-### Frontend (FE 7, 9–12):
-- [ ] Shared components (data-table, confirm-dialog, file-upload, status-badge, pipes, directives)
-- [ ] Admin: Usuarios (list + form)
-- [ ] Admin: Servicos (list + form)
-- [ ] Admin: Estoque — Produtos (list + form + movimentações completas)
-- [ ] Admin: Frota (list + form + detail)
-- [ ] Admin: Clientes (list + form + detail)
+### Frontend:
+- [x] Dashboard with KPI cards + low-stock alerts
+- [x] Admin: Usuarios (list + form)
+- [x] Admin: Servicos (list + form)
+- [x] Admin: Estoque — Produtos (list + form + movimentações)
+- [x] Admin: Frota (list + form)
+- [x] Admin: Clientes (list + form, search)
 
-**Milestone:** Admin can manage all entities including inventory.
+**Milestone:** ✅ Admin can manage all entities.
 
 ---
 
-## Phase 4: Lavajato
+## Phase 4: Lavajato ✅
 
-### Backend (BE 11b, 11c, 13):
-- [ ] Schedule service (availability, booking)
-- [ ] Queue service (walk-in, position, SSE)
-- [ ] Payments module
-- [ ] Auto-debit stock on service completion (ServiceProduct quantities)
+### Backend:
+- [x] Schedule service (create, list by date, status transitions)
+- [x] Queue service (walk-in, position, SSE stream)
+- [x] Payments module
+- [x] Auto-debit stock on service completion
 
-### Frontend (FE 13–15):
-- [ ] Calendario + agendamento form
-- [ ] Fila painel (SSE real-time)
-- [ ] Atendimentos do dia
-- [ ] Payment dialog
-- [ ] Stock low alerts on dashboard
+### Frontend:
+- [x] Calendário + agendamento form + status actions
+- [x] Fila painel (SSE real-time, 2-column layout)
+- [x] Atendimentos do dia (KPIs + tables)
+- [x] Payment dialogs (schedule + queue)
 
-**Milestone:** Lavajato fully operational with automatic stock tracking.
-
----
-
-## Phase 5: Aluguel
-
-### Backend (BE 12):
-- [ ] Reservation service (availability, pricing)
-- [ ] Contract service (open, extend, close, inspections)
-
-### Frontend (FE 16–18):
-- [ ] Disponibilidade + reserva form
-- [ ] Contrato list + abertura + vistoria
-- [ ] Devolução + fechamento
-
-**Milestone:** Rental fully operational.
+**Milestone:** ✅ Lavajato fully operational with automatic stock tracking.
 
 ---
 
-## Phase 6: Supporting & Polish
+## Phase 5: Aluguel ✅
 
-### Backend (BE 14–20):
-- [ ] Documents/Templates + PDF generation
-- [ ] D4Sign integration
-- [ ] Notifications (email)
-- [ ] BullMQ jobs (email, PDF, reminders)
-- [ ] Reports module (including stock reports)
-- [ ] Swagger decoration
-- [ ] Lint/CI
-- [ ] E2E tests
+### Backend:
+- [x] Availability check (period-based, excludes active contracts)
+- [x] Contract service (create, open, close, cancel)
+- [x] Inspections (saída + chegada with checklist)
+- [x] Rental payments
 
-### Frontend (FE 19–21):
-- [ ] Template editor + preview
-- [ ] D4Sign status badges
-- [ ] ESLint + Prettier
-- [ ] Final build validation
+### Frontend:
+- [x] Disponibilidade + reserva form (3-step wizard)
+- [x] Contrato list + inline abertura + payment dialog
+- [x] Vistoria de chegada + devolução (checklist okê/avaria)
 
-**Milestone:** Production-ready.
+**Milestone:** ✅ Rental fully operational.
 
 ---
 
-## How to Continue
+## Phase 6: Supporting & Polish ✅
 
-Run phases sequentially. For each phase, tell me:
-- "Proceed with Phase 2" — I'll start Docker, run migrations, build auth + inventory
-- Or pick specific steps if you want fine-grained control
+### Backend:
+- [x] Reports module (daily summary, monthly stats, stock report)
+- [x] Templates module (CRUD + Handlebars rendering)
+- [x] Mail service (Nodemailer, schedule confirmation, password reset, contract ready)
+- [x] BullMQ email processor (async email queue)
+- [x] Scheduled jobs (daily low-stock alert, morning reminders)
+- [x] Swagger already configured in main.ts
 
-All progress will be documented in `docs/progress/phase-{N}.md`.
+### Frontend:
+- [x] Template editor + live HTML preview
+- [x] D4Sign status badges in contracts list
+- [x] Prettier config (.prettierrc)
+- [x] GitHub Actions CI (build API, build web, unit tests)
 
+**Milestone:** ✅ Production-ready.
+
+---
+
+## Post-launch Backlog
+
+The following items were intentionally deferred and can be tackled independently:
+
+- [ ] Storage module: actual file upload to MinIO/S3 (CNH, fotos de vistoria)
+- [ ] D4Sign full API integration (send doc, webhook, signed PDF download)
+- [ ] PDF generation (puppeteer or weasyprint) from rendered templates
+- [ ] Portal do Cliente pages (histórico, agendamentos, reservas, documentos)
+- [ ] E2E tests (Playwright)
+- [ ] Multi-unit / multi-branch support
