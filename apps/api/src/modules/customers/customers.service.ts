@@ -3,13 +3,16 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
 import { UpdateCustomerDto } from './dto/update-customer.dto.js';
+import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
 export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(search?: string) {
+  async findAll(search?: string, pagination?: PaginationDto) {
+    const { page = 1, perPage = 20 } = pagination ?? {};
     const where: Prisma.CustomerWhereInput = {
+      ativo: true,   // D4: consistently filter both ativo AND deletedAt
       deletedAt: null,
       ...(search && {
         OR: [
@@ -19,11 +22,21 @@ export class CustomersService {
         ],
       }),
     };
-    return this.prisma.customer.findMany({ where, orderBy: { nome: 'asc' } });
+    const [data, total] = await Promise.all([
+      this.prisma.customer.findMany({
+        where,
+        orderBy: { nome: 'asc' },
+        skip: (page - 1) * perPage,
+        take: perPage,
+      }),
+      this.prisma.customer.count({ where }),
+    ]);
+    return { data, total, page, perPage, totalPages: Math.ceil(total / perPage) };
   }
 
   async findOne(id: string) {
     const c = await this.prisma.customer.findUnique({ where: { id } });
+    if (!c || c.deletedAt) throw new NotFoundException('Cliente não encontrado');
     if (!c) throw new NotFoundException('Cliente não encontrado');
     return c;
   }

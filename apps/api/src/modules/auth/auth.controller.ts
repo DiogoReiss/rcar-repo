@@ -1,6 +1,8 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle } from '@nestjs/throttler';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
@@ -13,12 +15,14 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // S1: 5 attempts per minute for login
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login com e-mail e senha' })
   @ApiResponse({ status: 200, type: TokenResponseDto })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    return this.authService.login(dto, res);
   }
 
   @Post('refresh')
@@ -26,8 +30,20 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renovar tokens' })
   @ApiResponse({ status: 200, type: TokenResponseDto })
-  async refresh(@CurrentUser() user: { id: string; email: string; role: string }) {
-    return this.authService.refresh(user);
+  async refresh(
+    @CurrentUser() user: { id: string; email: string; role: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.refresh(user, res);
+  }
+
+  // S4: Logout invalidates refresh token
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Encerrar sessão e invalidar refresh token' })
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies?.['refresh_token'] as string | undefined;
+    return this.authService.logout(refreshToken, res);
   }
 
   @Post('forgot-password')
@@ -44,4 +60,3 @@ export class AuthController {
     return this.authService.resetPassword(dto.token, dto.novaSenha);
   }
 }
-

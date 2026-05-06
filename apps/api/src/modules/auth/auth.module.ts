@@ -2,14 +2,19 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy.js';
+import { TokenBlacklistService } from './token-blacklist.service.js';
+import { MailModule } from '../mail/mail.module.js';
 
 @Module({
   imports: [
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,7 +25,14 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshJwtStrategy],
-  exports: [AuthService],
+  providers: [
+    AuthService,
+    TokenBlacklistService,
+    JwtStrategy,
+    RefreshJwtStrategy,
+    // S1: Apply throttler globally via APP_GUARD
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
+  exports: [AuthService, TokenBlacklistService],
 })
 export class AuthModule {}

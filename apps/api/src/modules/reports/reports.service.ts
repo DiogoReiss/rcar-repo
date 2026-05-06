@@ -110,5 +110,23 @@ export class ReportsService {
       ultimasMovimentacoes: p.movements,
     }));
   }
-}
 
+  // A10: Aggregated dashboard endpoint — single query replaces 5 parallel frontend requests
+  async getDashboardKpis() {
+    const [usersCount, vehiclesCount, customersCount, servicesCount, lowStock] = await Promise.all([
+      this.prisma.user.count({ where: { ativo: true, deletedAt: null } }),
+      this.prisma.vehicle.count({ where: { deletedAt: null } }),
+      this.prisma.customer.count({ where: { ativo: true, deletedAt: null } }),
+      this.prisma.washService.count({ where: { ativo: true } }),
+      this.prisma.product.findMany({
+        where: { ativo: true, deletedAt: null },
+        select: { id: true, nome: true, unidade: true, quantidadeAtual: true, estoqueMinimo: true },
+        orderBy: { nome: 'asc' },
+      }).then(products =>
+        products.filter(p => Number(p.quantidadeAtual) <= Number(p.estoqueMinimo)),
+      ),
+    ]);
+
+    return { usersCount, vehiclesCount, customersCount, servicesCount, lowStock };
+  }
+}

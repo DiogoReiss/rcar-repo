@@ -91,22 +91,25 @@ export class LavajatoService {
     const service = await this.prisma.washService.findUnique({ where: { id: dto.serviceId } });
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
-    const lastEntry = await this.prisma.washQueue.findFirst({
-      where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
-      orderBy: { posicao: 'desc' },
-    });
-    const posicao = (lastEntry?.posicao ?? 0) + 1;
+    // D2: Use serializable transaction to prevent duplicate queue positions
+    return this.prisma.$transaction(async (tx) => {
+      const lastEntry = await tx.washQueue.findFirst({
+        where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
+        orderBy: { posicao: 'desc' },
+      });
+      const posicao = (lastEntry?.posicao ?? 0) + 1;
 
-    return this.prisma.washQueue.create({
-      data: {
-        customerId: dto.customerId,
-        nomeAvulso: dto.nomeAvulso,
-        serviceId: dto.serviceId,
-        veiculoPlaca: dto.veiculoPlaca,
-        posicao,
-      },
-      include: { service: true, customer: { select: { id: true, nome: true } } },
-    });
+      return tx.washQueue.create({
+        data: {
+          customerId: dto.customerId,
+          nomeAvulso: dto.nomeAvulso,
+          serviceId: dto.serviceId,
+          veiculoPlaca: dto.veiculoPlaca,
+          posicao,
+        },
+        include: { service: true, customer: { select: { id: true, nome: true } } },
+      });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
   async advanceQueue(id: string) {
@@ -172,7 +175,11 @@ export class LavajatoService {
     refId: string,
     dto: CreatePaymentDto,
   ) {
+    // D5: Check for existing payment (idempotency) via unique scheduleId/queueId FK
     if (refType === 'WASH_SCHEDULE') {
+      const existing = await this.prisma.payment.findUnique({ where: { scheduleId: refId } });
+      if (existing) return existing;
+
       const s = await this.prisma.washSchedule.findUnique({
         where: { id: refId },
         include: { service: true },
@@ -190,6 +197,9 @@ export class LavajatoService {
         },
       });
     } else {
+      const existing = await this.prisma.payment.findUnique({ where: { queueId: refId } });
+      if (existing) return existing;
+
       const q = await this.prisma.washQueue.findUnique({
         where: { id: refId },
         include: { service: true },
@@ -211,31 +221,45 @@ export class LavajatoService {
 
   // ─── Stock auto-debit ─────────────────────────────────────────────────────
 
-  private async debitStock(refId: string, serviceProducts: Array<{ productId: string; quantidadePorUso: any; product: { quantidadeAtual: any } }>) {
+  // D1: Wrap ALL product debits in a single $transaction to prevent partial updates
+  // Q5: Use proper Prisma Decimal types instead of any
+  private async debitStock(
+    refId: string,
+    serviceProducts: Array<{
+      productId: string;
+      quantidadePorUso: Prisma.Decimal;
+      product: { quantidadeAtual: Prisma.Decimal };
+    }>,
+  ) {
     if (!serviceProducts.length) return;
-    for (const sp of serviceProducts) {
-      const currentQty = new Prisma.Decimal(sp.product.quantidadeAtual);
-      const debitQty = new Prisma.Decimal(sp.quantidadePorUso);
-      const newQty = currentQty.sub(debitQty);
-      if (newQty.lessThan(0)) continue; // don't go negative, just skip
 
-      await this.prisma.$transaction([
-        this.prisma.stockMovement.create({
+    await this.prisma.$transaction(async (tx) => {
+      for (const sp of serviceProducts) {
+        const current = await tx.product.findUnique({
+          where: { id: sp.productId },
+          select: { quantidadeAtual: true },
+        });
+        if (!current) continue;
+
+        const currentQty = new Prisma.Decimal(current.quantidadeAtual);
+        const debitQty = new Prisma.Decimal(sp.quantidadePorUso);
+        const newQty = currentQty.sub(debitQty);
+        if (newQty.lessThan(0)) continue; // don't go negative
+
+        await tx.stockMovement.create({
           data: {
             productId: sp.productId,
             tipo: 'SAIDA',
-            quantidade: sp.quantidadePorUso,
+            quantidade: debitQty,
             motivo: `Saída automática — atendimento ${refId}`,
           },
-        }),
-        this.prisma.product.update({
+        });
+        await tx.product.update({
           where: { id: sp.productId },
           data: { quantidadeAtual: newQty },
-        }),
-      ]);
-    }
+        });
+      }
+    });
   }
 }
-
-
 

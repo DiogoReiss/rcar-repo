@@ -15,7 +15,7 @@ export class UsersService {
 
   async findAll() {
     return this.prisma.user.findMany({
-      where: { deletedAt: null },
+      where: { ativo: true, deletedAt: null }, // D4: filter both ativo AND deletedAt
       select: this.select,
       orderBy: { nome: 'asc' },
     });

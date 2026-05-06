@@ -33,5 +33,11 @@ export class ReportsController {
   stock() {
     return this.reportsService.getStockReport();
   }
-}
 
+  // A10: Single aggregated endpoint replacing 5 parallel frontend calls
+  @Get('dashboard')
+  @ApiOperation({ summary: 'KPIs do dashboard (usuários, veículos, clientes, serviços, baixo estoque)' })
+  dashboard() {
+    return this.reportsService.getDashboardKpis();
+  }
+}

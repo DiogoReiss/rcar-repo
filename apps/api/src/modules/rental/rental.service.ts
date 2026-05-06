@@ -73,46 +73,47 @@ export class RentalService {
   }
 
   async create(dto: CreateContractDto) {
-    // Check vehicle availability
     const start = new Date(dto.dataRetirada);
     const end = new Date(dto.dataDevolucao);
 
     if (start >= end) throw new BadRequestException('Data de devolução deve ser posterior à retirada');
 
-    const conflict = await this.prisma.rentalContract.findFirst({
-      where: {
-        vehicleId: dto.vehicleId,
-        status: { in: ['RESERVADO', 'ATIVO'] },
-        AND: [{ dataRetirada: { lt: end } }, { dataDevolucao: { gt: start } }],
-      },
-    });
-    if (conflict) throw new ConflictException('Veículo indisponível para o período selecionado');
+    // D3: Wrap availability check + create in a serializable transaction to prevent double booking
+    return this.prisma.$transaction(async (tx) => {
+      const conflict = await tx.rentalContract.findFirst({
+        where: {
+          vehicleId: dto.vehicleId,
+          status: { in: ['RESERVADO', 'ATIVO'] },
+          AND: [{ dataRetirada: { lt: end } }, { dataDevolucao: { gt: start } }],
+        },
+      });
+      if (conflict) throw new ConflictException('Veículo indisponível para o período selecionado');
 
-    // Calculate total value
-    const diffMs = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    const valorTotal = new Prisma.Decimal(dto.valorDiaria).mul(diffDays)
-      .add(dto.seguro && dto.valorSeguro ? new Prisma.Decimal(dto.valorSeguro) : 0);
+      const diffMs = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const valorTotal = new Prisma.Decimal(dto.valorDiaria).mul(diffDays)
+        .add(dto.seguro && dto.valorSeguro ? new Prisma.Decimal(dto.valorSeguro) : 0);
 
-    return this.prisma.rentalContract.create({
-      data: {
-        customerId: dto.customerId,
-        vehicleId: dto.vehicleId,
-        modalidade: dto.modalidade,
-        dataRetirada: start,
-        dataDevolucao: end,
-        valorDiaria: dto.valorDiaria,
-        valorTotal,
-        seguro: dto.seguro ?? false,
-        valorSeguro: dto.valorSeguro,
-        kmLimite: dto.kmLimite,
-        observacoes: dto.observacoes,
-      },
-      include: {
-        customer: { select: { id: true, nome: true } },
-        vehicle: { select: { id: true, placa: true, modelo: true } },
-      },
-    });
+      return tx.rentalContract.create({
+        data: {
+          customerId: dto.customerId,
+          vehicleId: dto.vehicleId,
+          modalidade: dto.modalidade,
+          dataRetirada: start,
+          dataDevolucao: end,
+          valorDiaria: dto.valorDiaria,
+          valorTotal,
+          seguro: dto.seguro ?? false,
+          valorSeguro: dto.valorSeguro,
+          kmLimite: dto.kmLimite,
+          observacoes: dto.observacoes,
+        },
+        include: {
+          customer: { select: { id: true, nome: true } },
+          vehicle: { select: { id: true, placa: true, modelo: true } },
+        },
+      });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
 
   // ─── Open contract (vistoria de saída) ───────────────────────────────────
