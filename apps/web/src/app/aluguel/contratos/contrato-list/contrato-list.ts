@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
-import { RentalContract } from '@shared/models/entities.model';
+import { RentalContract, PaginatedResponse } from '@shared/models/entities.model';
 import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-contrato-list',
-  imports: [FormsModule, RouterLink, ConfirmDialogComponent],
+  imports: [FormsModule, RouterLink, ConfirmDialogComponent, PageHeaderComponent],
   templateUrl: './contrato-list.html',
   styleUrl: './contrato-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,8 +42,8 @@ export default class ContratoListComponent implements OnInit {
     this.loading.set(true); this.error.set(null);
     try {
       const path = this.statusFilter() ? `/rental/contracts?status=${this.statusFilter()}` : '/rental/contracts';
-      const res = await firstValueFrom(this.api.get<RentalContract[]>(path));
-      this.contracts.set(res);
+      const res = await firstValueFrom(this.api.get<PaginatedResponse<RentalContract>>(path));
+      this.contracts.set(res.data);
     } catch { this.error.set('Erro ao carregar contratos.'); }
     finally { this.loading.set(false); }
   }

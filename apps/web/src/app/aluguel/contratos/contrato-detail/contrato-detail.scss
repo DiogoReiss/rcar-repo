@@ -1,0 +1,39 @@
+@use 'variables' as *;
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-lg;
+  padding: $spacing-lg;
+}
+
+.detail-card {
+  background: #fff;
+  border: 1px solid $color-neutral-200;
+  border-radius: 10px;
+  padding: $spacing-lg;
+
+  h2 { font-size: 1rem; font-weight: 600; margin: 0 0 $spacing-md; color: $color-neutral-800; }
+}
+
+.info-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xs $spacing-md;
+  margin: 0;
+
+  dt { font-size: 0.8125rem; color: $color-neutral-500; font-weight: 500; }
+  dd { font-size: 0.9375rem; color: $color-neutral-800; margin: 0; }
+}
+
+.total-real { font-weight: 700; color: $color-success-dark; }
+
+.actions {
+  padding: 0 $spacing-lg $spacing-lg;
+  display: flex;
+  gap: $spacing-md;
+}
+
+.loading-state, .error-state { padding: $spacing-xl; text-align: center; color: $color-neutral-500; }
+.error-state { color: $color-danger; }
+

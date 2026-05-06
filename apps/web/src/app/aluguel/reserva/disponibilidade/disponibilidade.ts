@@ -4,10 +4,11 @@ import { Router } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { Vehicle, Customer, RentalContract } from '@shared/models/entities.model';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-disponibilidade',
-  imports: [FormsModule],
+  imports: [FormsModule, PageHeaderComponent],
   templateUrl: './disponibilidade.html',
   styleUrl: './disponibilidade.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

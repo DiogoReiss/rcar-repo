@@ -1,6 +1,5 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Contratos de Aluguel</h1>
+  <lync-page-header title="Contratos de Aluguel">
     <div class="header-actions">
       <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); load()" name="sf" class="filter-select">
         <option value="">Todos</option>
@@ -11,7 +10,7 @@
       </select>
       <a class="btn-primary" routerLink="/aluguel/reserva">+ Nova Reserva</a>
     </div>
-  </header>
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
