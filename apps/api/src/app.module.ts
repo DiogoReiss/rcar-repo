@@ -3,6 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { InventoryModule } from './modules/inventory/inventory.module.js';
+import { UsersModule } from './modules/users/users.module.js';
+import { CustomersModule } from './modules/customers/customers.module.js';
+import { FleetModule } from './modules/fleet/fleet.module.js';
+import { WashModule } from './modules/wash/wash.module.js';
 
 @Module({
   imports: [
@@ -13,6 +17,10 @@ import { InventoryModule } from './modules/inventory/inventory.module.js';
     PrismaModule,
     AuthModule,
     InventoryModule,
+    UsersModule,
+    CustomersModule,
+    FleetModule,
+    WashModule,
   ],
   controllers: [],
   providers: [],
