@@ -12,7 +12,7 @@
     <div class="template-grid">
       @for (t of templates(); track t.id) {
         <div class="template-card">
-          <div class="template-type">{{ tipoLabel[t.tipo] ?? t.tipo }}</div>
+          <div class="template-type">{{ tipoLabel[t.tipo] }}</div>
           <div class="template-name">{{ t.nome }}</div>
           <div class="template-vars">
           @for (v of t.variaveis; track v) { <span class="var-chip">{{ '{{' + v + '}}' }}</span> }

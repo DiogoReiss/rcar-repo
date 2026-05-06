@@ -83,7 +83,8 @@
 .table-wrapper {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid $color-neutral-200;
   overflow: hidden;
 }
 
@@ -92,27 +93,27 @@
   border-collapse: collapse;
 
   th {
-    background: #f8fafc;
+    background: $color-neutral-50;
     padding: $spacing-sm $spacing-md;
     text-align: left;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #64748b;
+    color: $color-neutral-600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid $color-neutral-200;
   }
 
   td {
     padding: $spacing-sm $spacing-md;
     font-size: 0.875rem;
-    color: #1e293b;
-    border-bottom: 1px solid #f1f5f9;
+    color: $color-neutral-900;
+    border-bottom: 1px solid $color-neutral-100;
     vertical-align: middle;
   }
 
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f8fafc; }
+  tr:hover td { background: $color-neutral-50; }
 
   .actions {
     display: flex;
@@ -121,7 +122,7 @@
 
   .empty {
     text-align: center;
-    color: #94a3b8;
+    color: $color-neutral-500;
     padding: $spacing-xl;
   }
 }
@@ -152,7 +153,8 @@
 .form-card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid $color-neutral-200;
   padding: $spacing-xl;
   max-width: 600px;
 }
@@ -173,12 +175,12 @@
   label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #374151;
+    color: $color-neutral-800;
   }
 
   input, select, textarea {
     padding: $spacing-sm $spacing-md;
-    border: 1px solid #d1d5db;
+    border: 1px solid $color-neutral-300;
     border-radius: 8px;
     font-size: $font-size-base;
     font-family: $font-family-base;
@@ -201,7 +203,7 @@
 }
 
 // ─── State messages ──────────────────────────────────────────────────────────
-.loading { color: #64748b; padding: $spacing-xl; text-align: center; }
+.loading { color: $color-neutral-600; padding: $spacing-xl; text-align: center; }
 .error   { color: $color-danger; background: #fef2f2; border: 1px solid $color-danger; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
 .success { color: $color-success; background: #f0fdf4; border: 1px solid $color-success; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
 
@@ -214,7 +216,7 @@
   input {
     flex: 1;
     padding: $spacing-sm $spacing-md;
-    border: 1px solid #d1d5db;
+    border: 1px solid $color-neutral-300;
     border-radius: 8px;
     font-size: $font-size-base;
     font-family: $font-family-base;

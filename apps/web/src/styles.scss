@@ -1,1 +1,36 @@
-/* Global styles */
+/* Global bright-theme styles */
+@use 'styles/variables' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-neutral-900;
+  background: $color-neutral-50;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-primary-dark;
+    text-decoration: underline;
+  }
+}
+
+::selection {
+  background: rgba($color-primary, 0.2);
+  color: $color-primary-darker;
+}
