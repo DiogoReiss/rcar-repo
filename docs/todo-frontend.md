@@ -189,7 +189,8 @@
 | 🟢 | 14.4 | Criar `src/app/core/services/sse.service.ts` (serviço genérico de conexão SSE nativa) |
 | 🟢 | 14.5 | Criar service `FilaService` com signals + integração SSE |
 | 🟢 | 14.6 | Redesenho do painel de fila: board Kanban 3 colunas (Aguardando/Em Atendimento/Concluídos), cards com badge de posição circular, horário de entrada, placa estilizada, indicador SSE animado e summary strip de contagens |
-| 🔴 | 14.7 | Testes unitários |
+| 🟢 | 14.7 | Cards simplificados (badge + nome + serviço + grip); drag & drop HTML5 nativo entre colunas (somente avanço); info extra em dialog ao clicar (placa, horário, valor, ações Chamar/Concluir/Pagar) |
+| 🔴 | 14.8 | Testes unitários |
 
 ---
 

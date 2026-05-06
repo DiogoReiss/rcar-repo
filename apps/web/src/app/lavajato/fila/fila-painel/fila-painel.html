@@ -1,7 +1,6 @@
 <section class="page">
   <lync-page-header title="Fila de Atendimento">
     <div class="header-actions">
-      <!-- SSE status indicator -->
       <span class="sse-status" [class.sse-status--error]="sseError()">
         <span class="sse-dot" aria-hidden="true"></span>
         @if (sseError()) { Desconectado }
@@ -40,29 +39,38 @@
 
   <div class="fila-board">
 
-    <!-- ─── Aguardando ───────────────────────────────────────── -->
+    <!-- ─── Aguardando ─────────────────────────────────── -->
     <div class="board-col">
       <div class="board-col-header board-col-header--waiting">
         <span class="board-col-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
         <span class="board-col-title">Aguardando</span>
         <span class="board-col-count">{{ aguardando().length }}</span>
       </div>
-
-      <div class="board-col-body">
+      <div
+        class="board-col-body"
+        [class.board-col-body--drag-over]="dragOverCol() === 'AGUARDANDO'"
+        (dragover)="onDragOver($event, 'AGUARDANDO')"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, 'AGUARDANDO')"
+      >
         @for (q of aguardando(); track q.id) {
-          <div class="queue-card queue-card--waiting">
+          <div
+            class="queue-card queue-card--waiting"
+            draggable="true"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver detalhes de ' + (q.customer?.nome ?? q.nomeAvulso)"
+            (dragstart)="onDragStart($event, q)"
+            (click)="openDetail(q)"
+            (keydown.enter)="openDetail(q)"
+            (keydown.space)="openDetail(q)"
+          >
             <div class="queue-badge queue-badge--waiting">#{{ q.posicao }}</div>
             <div class="queue-info">
               <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
               <span class="queue-service">{{ q.service?.nome }}</span>
-              @if (q.veiculoPlaca) {
-                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
-              }
-              <span class="queue-time"><i class="pi pi-clock" aria-hidden="true"></i> {{ formatEntryTime(q.createdAt) }}</span>
             </div>
-            <div class="queue-actions">
-              <lync-btn label="Chamar" icon="pi pi-arrow-right" (clicked)="onAdvance(q.id)" />
-            </div>
+            <i class="pi pi-grip-vertical queue-drag" aria-hidden="true"></i>
           </div>
         }
         @if (!aguardando().length) {
@@ -74,30 +82,38 @@
       </div>
     </div>
 
-    <!-- ─── Em Atendimento ───────────────────────────────────── -->
+    <!-- ─── Em Atendimento ─────────────────────────────── -->
     <div class="board-col">
       <div class="board-col-header board-col-header--active">
         <span class="board-col-icon"><i class="pi pi-wrench" aria-hidden="true"></i></span>
         <span class="board-col-title">Em Atendimento</span>
         <span class="board-col-count">{{ emAtendimento().length }}</span>
       </div>
-
-      <div class="board-col-body">
+      <div
+        class="board-col-body"
+        [class.board-col-body--drag-over]="dragOverCol() === 'EM_ATENDIMENTO'"
+        (dragover)="onDragOver($event, 'EM_ATENDIMENTO')"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, 'EM_ATENDIMENTO')"
+      >
         @for (q of emAtendimento(); track q.id) {
-          <div class="queue-card queue-card--active">
+          <div
+            class="queue-card queue-card--active"
+            draggable="true"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver detalhes de ' + (q.customer?.nome ?? q.nomeAvulso)"
+            (dragstart)="onDragStart($event, q)"
+            (click)="openDetail(q)"
+            (keydown.enter)="openDetail(q)"
+            (keydown.space)="openDetail(q)"
+          >
             <div class="queue-badge queue-badge--active">#{{ q.posicao }}</div>
             <div class="queue-info">
               <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
               <span class="queue-service">{{ q.service?.nome }}</span>
-              @if (q.veiculoPlaca) {
-                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
-              }
-              <span class="queue-time"><i class="pi pi-clock" aria-hidden="true"></i> {{ formatEntryTime(q.createdAt) }}</span>
             </div>
-            <div class="queue-actions">
-              <lync-btn label="Concluir" icon="pi pi-check" (clicked)="onAdvance(q.id)" />
-              <lync-btn label="Pagamento" icon="pi pi-credit-card" variant="secondary" (clicked)="payingId.set(q.id)" />
-            </div>
+            <i class="pi pi-grip-vertical queue-drag" aria-hidden="true"></i>
           </div>
         }
         @if (!emAtendimento().length) {
@@ -109,29 +125,35 @@
       </div>
     </div>
 
-    <!-- ─── Concluídos ───────────────────────────────────────── -->
+    <!-- ─── Concluídos ─────────────────────────────────── -->
     <div class="board-col board-col--done">
       <div class="board-col-header board-col-header--done">
         <span class="board-col-icon"><i class="pi pi-check-circle" aria-hidden="true"></i></span>
         <span class="board-col-title">Concluídos</span>
         <span class="board-col-count">{{ concluidos().length }}</span>
       </div>
-
-      <div class="board-col-body">
+      <div
+        class="board-col-body"
+        (dragover)="onDragOver($event, 'CONCLUIDO')"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, 'CONCLUIDO')"
+      >
         @for (q of concluidos(); track q.id) {
-          <div class="queue-card queue-card--done">
-            <div class="queue-badge queue-badge--done"><i class="pi pi-check" aria-hidden="true"></i></div>
+          <div
+            class="queue-card queue-card--done"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver detalhes de ' + (q.customer?.nome ?? q.nomeAvulso)"
+            (click)="openDetail(q)"
+            (keydown.enter)="openDetail(q)"
+            (keydown.space)="openDetail(q)"
+          >
+            <div class="queue-badge queue-badge--done">
+              <i class="pi pi-check" aria-hidden="true"></i>
+            </div>
             <div class="queue-info">
               <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
               <span class="queue-service">{{ q.service?.nome }}</span>
-              @if (q.veiculoPlaca) {
-                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
-              }
-              @if (q.concluidoAt) {
-                <span class="queue-time queue-time--done">
-                  <i class="pi pi-check" aria-hidden="true"></i> {{ formatEntryTime(q.concluidoAt) }}
-                </span>
-              }
             </div>
           </div>
         }
@@ -145,6 +167,73 @@
     </div>
 
   </div>
+
+  <!-- ─── Detail dialog ──────────────────────────────────── -->
+  @if (detailItem(); as q) {
+    <p-dialog
+      [visible]="true"
+      (visibleChange)="!$event && closeDetail()"
+      [header]="q.customer?.nome ?? q.nomeAvulso ?? 'Detalhes'"
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [style]="{ width: '360px', maxWidth: '96vw' }"
+    >
+      <div class="detail-body">
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="badge" [class]="statusBadgeClass[q.status]">{{ statusLabel[q.status] }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Serviço</span>
+          <span class="detail-value">{{ q.service?.nome }}</span>
+        </div>
+        @if (q.service?.preco) {
+          <div class="detail-row">
+            <span class="detail-label">Valor</span>
+            <span class="detail-value detail-value--price">{{ q.service?.preco | currencyBrl }}</span>
+          </div>
+        }
+        @if (q.veiculoPlaca) {
+          <div class="detail-row">
+            <span class="detail-label">Placa</span>
+            <span class="detail-value detail-plate">{{ q.veiculoPlaca }}</span>
+          </div>
+        }
+        <div class="detail-row">
+          <span class="detail-label">Entrada</span>
+          <span class="detail-value">{{ formatEntryTime(q.createdAt) }}</span>
+        </div>
+        @if (q.concluidoAt) {
+          <div class="detail-row">
+            <span class="detail-label">Concluído</span>
+            <span class="detail-value">{{ formatEntryTime(q.concluidoAt) }}</span>
+          </div>
+        }
+        <div class="detail-row">
+          <span class="detail-label">Posição</span>
+          <span class="detail-value">#{{ q.posicao }}</span>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="detail-footer">
+          <button type="button" class="btn-secondary" (click)="closeDetail()">Fechar</button>
+          @if (detailCanPay) {
+            <button type="button" class="btn-secondary" (click)="openPayFromDetail()">
+              <i class="pi pi-credit-card" aria-hidden="true"></i> Pagar
+            </button>
+          }
+          @if (detailCanAdvance) {
+            <button type="button" class="btn-primary" (click)="onAdvanceDetail()">
+              <i class="pi pi-arrow-right" aria-hidden="true"></i>
+              {{ q.status === 'AGUARDANDO' ? 'Chamar' : 'Concluir' }}
+            </button>
+          }
+        </div>
+      </ng-template>
+    </p-dialog>
+  }
 
   <!-- Payment dialog -->
   <lync-payment-dialog
