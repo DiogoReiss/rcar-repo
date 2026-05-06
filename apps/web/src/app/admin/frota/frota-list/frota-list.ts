@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { MessageService } from 'primeng/api';
 import { FrotaService } from '../frota.service';
 import { Vehicle } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -27,6 +28,7 @@ const CAT_LABELS: Record<string, string> = {
 })
 export default class FrotaListComponent {
   private readonly frotaService = inject(FrotaService);
+  private readonly toast = inject(MessageService);
 
   readonly veiculos = this.frotaService.veiculos;
   readonly loading  = this.frotaService.loading;
@@ -87,8 +89,10 @@ export default class FrotaListComponent {
     try {
       if (this.isEdit()) {
         await firstValueFrom(this.frotaService.update(this.editTarget()!.id, data));
+        this.toast.add({ severity: 'success', summary: 'Veículo atualizado', detail: 'Alterações salvas.', life: 3000 });
       } else {
         await firstValueFrom(this.frotaService.create(data));
+        this.toast.add({ severity: 'success', summary: 'Veículo cadastrado', detail: 'Veículo adicionado à frota.', life: 3000 });
       }
       this.closeDialog();
     } finally { this.saving.set(false); }

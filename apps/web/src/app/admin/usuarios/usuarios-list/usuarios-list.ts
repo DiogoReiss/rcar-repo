@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { MessageService } from 'primeng/api';
 import { UsersService } from '../users.service';
 import { User } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -25,6 +26,7 @@ const ROLE_LABELS: Record<string, string> = {
 })
 export default class UsuariosListComponent {
   private readonly usersService = inject(UsersService);
+  private readonly toast = inject(MessageService);
 
   readonly users = this.usersService.users;
   readonly loading = this.usersService.loading;
@@ -73,11 +75,13 @@ export default class UsuariosListComponent {
         const data: Record<string, unknown> = { nome: this.fNome(), email: this.fEmail(), role: this.fRole() };
         if (this.fSenha()) data['senha'] = this.fSenha();
         await firstValueFrom(this.usersService.update(this.editTarget()!.id, data as any));
+        this.toast.add({ severity: 'success', summary: 'Usuário atualizado', detail: 'Alterações salvas.', life: 3000 });
       } else {
         await firstValueFrom(this.usersService.create({
           nome: this.fNome(), email: this.fEmail(),
           senha: this.fSenha(), role: this.fRole(), ativo: true,
         }));
+        this.toast.add({ severity: 'success', summary: 'Usuário criado', detail: 'Usuário cadastrado com sucesso.', life: 3000 });
       }
       this.closeDialog();
     } finally { this.saving.set(false); }

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { MessageService } from 'primeng/api';
 import { ServicosService } from '../servicos.service';
 import { WashService } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -19,6 +20,7 @@ import FormFieldComponent from '@shared/components/form-field/form-field';
 })
 export default class ServicosListComponent {
   private readonly servicosService = inject(ServicosService);
+  private readonly toast = inject(MessageService);
 
   readonly servicos  = this.servicosService.servicos;
   readonly loading   = this.servicosService.loading;
@@ -69,8 +71,10 @@ export default class ServicosListComponent {
     try {
       if (this.isEdit()) {
         await firstValueFrom(this.servicosService.update(this.editTarget()!.id, data));
+        this.toast.add({ severity: 'success', summary: 'Serviço atualizado', detail: 'Alterações salvas com sucesso.', life: 3000 });
       } else {
         await firstValueFrom(this.servicosService.create(data));
+        this.toast.add({ severity: 'success', summary: 'Serviço criado', detail: 'Serviço cadastrado com sucesso.', life: 3000 });
       }
       this.closeDialog();
     } finally { this.saving.set(false); }
@@ -83,7 +87,9 @@ export default class ServicosListComponent {
     if (!s) return;
     this.confirmTarget.set(null);
     this.toggling.set(s.id);
-    try { await firstValueFrom(this.servicosService.update(s.id, { ativo: !s.ativo })); }
+    try { await firstValueFrom(this.servicosService.update(s.id, { ativo: !s.ativo }));
+      this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
+    }
     finally { this.toggling.set(null); }
   }
 
