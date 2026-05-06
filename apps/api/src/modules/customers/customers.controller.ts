@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CustomersService } from './customers.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
@@ -26,7 +26,7 @@ export class CustomersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhe do cliente' })
-  findOne(@Param('id') id: string) { return this.customersService.findOne(id); }
+  findOne(@Param('id', ParseUUIDPipe) id: string) { return this.customersService.findOne(id); }
 
   @Post()
   @ApiOperation({ summary: 'Cadastra cliente' })
@@ -34,12 +34,11 @@ export class CustomersController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza cliente' })
-  update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) { return this.customersService.update(id, dto); }
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCustomerDto) { return this.customersService.update(id, dto); }
 
   @Delete(':id')
   @Roles('GESTOR_GERAL')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Desativa cliente' })
-  async remove(@Param('id') id: string) { await this.customersService.remove(id); }
+  async remove(@Param('id', ParseUUIDPipe) id: string) { await this.customersService.remove(id); }
 }
-

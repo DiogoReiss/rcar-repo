@@ -1,0 +1,38 @@
+<section class="page">
+  <lync-page-header title="Meus Documentos" />
+
+  @if (loading()) {
+    <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
+  } @else if (!contracts().length) {
+    <div class="portal-empty">
+      <i class="pi pi-file"></i>
+      <p>Nenhum documento disponível ainda.</p>
+    </div>
+  } @else {
+    <div class="docs-list">
+      @for (c of contracts(); track c.id) {
+        <div class="doc-card">
+          <div class="doc-icon">
+            <i class="pi pi-file-pdf" aria-hidden="true"></i>
+          </div>
+          <div class="doc-body">
+            <strong class="doc-title">Contrato de Locação</strong>
+            <span class="doc-sub">{{ c.vehicle?.modelo }} · {{ c.vehicle?.placa }}</span>
+            <span class="doc-date">
+              {{ formatDate(c.dataRetirada) }} → {{ formatDate(c.dataDevolucao) }}
+            </span>
+          </div>
+          <div class="doc-side">
+            <span class="badge badge--{{ c.status === 'ATIVO' ? 'operador' : c.status === 'ENCERRADO' ? 'inactive' : 'warning' }}">
+              {{ statusLabel[c.status] }}
+            </span>
+            <button class="doc-btn" (click)="download(c)" aria-label="Baixar PDF">
+              <i class="pi pi-download" aria-hidden="true"></i> Baixar PDF
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+

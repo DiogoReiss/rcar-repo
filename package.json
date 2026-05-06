@@ -7,6 +7,7 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "dev": "pnpm --filter web dev & pnpm --filter api start:dev",
+    "dev:mock": "pnpm --filter web dev:mock",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test"

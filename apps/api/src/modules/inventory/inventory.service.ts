@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { CreateStockMovementDto } from './dto/create-stock-movement.dto.js';
 import { Prisma } from '@prisma/client';
+import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
 export class InventoryService {
@@ -22,11 +23,15 @@ export class InventoryService {
     });
   }
 
-  async findAllProducts(includeInactive = false) {
-    return this.prisma.product.findMany({
-      where: includeInactive ? {} : { ativo: true, deletedAt: null },
-      orderBy: { nome: 'asc' },
-    });
+  async findAllProducts(includeInactive = false, pagination?: PaginationDto) {
+    const { page = 1, perPage = 20 } = pagination ?? {};
+    const safePage = Math.max(1, page);
+    const where = includeInactive ? {} : { ativo: true, deletedAt: null };
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({ where, orderBy: { nome: 'asc' }, skip: (safePage - 1) * perPage, take: perPage }),
+      this.prisma.product.count({ where }),
+    ]);
+    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
   }
 
   async findProductById(id: string) {
@@ -63,7 +68,16 @@ export class InventoryService {
     );
   }
 
-  async createMovement(dto: CreateStockMovementDto, userId?: string) {
+  async createMovement(dto: CreateStockMovementDto, userId?: string, idempotencyKey?: string) {
+    // D9: Idempotency — skip duplicate if same key already processed
+    if (idempotencyKey) {
+      const existing = await this.prisma.stockMovement.findFirst({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        where: { idempotencyKey } as any,
+      });
+      if (existing) return existing;
+    }
+
     const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
     if (!product) throw new NotFoundException('Produto não encontrado');
 
@@ -96,6 +110,8 @@ export class InventoryService {
           quantidade: dto.quantidade,
           motivo: dto.motivo,
           userId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ...(idempotencyKey && { idempotencyKey } as any),
         },
       }),
       this.prisma.product.update({
@@ -107,13 +123,21 @@ export class InventoryService {
     return movement;
   }
 
-  async findMovements(productId?: string) {
-    return this.prisma.stockMovement.findMany({
-      where: productId ? { productId } : {},
-      include: { product: { select: { nome: true, unidade: true } } },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    });
+  async findMovements(productId?: string, pagination?: PaginationDto) {
+    const { page = 1, perPage = 50 } = pagination ?? {};
+    const safePage = Math.max(1, page);
+    const where = productId ? { productId } : {};
+    const [data, total] = await Promise.all([
+      this.prisma.stockMovement.findMany({
+        where,
+        include: { product: { select: { nome: true, unidade: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip: (safePage - 1) * perPage,
+        take: perPage,
+      }),
+      this.prisma.stockMovement.count({ where }),
+    ]);
+    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
   }
 }
 

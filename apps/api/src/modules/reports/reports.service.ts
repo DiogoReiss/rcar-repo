@@ -111,6 +111,112 @@ export class ReportsService {
     }));
   }
 
+  // Dashboard charts — weekly services, rush hour, product usage, income/outcome
+  async getChartsData() {
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 6);
+    weekAgo.setHours(0, 0, 0, 0);
+
+    const [schedules, queues, payments, movements] = await Promise.all([
+      this.prisma.washSchedule.findMany({
+        where: { dataHora: { gte: weekAgo }, status: { not: 'CANCELADO' } },
+        include: { service: { select: { nome: true, preco: true } } },
+      }),
+      this.prisma.washQueue.findMany({
+        where: { createdAt: { gte: weekAgo }, status: { not: 'AGUARDANDO' } },
+        include: { service: { select: { nome: true, preco: true } } },
+      }),
+      this.prisma.payment.findMany({
+        where: { createdAt: { gte: weekAgo }, status: 'CONFIRMADO' },
+        select: { createdAt: true, valor: true, refType: true },
+      }),
+      this.prisma.stockMovement.findMany({
+        where: { createdAt: { gte: weekAgo }, tipo: 'SAIDA' },
+        include: { product: { select: { nome: true } } },
+      }),
+    ]);
+
+    // Build label array for last 7 days
+    const dayLabels: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      dayLabels.push(d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' }));
+    }
+
+    // Weekly services per day (schedules + queue combined)
+    const servicesPerDay = new Array(7).fill(0);
+    for (const s of schedules) {
+      const d = new Date(s.dataHora);
+      const daysAgo = Math.round((now.getTime() - d.getTime()) / 86400000);
+      const idx = 6 - Math.min(6, Math.max(0, daysAgo));
+      servicesPerDay[idx]++;
+    }
+    for (const q of queues) {
+      const d = new Date(q.createdAt);
+      const daysAgo = Math.round((now.getTime() - d.getTime()) / 86400000);
+      const idx = 6 - Math.min(6, Math.max(0, daysAgo));
+      servicesPerDay[idx]++;
+    }
+
+    // Rush hour (0–23)
+    const hourLabels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}h`);
+    const servicesPerHour = new Array(24).fill(0);
+    for (const s of schedules) {
+      servicesPerHour[new Date(s.dataHora).getHours()]++;
+    }
+    for (const q of queues) {
+      servicesPerHour[new Date(q.createdAt).getHours()]++;
+    }
+
+    // Income/Outcome per day
+    const incomePerDay = new Array(7).fill(0);
+    const outcomePerDay = new Array(7).fill(0);
+    for (const p of payments) {
+      const d = new Date(p.createdAt);
+      const daysAgo = Math.round((now.getTime() - d.getTime()) / 86400000);
+      const idx = 6 - Math.min(6, Math.max(0, daysAgo));
+      incomePerDay[idx] += Number(p.valor);
+    }
+    for (const m of movements) {
+      const d = new Date(m.createdAt);
+      const daysAgo = Math.round((now.getTime() - d.getTime()) / 86400000);
+      const idx = 6 - Math.min(6, Math.max(0, daysAgo));
+      outcomePerDay[idx] += Number(m.quantidade);
+    }
+
+    // Top product usage (by saidas count)
+    const productMap = new Map<string, number>();
+    for (const m of movements) {
+      const nome = m.product.nome;
+      productMap.set(nome, (productMap.get(nome) ?? 0) + Number(m.quantidade));
+    }
+    const sortedProducts = Array.from(productMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    return {
+      weeklyServices: {
+        labels: dayLabels,
+        data: servicesPerDay,
+      },
+      rushHour: {
+        labels: hourLabels,
+        data: servicesPerHour,
+      },
+      incomeOutcome: {
+        labels: dayLabels,
+        income: incomePerDay,
+        outcome: outcomePerDay,
+      },
+      productUsage: {
+        labels: sortedProducts.map(([name]) => name),
+        data: sortedProducts.map(([, qty]) => qty),
+      },
+    };
+  }
+
   // A10: Aggregated dashboard endpoint — single query replaces 5 parallel frontend requests
   async getDashboardKpis() {
     const [usersCount, vehiclesCount, customersCount, servicesCount, lowStock] = await Promise.all([

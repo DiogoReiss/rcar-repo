@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
@@ -19,8 +19,9 @@ import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MeusAgendamentosComponent {
-  private readonly api   = inject(ApiService);
-  private readonly toast = inject(MessageService);
+  private readonly api        = inject(ApiService);
+  private readonly toast      = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly schedules = signal<WashSchedule[]>([]);
   readonly services  = signal<WashSvc[]>([]);
@@ -43,7 +44,7 @@ export default class MeusAgendamentosComponent {
   };
 
   constructor() {
-    this.api.get<{ data: WashSvc[] }>('/wash/services').pipe(takeUntilDestroyed()).subscribe({
+    this.api.get<{ data: WashSvc[] }>('/wash/services').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (r) => { this.services.set(r.data); if (r.data.length) this.fServiceId.set(r.data[0].id); },
     });
     this.load();
@@ -51,7 +52,7 @@ export default class MeusAgendamentosComponent {
 
   private load() {
     this.loading.set(true);
-    this.api.get<WashSchedule[]>('/portal/my-schedules').pipe(takeUntilDestroyed()).subscribe({
+    this.api.get<WashSchedule[]>('/portal/my-schedules').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (s) => { this.schedules.set(s); this.loading.set(false); },
       error: ()  => this.loading.set(false),
     });

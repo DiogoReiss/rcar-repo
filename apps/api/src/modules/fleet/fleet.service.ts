@@ -3,17 +3,24 @@ import { VehicleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateVehicleDto } from './dto/create-vehicle.dto.js';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto.js';
+import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
 export class FleetService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(status?: VehicleStatus) {
+  async findAll(status?: VehicleStatus, pagination?: PaginationDto) {
+    const { page = 1, perPage = 20 } = pagination ?? {};
+    const safePage = Math.max(1, page);
     const where: Prisma.VehicleWhereInput = {
       deletedAt: null,
       ...(status && { status }),
     };
-    return this.prisma.vehicle.findMany({ where, orderBy: { modelo: 'asc' } });
+    const [data, total] = await Promise.all([
+      this.prisma.vehicle.findMany({ where, orderBy: { modelo: 'asc' }, skip: (safePage - 1) * perPage, take: perPage }),
+      this.prisma.vehicle.count({ where }),
+    ]);
+    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
   }
 
   async findOne(id: string) {

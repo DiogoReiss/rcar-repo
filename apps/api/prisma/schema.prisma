@@ -373,13 +373,14 @@ model Product {
 }
 
 model StockMovement {
-  id         String            @id @default(uuid())
-  productId  String            @map("product_id")
-  tipo       StockMovementType
-  quantidade Decimal           @db.Decimal(10, 3)
-  motivo     String?
-  userId     String?           @map("user_id")
-  createdAt  DateTime          @default(now()) @map("created_at")
+  id               String            @id @default(uuid())
+  productId        String            @map("product_id")
+  tipo             StockMovementType
+  quantidade       Decimal           @db.Decimal(10, 3)
+  motivo           String?
+  userId           String?           @map("user_id")
+  idempotencyKey   String?           @unique @map("idempotency_key")
+  createdAt        DateTime          @default(now()) @map("created_at")
 
   product Product @relation(fields: [productId], references: [id])
 

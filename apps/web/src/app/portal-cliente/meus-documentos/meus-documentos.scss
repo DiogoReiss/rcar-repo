@@ -1,0 +1,55 @@
+@use 'variables' as *;
+@use 'admin' as *;
+
+:host { display: block; }
+
+.portal-loading {
+  display: flex; align-items: center; gap: $spacing-sm;
+  color: $color-neutral-400; padding: $spacing-xl; font-size: 0.9rem;
+}
+
+.portal-empty {
+  display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
+  padding: $spacing-xl; background: #fff; border-radius: 10px;
+  margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
+  i { font-size: 2rem; }
+  p { font-size: 0.9rem; margin: 0; }
+}
+
+.docs-list {
+  display: flex; flex-direction: column; gap: $spacing-md;
+  padding: 0 $spacing-lg $spacing-lg;
+}
+
+.doc-card {
+  background: #fff; border-radius: 12px; padding: $spacing-lg;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid $color-neutral-200;
+  display: flex; align-items: center; gap: $spacing-md;
+}
+
+.doc-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba($color-primary, 0.1); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  i { font-size: 1.4rem; color: $color-primary; }
+}
+
+.doc-body {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  strong.doc-title { font-size: 0.95rem; color: $color-neutral-900; }
+  span.doc-sub     { font-size: 0.8rem; color: $color-neutral-600; }
+  span.doc-date    { font-size: 0.78rem; color: $color-neutral-400; }
+}
+
+.doc-side {
+  display: flex; flex-direction: column; align-items: flex-end; gap: $spacing-sm;
+}
+
+.doc-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+  background: $color-primary; color: #fff; border: none; border-radius: 6px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+  &:hover { opacity: 0.9; }
+  i { font-size: 0.75rem; }
+}
+

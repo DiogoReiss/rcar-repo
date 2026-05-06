@@ -10,6 +10,7 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy.js';
 import { TokenBlacklistService } from './token-blacklist.service.js';
 import { MailModule } from '../mail/mail.module.js';
+import { LoginAttemptsService } from './login-attempts.service.js';
 
 @Module({
   imports: [
@@ -28,11 +29,12 @@ import { MailModule } from '../mail/mail.module.js';
   providers: [
     AuthService,
     TokenBlacklistService,
+    LoginAttemptsService,
     JwtStrategy,
     RefreshJwtStrategy,
     // S1: Apply throttler globally via APP_GUARD
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
-  exports: [AuthService, TokenBlacklistService],
+  exports: [AuthService, TokenBlacklistService, LoginAttemptsService],
 })
 export class AuthModule {}

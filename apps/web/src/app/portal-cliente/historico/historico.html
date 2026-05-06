@@ -1,0 +1,47 @@
+<section class="page">
+  <lync-page-header title="Histórico" />
+
+  @if (loading()) {
+    <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
+  } @else if (!items().length) {
+    <div class="portal-empty">
+      <i class="pi pi-history"></i>
+      <p>Nenhuma atividade no histórico ainda.</p>
+    </div>
+  } @else {
+    <div class="hist-list">
+      @for (item of items(); track item.data.id) {
+        @if (item.kind === 'lavagem') {
+          <div class="hist-card hist-card--lavagem">
+            <div class="hist-icon">
+              <i class="pi pi-droplet" aria-hidden="true"></i>
+            </div>
+            <div class="hist-body">
+              <strong>{{ asSchedule(item).service?.nome ?? 'Lavagem' }}</strong>
+              <span>{{ formatDate(asSchedule(item).dataHora) }}</span>
+            </div>
+            <div class="hist-side">
+              <span class="badge badge--success">{{ asSchedule(item).service?.preco | currencyBrl }}</span>
+              <span class="hist-tag">Lavajato</span>
+            </div>
+          </div>
+        } @else {
+          <div class="hist-card hist-card--aluguel">
+            <div class="hist-icon">
+              <i class="pi pi-car" aria-hidden="true"></i>
+            </div>
+            <div class="hist-body">
+              <strong>{{ asContract(item).vehicle?.modelo ?? 'Veículo' }}</strong>
+              <span>{{ formatDate(asContract(item).dataRetirada) }} → {{ formatDate(asContract(item).dataDevolucao) }}</span>
+            </div>
+            <div class="hist-side">
+              <span class="badge badge--inactive">{{ asContract(item).valorTotal | currencyBrl }}</span>
+              <span class="hist-tag">Aluguel</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</section>
+

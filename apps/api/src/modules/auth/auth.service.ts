@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { TokenBlacklistService } from './token-blacklist.service.js';
 import { MailService } from '../mail/mail.service.js';
 import { LoginDto } from './dto/login.dto.js';
+import { LoginAttemptsService } from './login-attempts.service.js';
 
 const COOKIE_BASE = {
   httpOnly: true,
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly blacklist: TokenBlacklistService,
     private readonly mailService: MailService,
+    private readonly loginAttempts: LoginAttemptsService,
   ) {}
 
   private get refreshSecret() {
@@ -45,16 +47,30 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, res: Response) {
+    // S11: Per-account lockout check
+    if (this.loginAttempts.isLocked(dto.email)) {
+      const ms = this.loginAttempts.getRemainingLockMs(dto.email);
+      throw new HttpException(
+        `Conta temporariamente bloqueada. Tente novamente em ${Math.ceil(ms / 60000)} minuto(s).`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
 
     if (!user || !user.ativo || user.deletedAt) {
+      this.loginAttempts.recordFailure(dto.email);
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
     const passwordValid = await bcrypt.compare(dto.senha, user.senhaHash);
     if (!passwordValid) {
+      this.loginAttempts.recordFailure(dto.email);
       throw new UnauthorizedException('Credenciais inválidas');
     }
+
+    // Success — clear failure counter
+    this.loginAttempts.clearAttempts(dto.email);
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);

@@ -4,10 +4,14 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateScheduleDto } from './dto/create-schedule.dto.js';
 import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
 import { CreateQueueEntryDto, CreatePaymentDto } from './dto/create-queue-entry.dto.js';
+import { QueueEventsService } from './queue-events.service.js';
 
 @Injectable()
 export class LavajatoService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queueEvents: QueueEventsService,
+  ) {}
 
   // ─── Schedules ────────────────────────────────────────────────────────────
 
@@ -92,7 +96,7 @@ export class LavajatoService {
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
     // D2: Use serializable transaction to prevent duplicate queue positions
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const lastEntry = await tx.washQueue.findFirst({
         where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
         orderBy: { posicao: 'desc' },
@@ -110,6 +114,8 @@ export class LavajatoService {
         include: { service: true, customer: { select: { id: true, nome: true } } },
       });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    this.queueEvents.emit_queueChanged();
+    return result;
   }
 
   async advanceQueue(id: string) {
@@ -132,20 +138,24 @@ export class LavajatoService {
       throw new BadRequestException('Entrada já concluída');
     }
 
-    return this.prisma.washQueue.update({
+    const result = await this.prisma.washQueue.update({
       where: { id },
       data: { status: newStatus, ...(concluidoAt && { concluidoAt }) },
       include: { service: true },
     });
+    this.queueEvents.emit_queueChanged();
+    return result;
   }
 
   async removeFromQueue(id: string) {
     const entry = await this.prisma.washQueue.findUnique({ where: { id } });
     if (!entry) throw new NotFoundException('Entrada na fila não encontrada');
-    return this.prisma.washQueue.update({
+    const result = await this.prisma.washQueue.update({
       where: { id },
       data: { status: 'CONCLUIDO', concluidoAt: new Date() },
     });
+    this.queueEvents.emit_queueChanged();
+    return result;
   }
 
   async getAtendimentosDia(date?: string) {

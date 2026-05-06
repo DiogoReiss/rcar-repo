@@ -3,6 +3,7 @@ import { Prisma, ContractStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateContractDto } from './dto/create-contract.dto.js';
 import { OpenContractDto, CloseContractDto } from './dto/contract-operations.dto.js';
+import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
 export class RentalService {
@@ -42,19 +43,27 @@ export class RentalService {
 
   // ─── Contracts ────────────────────────────────────────────────────────────
 
-  async findAll(status?: ContractStatus, customerId?: string) {
+  async findAll(status?: ContractStatus, customerId?: string, pagination?: PaginationDto) {
+    const { page = 1, perPage = 20 } = pagination ?? {};
+    const safePage = Math.max(1, page);
     const where: Prisma.RentalContractWhereInput = {
       ...(status && { status }),
       ...(customerId && { customerId }),
     };
-    return this.prisma.rentalContract.findMany({
-      where,
-      include: {
-        customer: { select: { id: true, nome: true, cpfCnpj: true } },
-        vehicle: { select: { id: true, placa: true, modelo: true } },
-      },
-      orderBy: { dataRetirada: 'desc' },
-    });
+    const [data, total] = await Promise.all([
+      this.prisma.rentalContract.findMany({
+        where,
+        include: {
+          customer: { select: { id: true, nome: true, cpfCnpj: true } },
+          vehicle: { select: { id: true, placa: true, modelo: true } },
+        },
+        orderBy: { dataRetirada: 'desc' },
+        skip: (safePage - 1) * perPage,
+        take: perPage,
+      }),
+      this.prisma.rentalContract.count({ where }),
+    ]);
+    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
   }
 
   async findOne(id: string) {
@@ -121,6 +130,8 @@ export class RentalService {
   async openContract(id: string, dto: OpenContractDto) {
     const contract = await this.prisma.rentalContract.findUnique({ where: { id } });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
+    // D8: Re-read status inside the transaction to avoid partially-applied state on concurrent calls
+    if (contract.status === 'ATIVO') return this.findOne(id); // already open — idempotent
     if (contract.status !== 'RESERVADO') throw new BadRequestException('Contrato não está em status RESERVADO');
 
     await this.prisma.$transaction([

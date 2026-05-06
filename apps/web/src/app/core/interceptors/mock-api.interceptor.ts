@@ -78,6 +78,11 @@ let mockSchedules: Record<string, unknown>[] = [
   // Tomorrow
   { id: 's9',  customerId: 'c5',             serviceId: 'ws2', dataHora: dt(tomorrow(), '09:30'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c5', nome: 'Rafael Mendes', telefone: '(51) 97654-3210' } },
   { id: 's10', customerId: 'c1',             serviceId: 'ws3', dataHora: dt(tomorrow(), '15:00'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[2], customer: { id: 'c1', nome: 'Carlos Andrade', telefone: '(11) 91234-5678' } },
+  // Client c1 wash history (past concluded)
+  { id: 's11', customerId: 'c1', serviceId: 'ws2', dataHora: dt(yesterday(7),  '10:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c1', nome: 'Carlos Andrade', telefone: '(11) 91234-5678' } },
+  { id: 's12', customerId: 'c1', serviceId: 'ws4', dataHora: dt(yesterday(14), '09:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[3], customer: { id: 'c1', nome: 'Carlos Andrade', telefone: '(11) 91234-5678' } },
+  { id: 's13', customerId: 'c1', serviceId: 'ws1', dataHora: dt(yesterday(21), '14:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[0], customer: { id: 'c1', nome: 'Carlos Andrade', telefone: '(11) 91234-5678' } },
+  { id: 's14', customerId: 'c1', serviceId: 'ws3', dataHora: dt(yesterday(30), '11:00'), status: 'CANCELADO', service: MOCK_WASH_SERVICES[2], customer: { id: 'c1', nome: 'Carlos Andrade', telefone: '(11) 91234-5678' } },
 ];
 
 let mockQueue: Record<string, unknown>[] = [
@@ -115,6 +120,37 @@ let mockContracts: Record<string, unknown>[] = [
     createdAt: new Date().toISOString(),
     customer: { id: 'c1', nome: 'Carlos Andrade', cpfCnpj: '123.456.789-00' },
     vehicle: { id: 'v3', placa: 'GHI-9012', modelo: 'HR-V EXL', kmAtual: 6200 },
+  },
+  // Histórico do cliente c1
+  {
+    id: 'rc4', customerId: 'c1', vehicleId: 'v6', modalidade: 'DIARIA' as const,
+    dataRetirada: '2026-03-10T10:00:00Z', dataDevolucao: '2026-03-13T10:00:00Z',
+    dataDevReal: '2026-03-13T09:00:00Z',
+    valorDiaria: 100, valorTotal: 300, seguro: false,
+    status: 'ENCERRADO' as const, kmRetirada: 4200, kmLimite: 200, combustivelSaida: 'CHEIO',
+    createdAt: '2026-03-10T09:00:00Z',
+    customer: { id: 'c1', nome: 'Carlos Andrade', cpfCnpj: '123.456.789-00' },
+    vehicle: { id: 'v6', placa: 'PQR-2345', modelo: 'Polo Track', kmAtual: 4800 },
+  },
+  {
+    id: 'rc5', customerId: 'c1', vehicleId: 'v5', modalidade: 'SEMANAL' as const,
+    dataRetirada: '2026-01-15T10:00:00Z', dataDevolucao: '2026-01-22T10:00:00Z',
+    dataDevReal: '2026-01-22T11:00:00Z',
+    valorDiaria: 150, valorTotal: 1050, seguro: true, valorSeguro: 105,
+    status: 'ENCERRADO' as const, kmRetirada: 20000, kmLimite: 300, combustivelSaida: 'CHEIO',
+    createdAt: '2026-01-15T09:00:00Z',
+    customer: { id: 'c1', nome: 'Carlos Andrade', cpfCnpj: '123.456.789-00' },
+    vehicle: { id: 'v5', placa: 'MNO-7890', modelo: 'Renegade Sport', kmAtual: 22100 },
+  },
+  // Outros clientes
+  {
+    id: 'rc6', customerId: 'c4', vehicleId: 'v6', modalidade: 'DIARIA' as const,
+    dataRetirada: tomorrow(2), dataDevolucao: tomorrow(5),
+    valorDiaria: 100, valorTotal: 300, seguro: false,
+    status: 'RESERVADO' as const,
+    createdAt: new Date().toISOString(),
+    customer: { id: 'c4', nome: 'Fernanda Costa', cpfCnpj: '321.654.987-11' },
+    vehicle: { id: 'v6', placa: 'PQR-2345', modelo: 'Polo Track', kmAtual: 4800 },
   },
 ];
 
@@ -315,6 +351,29 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (method === 'GET'  && path === '/portal/my-contracts') {
     return ok(paginated(mockContracts.filter(c => c['customerId'] === CLIENT_CUSTOMER_ID)));
+  }
+  if (method === 'POST' && path === '/portal/my-contracts') {
+    const body    = req.body as Record<string, unknown>;
+    const vehicle = MOCK_VEHICLES.find(v => v.id === body['vehicleId']);
+    const ret     = new Date(body['dataRetirada'] as string);
+    const dev     = new Date(body['dataDevolucao'] as string);
+    const days    = Math.max(1, Math.round((dev.getTime() - ret.getTime()) / 86400000));
+    const diaria  = vehicle?.categoria === 'SUV' ? 220 : vehicle?.categoria === 'INTERMEDIARIO' ? 180 : 100;
+    const total   = diaria * days * (body['seguro'] ? 1.1 : 1);
+    const entry = {
+      ...body,
+      id: `rc-${Date.now()}`,
+      customerId: CLIENT_CUSTOMER_ID,
+      status: 'RESERVADO',
+      valorDiaria: diaria,
+      valorTotal: Math.round(total),
+      valorSeguro: body['seguro'] ? Math.round(diaria * days * 0.1) : undefined,
+      createdAt: new Date().toISOString(),
+      customer: { id: 'c1', nome: 'Carlos Andrade', cpfCnpj: '123.456.789-00' },
+      vehicle: vehicle ? { id: vehicle.id, placa: vehicle.placa, modelo: vehicle.modelo, kmAtual: vehicle.kmAtual } : undefined,
+    };
+    mockContracts.push(entry);
+    return ok(entry);
   }
   if (method === 'GET'  && path === '/portal/available-vehicles') {
     return ok(paginated(MOCK_VEHICLES.filter(v => v.status === 'DISPONIVEL')));

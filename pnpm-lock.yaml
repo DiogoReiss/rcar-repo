@@ -218,6 +218,9 @@ importers:
       '@rcar/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       primeicons:
         specifier: ^7.0.0
         version: 7.0.0

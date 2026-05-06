@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
@@ -9,6 +9,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
 import { TokenResponseDto } from './dto/token-response.dto.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -58,5 +59,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Redefinir senha com token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.novaSenha);
+  }
+
+  // S9: Token freshness check — guards call this to validate cookie is still active
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Verifica se a sessão atual é válida e retorna o perfil do usuário' })
+  me(@CurrentUser() user: { id: string; nome: string; email: string; role: string }) {
+    return user;
   }
 }

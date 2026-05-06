@@ -1,0 +1,55 @@
+@use 'variables' as *;
+@use 'admin' as *;
+
+:host { display: block; }
+
+.portal-loading {
+  display: flex; align-items: center; gap: $spacing-sm;
+  color: $color-neutral-400; padding: $spacing-xl; font-size: 0.9rem;
+}
+
+.portal-empty {
+  display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
+  padding: $spacing-xl; background: #fff; border-radius: 10px;
+  margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
+  i { font-size: 2rem; }
+  p { font-size: 0.9rem; margin: 0; }
+}
+
+.hist-list {
+  display: flex; flex-direction: column; gap: $spacing-sm;
+  padding: 0 $spacing-lg $spacing-lg;
+}
+
+.hist-card {
+  background: #fff; border-radius: 10px; padding: $spacing-md;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid $color-neutral-200;
+  display: flex; align-items: center; gap: $spacing-md;
+
+  &--lavagem { border-left-color: #3b82f6; }
+  &--aluguel { border-left-color: $color-primary; }
+}
+
+.hist-icon {
+  width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  .hist-card--lavagem & { background: rgba(59,130,246,0.1); i { color: #3b82f6; } }
+  .hist-card--aluguel & { background: rgba($color-primary, 0.1); i { color: $color-primary; } }
+  i { font-size: 1.1rem; }
+}
+
+.hist-body {
+  flex: 1; display: flex; flex-direction: column; gap: 1px;
+  strong { font-size: 0.9rem; color: $color-neutral-900; }
+  span   { font-size: 0.78rem; color: $color-neutral-500; }
+}
+
+.hist-side {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+
+.hist-tag {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: $color-neutral-400;
+}
+

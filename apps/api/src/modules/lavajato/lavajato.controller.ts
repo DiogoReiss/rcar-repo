@@ -1,22 +1,27 @@
 import {
   Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  UseGuards, Res, Sse, HttpCode, HttpStatus,
+  UseGuards, Sse, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Response } from 'express';
-import { Observable, interval, map } from 'rxjs';
+import { Observable, switchMap, startWith } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { LavajatoService } from './lavajato.service.js';
 import { CreateScheduleDto } from './dto/create-schedule.dto.js';
 import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
 import { CreateQueueEntryDto, CreatePaymentDto } from './dto/create-queue-entry.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { QueueEventsService } from './queue-events.service.js';
+import { from } from 'rxjs';
 
 @ApiTags('Lavajato')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('lavajato')
 export class LavajatoController {
-  constructor(private readonly lavajatoService: LavajatoService) {}
+  constructor(
+    private readonly lavajatoService: LavajatoService,
+    private readonly queueEvents: QueueEventsService,
+  ) {}
 
   // ─── Schedules ──────────────────────────────────────────────────────────
 
@@ -74,10 +79,14 @@ export class LavajatoController {
   }
 
   @Sse('queue/stream')
-  @ApiOperation({ summary: 'SSE: stream de atualizações da fila' })
+  @ApiOperation({ summary: 'SSE: stream de atualizações da fila (push on change, not polling)' })
   queueStream(): Observable<MessageEvent> {
-    return interval(3000).pipe(
-      map(() => ({ data: { ping: true, ts: new Date().toISOString() } } as MessageEvent)),
+    // A15: Push queue snapshot only on actual change (event-driven, not polling)
+    // S12: Auth is via httpOnly cookie (JwtAuthGuard reads cookie) — no ?token= query param
+    return this.queueEvents.queueChanged$().pipe(
+      startWith(null),
+      switchMap(() => from(this.lavajatoService.getQueue())),
+      map(queue => ({ data: { queue, ts: new Date().toISOString() } } as MessageEvent)),
     );
   }
 

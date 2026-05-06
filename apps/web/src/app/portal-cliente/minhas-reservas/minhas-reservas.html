@@ -1,12 +1,16 @@
 <section class="page">
-  <lync-page-header title="Minhas Reservas" />
+  <lync-page-header title="Minhas Reservas">
+    <lync-btn label="+ Nova Reserva" (clicked)="openNew()" />
+  </lync-page-header>
 
   @if (loading()) {
     <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
   } @else if (!contracts().length) {
     <div class="portal-empty">
       <i class="pi pi-car"></i>
-      <p>Você não tem reservas ainda.</p>
+      <p>Você não tem reservas ainda.<br>
+        <button class="portal-empty-action" (click)="openNew()">Reservar um veículo →</button>
+      </p>
     </div>
   } @else {
     <div class="reservas-list">
@@ -46,5 +50,54 @@
       }
     </div>
   }
+
+  <!-- Nova Reserva dialog -->
+  <lync-entity-dialog
+    title="Solicitar Reserva"
+    [visible]="dialogVisible()"
+    [loading]="saving()"
+    (submitted)="onSave()"
+    (cancelled)="dialogVisible.set(false)"
+    (visibleChange)="dialogVisible.set($event)"
+  >
+    <div class="book-form">
+      <lync-form-field label="Veículo disponível" [required]="true">
+        <select [ngModel]="fVehicleId()" (ngModelChange)="fVehicleId.set($event)" name="veh">
+          @for (v of availVehicles(); track v.id) {
+            <option [value]="v.id">{{ v.modelo }} ({{ v.placa }}) — {{ categoriaLabel[v.categoria] }}</option>
+          }
+        </select>
+      </lync-form-field>
+
+      @if (selectedVehicle(); as v) {
+        <div class="vehicle-preview">
+          <i class="pi pi-car" aria-hidden="true"></i>
+          {{ v.modelo }} · {{ v.ano }} · {{ v.cor }}
+        </div>
+      }
+
+      <lync-form-field label="Modalidade" [required]="true">
+        <select [ngModel]="fModalidade()" (ngModelChange)="fModalidade.set($event)" name="mod">
+          @for (m of modalidades; track m.value) {
+            <option [value]="m.value">{{ m.label }}</option>
+          }
+        </select>
+      </lync-form-field>
+
+      <div class="date-row">
+        <lync-form-field label="Retirada" [required]="true">
+          <input type="date" [ngModel]="fDataRetirada()" (ngModelChange)="fDataRetirada.set($event)" name="ret" />
+        </lync-form-field>
+        <lync-form-field label="Devolução" [required]="true">
+          <input type="date" [ngModel]="fDataDevolucao()" (ngModelChange)="fDataDevolucao.set($event)" name="dev" />
+        </lync-form-field>
+      </div>
+
+      <label class="seguro-toggle">
+        <input type="checkbox" [ngModel]="fSeguro()" (ngModelChange)="fSeguro.set($event)" name="seg" />
+        Incluir seguro (+10% sobre total)
+      </label>
+    </div>
+  </lync-entity-dialog>
 </section>
 

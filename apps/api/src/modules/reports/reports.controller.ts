@@ -40,4 +40,10 @@ export class ReportsController {
   dashboard() {
     return this.reportsService.getDashboardKpis();
   }
+
+  @Get('charts')
+  @ApiOperation({ summary: 'Dados de gráficos do dashboard (serviços semanais, hora de pico, uso de produtos, receita)' })
+  charts() {
+    return this.reportsService.getChartsData();
+  }
 }
