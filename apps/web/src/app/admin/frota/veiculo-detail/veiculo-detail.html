@@ -1,0 +1,68 @@
+<lync-page-header [title]="vehicle() ? (vehicle()!.modelo + ' — ' + vehicle()!.placa) : 'Detalhe do Veículo'">
+  <a routerLink="/admin/frota" class="btn-secondary">← Voltar</a>
+</lync-page-header>
+
+@if (loading()) {
+  <div class="loading-state">Carregando...</div>
+}
+
+@if (error()) {
+  <div class="error-state">{{ error() }}</div>
+}
+
+@if (vehicle(); as v) {
+  <div class="detail-grid">
+    <section class="detail-card">
+      <h2>Informações</h2>
+      <dl class="info-list">
+        <dt>Placa</dt><dd>{{ v.placa }}</dd>
+        <dt>Modelo</dt><dd>{{ v.modelo }}</dd>
+        <dt>Ano</dt><dd>{{ v.ano }}</dd>
+        <dt>Cor</dt><dd>{{ v.cor }}</dd>
+        <dt>Categoria</dt><dd>{{ v.categoria }}</dd>
+        <dt>KM atual</dt><dd>{{ v.kmAtual }}</dd>
+        <dt>Status</dt>
+        <dd><span class="badge" [class]="statusClass[v.status]">{{ statusLabel[v.status] }}</span></dd>
+      </dl>
+    </section>
+
+    <section class="detail-card">
+      <h2>Histórico de Contratos</h2>
+      @if (!v.contracts?.length) {
+        <p class="empty-state">Nenhum contrato registrado.</p>
+      } @else {
+        <ul class="history-list">
+          @for (c of v.contracts!; track c.id) {
+            <li class="history-item">
+              <div class="history-main">
+                <span>{{ c.customer?.nome ?? 'Cliente' }}</span>
+                <span class="badge" [class]="contractStatusClass[c.status]">{{ c.status }}</span>
+              </div>
+              <div class="history-sub">{{ c.dataRetirada | dateBr }} → {{ c.dataDevolucao | dateBr }}</div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="detail-card">
+      <h2>Histórico de Manutenções</h2>
+      @if (!v.maintenances?.length) {
+        <p class="empty-state">Nenhuma manutenção registrada.</p>
+      } @else {
+        <ul class="history-list">
+          @for (m of v.maintenances!; track m.id) {
+            <li class="history-item">
+              <div class="history-main">
+                <span>{{ m.descricao }}</span>
+                <span class="history-value">{{ m.custo | currencyBrl }}</span>
+              </div>
+              <div class="history-sub">{{ m.data | dateBr }}</div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+}
+

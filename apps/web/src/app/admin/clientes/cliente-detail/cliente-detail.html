@@ -1,0 +1,76 @@
+<lync-page-header [title]="data()?.customer?.nome ?? 'Detalhe do Cliente'">
+  <a routerLink="/admin/clientes" class="btn-secondary">← Voltar</a>
+</lync-page-header>
+
+@if (loading()) {
+  <div class="loading-state">Carregando...</div>
+}
+
+@if (error()) {
+  <div class="error-state">{{ error() }}</div>
+}
+
+@if (data(); as d) {
+  <div class="detail-grid">
+    <section class="detail-card">
+      <h2>Dados do Cliente</h2>
+      <dl class="info-list">
+        <dt>Tipo</dt><dd>{{ d.customer.tipo === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica' }}</dd>
+        <dt>CPF/CNPJ</dt><dd>{{ d.customer.cpfCnpj }}</dd>
+        <dt>E-mail</dt><dd>{{ d.customer.email ?? '—' }}</dd>
+        <dt>Telefone</dt><dd>{{ d.customer.telefone ?? '—' }}</dd>
+        @if (d.customer.tipo === 'PF') {
+          <dt>CNH</dt><dd>{{ d.customer.cnh ?? '—' }}</dd>
+          <dt>Validade CNH</dt><dd>{{ d.customer.cnhValidade | dateBr }}</dd>
+        } @else {
+          <dt>Razão Social</dt><dd>{{ d.customer.razaoSocial ?? '—' }}</dd>
+          <dt>Responsável</dt><dd>{{ d.customer.responsavel ?? '—' }}</dd>
+        }
+        <dt>Ativo</dt><dd>{{ d.customer.ativo ? 'Sim' : 'Não' }}</dd>
+        <dt>Cadastro</dt><dd>{{ d.customer.createdAt | dateBr }}</dd>
+      </dl>
+    </section>
+
+    <section class="detail-card">
+      <h2>Histórico de Lavagens</h2>
+      @if (!d.schedules.length) {
+        <p class="empty-state">Nenhuma lavagem registrada.</p>
+      } @else {
+        <ul class="history-list">
+          @for (s of d.schedules; track s.id) {
+            <li class="history-item">
+              <div class="history-main">
+                <span>{{ s.service?.nome ?? 'Serviço' }}</span>
+                <span class="badge" [class]="scheduleStatusClass[s.status]">{{ s.status }}</span>
+              </div>
+              <div class="history-sub">{{ s.dataHora | dateBr:'datetime' }}</div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="detail-card">
+      <h2>Histórico de Contratos</h2>
+      @if (!d.contracts.length) {
+        <p class="empty-state">Nenhum contrato registrado.</p>
+      } @else {
+        <ul class="history-list">
+          @for (c of d.contracts; track c.id) {
+            <li class="history-item">
+              <div class="history-main">
+                <span>{{ c.vehicle?.modelo ?? 'Veículo' }} — {{ c.vehicle?.placa }}</span>
+                <span class="badge" [class]="contractStatusClass[c.status]">{{ c.status }}</span>
+              </div>
+              <div class="history-sub">
+                {{ c.dataRetirada | dateBr }} → {{ c.dataDevolucao | dateBr }} ·
+                {{ c.valorTotal | currencyBrl }}
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+}
+
