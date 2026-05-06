@@ -9,6 +9,10 @@ import { FleetModule } from './modules/fleet/fleet.module.js';
 import { WashModule } from './modules/wash/wash.module.js';
 import { LavajatoModule } from './modules/lavajato/lavajato.module.js';
 import { RentalModule } from './modules/rental/rental.module.js';
+import { ReportsModule } from './modules/reports/reports.module.js';
+import { TemplatesModule } from './modules/templates/templates.module.js';
+import { MailModule } from './modules/mail/mail.module.js';
+import { JobsModule } from './modules/jobs/jobs.module.js';
 
 @Module({
   imports: [
@@ -17,6 +21,8 @@ import { RentalModule } from './modules/rental/rental.module.js';
       envFilePath: '.env',
     }),
     PrismaModule,
+    MailModule,
+    JobsModule,
     AuthModule,
     InventoryModule,
     UsersModule,
@@ -25,6 +31,8 @@ import { RentalModule } from './modules/rental/rental.module.js';
     WashModule,
     LavajatoModule,
     RentalModule,
+    ReportsModule,
+    TemplatesModule,
   ],
   controllers: [],
   providers: [],
