@@ -62,7 +62,7 @@
 | Q6 | Dead import `computed` in dashboard | ✅ Done | Removed; dashboard rewritten with `.subscribe()` pattern |
 | Q7 | `ConfirmDialog` component | ✅ Done | `shared/components/confirm-dialog/` created |
 | Q8 | `vistoria-chegada.ts` kmDevolucao bug | ✅ Done | Uses `res.vehicle?.kmAtual ?? 0` correctly |
-| Q9 | Models duplicated (deferred) | ⏳ Deferred | No shared contract package yet |
+| Q9 | Models duplicated | ✅ Done | `packages/shared-types` monorepo package created; `entities.model.ts` and `user.model.ts` re-export from it |
 | Q10 | CI `prisma generate` missing | ✅ Done | Added `prisma generate` step + API unit tests to `ci.yml` |
 
 ---
@@ -73,6 +73,8 @@
 |--------|-------|-------------|
 | ab45939 | api | S1+S3+S4+S5+S6+S7+A3 security; D1+D2+D3+D4+D5 data integrity; A1+A4+A10 architecture |
 | 887f8bc | web+ci | Q4+Q6+Q7+Q8+A5+A6+A8+A9 frontend quality; Q1+Q2+Q3 tests; Q10 CI fix |
+| 250029e | monorepo | Q9 `@rcar/shared-types` package; clientes pagination fix; rental PaymentMethod type |
+| 74e228c | api+web | Deep Review #2 quick wins: S8+S10 bcrypt+password policy; Q13+Q14 page guard+health skip-throttle; D6+D7 rental idempotency; Q15 unit test fix; build fixes (import type, prisma generate) |
 
 ---
 
@@ -80,5 +82,6 @@
 
 - **S2** requires a Prisma migration: run `pnpm --filter api prisma migrate dev --name add-password-reset-token` when a DB is available.
 - **S7** CSRF mitigation is via `SameSite=Strict` cookies + strict CORS. Full CSRF token implementation deferred.
-- **Q9** (shared model contract) deferred — requires a `packages/` monorepo package setup.
+- **Q9** ✅ Resolved — `packages/shared-types` is the single source of truth for all domain types.
 - All code builds cleanly (`pnpm build` passes for both `api` and `web`).
+- See `docs/progress/deep-review-2.md` for the next round of improvement points (S8–S12, D6–D9, A11–A18, Q11–Q18).

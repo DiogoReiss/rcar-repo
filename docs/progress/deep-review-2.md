@@ -61,14 +61,14 @@
 
 ## Prioritized Action Plan
 
-### Sprint A — Quick wins (< 1 day each)
-- [ ] **S8**: Standardize bcrypt to 12 rounds in `users.service.ts`
-- [ ] **S10**: Raise password minimum to 8 chars in `CreateUserDto` and `LoginDto`
-- [ ] **Q13**: Add `@Min(1)` guard in `findAll` for page param (already present in `PaginationDto` — ensure it's used)
-- [ ] **Q14**: Add `@SkipThrottle()` to `HealthController`
-- [ ] **D6**: Add idempotency check to `rental.service.ts:registerPayment`
-- [ ] **D7**: Guard `closeContract` against already-closed contracts
-- [ ] **Q15**: Fix broken unit test — remove `require()` call, inject `Router` properly
+### Sprint A — Quick wins ✅ (committed 74e228c)
+- [x] **S8**: Standardized bcrypt to 12 rounds in `users.service.ts`
+- [x] **S10**: Raised password minimum to 8 chars in `CreateUserDto` and `LoginDto`
+- [x] **Q13**: Added `safePage = Math.max(1, page)` guard in `findAll` customers
+- [x] **Q14**: Added `@SkipThrottle()` to `HealthController`
+- [x] **D6**: Added idempotency check to `rental.service.ts:registerPayment`
+- [x] **D7**: Guarded `closeContract` against already-closed contracts (checks `ENCERRADO` before throwing)
+- [x] **Q15**: Fixed broken unit test — removed `require()`, uses injected `Router`
 
 ### Sprint B — Frontend reactivity (1–2 days)
 - [ ] **A12**: Convert all 14 remaining `firstValueFrom` / async-await service calls to `Observable` + `takeUntilDestroyed`
@@ -89,4 +89,5 @@
 - [ ] **Q16**: Add a global `ParseUUIDPipe` to all `:id` route params
 - [ ] **D8**: Verify `openContract` transaction cannot create a partially-applied state (already uses `$transaction` — add re-read and status guard)
 - [ ] **D9**: Add idempotency key header support to `inventory.createMovement`
+
 
