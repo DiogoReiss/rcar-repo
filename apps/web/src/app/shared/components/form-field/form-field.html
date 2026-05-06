@@ -1,0 +1,18 @@
+<div class="field-wrapper">
+  <label class="field-label">
+    {{ label() }}
+    @if (required()) {
+      <span class="field-required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <ng-content />
+
+  @if (hint() && !errorMessage()) {
+    <span class="field-hint">{{ hint() }}</span>
+  }
+  @if (errorMessage()) {
+    <span class="field-error" role="alert">{{ errorMessage() }}</span>
+  }
+</div>
+
