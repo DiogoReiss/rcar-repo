@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { Prisma, ContractStatus } from '@prisma/client';
+import { Prisma, ContractStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateContractDto } from './dto/create-contract.dto.js';
 import { OpenContractDto, CloseContractDto } from './dto/contract-operations.dto.js';
@@ -197,7 +197,7 @@ export class RentalService {
     return this.findOne(id);
   }
 
-  async registerPayment(contractId: string, metodo: string) {
+  async registerPayment(contractId: string, metodo: PaymentMethod) {
     const contract = await this.prisma.rentalContract.findUnique({ where: { id: contractId } });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
     return this.prisma.payment.create({
@@ -206,7 +206,7 @@ export class RentalService {
         contractId,
         customerId: contract.customerId,
         valor: contract.valorTotalReal ?? contract.valorTotal,
-        metodo: metodo as any,
+        metodo: metodo,
         status: 'CONFIRMADO',
       },
     });

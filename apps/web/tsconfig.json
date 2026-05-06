@@ -20,7 +20,8 @@
       "@lavajato/*": ["src/app/lavajato/*"],
       "@aluguel/*": ["src/app/aluguel/*"],
       "@portal/*": ["src/app/portal-cliente/*"],
-      "@env/*": ["src/environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@rcar/shared-types": ["../../packages/shared-types/src/index.ts"]
     },
     "target": "ES2022",
     "module": "preserve"

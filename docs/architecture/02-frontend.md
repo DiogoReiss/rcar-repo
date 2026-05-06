@@ -13,7 +13,7 @@
 | Testes unitários   | Vitest via Analog                        |
 | Testes browser     | Vitest browser mode                      |
 | Testes E2E         | Playwright                               |
-| Selector prefix    | `rcar`                                   |
+| Selector prefix    | `lync`                                   |
 
 ---
 
@@ -392,7 +392,43 @@ describe('ServicosListComponent', () => {
 
 ---
 
-## Estilização SCSS — Convenções
+## Shared Types (`packages/shared-types`)
+
+O pacote `@rcar/shared-types` é a **fonte única de verdade** para todos os tipos de domínio compartilhados entre o frontend e o backend.
+
+```
+packages/
+└── shared-types/
+    ├── package.json         # name: "@rcar/shared-types"
+    └── src/
+        └── index.ts         # Exporta todos os tipos: User, Customer, Vehicle, etc.
+```
+
+### Uso no frontend
+
+```typescript
+// Novo código importa diretamente:
+import type { User, RentalContract, PaginatedResponse } from '@rcar/shared-types';
+
+// Código existente continua funcionando via re-export:
+import type { User } from '@shared/models/entities.model';
+```
+
+### Tipos exportados
+
+| Categoria    | Tipos                                                                              |
+|--------------|-----------------------------------------------------------------------------------|
+| Enums        | `UserRole`, `CustomerType`, `VehicleStatus`, `ContractStatus`, `PaymentMethod`, … |
+| Auth         | `User`, `AuthTokens`, `LoginCredentials`                                           |
+| Entidades    | `Customer`, `Vehicle`, `WashService`, `Product`, `RentalContract`, `Template`, …  |
+| Paginação    | `PaginatedResponse<T>` — wrapper para todas as listas paginadas                    |
+
+### Convenção
+
+- Nunca duplique tipos entre `apps/web` e `apps/api` — adicione em `packages/shared-types`.
+- Ao alterar um modelo Prisma, atualize `shared-types` e regenere o cliente Prisma.
+
+---
 
 ### Princípio
 

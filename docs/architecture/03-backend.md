@@ -480,6 +480,17 @@ EMAIL_FROM=noreply@rcar.com.br
 
 ---
 
+## Shared Types (`packages/shared-types`)
+
+O pacote `@rcar/shared-types` centraliza os tipos de domínio usados tanto pela API quanto pelo frontend.
+
+- **Localização:** `packages/shared-types/src/index.ts`
+- **Package name:** `@rcar/shared-types`
+- O backend usa os tipos como documentação e como contratos para DTOs de resposta.
+- Quando o schema Prisma muda → atualize `shared-types` → regenere Prisma client.
+
+---
+
 ## Comandos
 
 ```bash

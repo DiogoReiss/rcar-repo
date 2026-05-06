@@ -3,6 +3,14 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { Customer } from '@shared/models/entities.model';
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ClientesService {
   private readonly api = inject(ApiService);
@@ -10,14 +18,21 @@ export class ClientesService {
   readonly clientes = signal<Customer[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly total = signal(0);
 
-  async load(search?: string) {
+  async load(search?: string, page = 1, perPage = 50) {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const path = search ? `/customers?search=${encodeURIComponent(search)}` : '/customers';
-      const res = await firstValueFrom(this.api.get<Customer[]>(path));
-      this.clientes.set(res);
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      params.set('page', String(page));
+      params.set('perPage', String(perPage));
+      const res = await firstValueFrom(
+        this.api.get<PaginatedResponse<Customer>>(`/customers?${params.toString()}`),
+      );
+      this.clientes.set(res.data);
+      this.total.set(res.total);
     } catch {
       this.error.set('Erro ao carregar clientes.');
     } finally {
@@ -37,4 +52,19 @@ export class ClientesService {
     return res;
   }
 }
+
+
+  async create(data: Omit<Customer, 'id' | 'ativo' | 'createdAt'>) {
+    const res = await firstValueFrom(this.api.post<Customer>('/customers', data));
+    this.clientes.update(c => [...c, res]);
+    return res;
+  }
+
+  async update(id: string, data: Partial<Customer>) {
+    const res = await firstValueFrom(this.api.patch<Customer>(`/customers/${id}`, data));
+    this.clientes.update(c => c.map(x => x.id === id ? res : x));
+    return res;
+  }
+}
+
 
