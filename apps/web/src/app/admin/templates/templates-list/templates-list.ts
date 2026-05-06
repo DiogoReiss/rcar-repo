@@ -47,9 +47,12 @@ export default class TemplatesListComponent implements OnInit {
 
   async load() {
     this.loading.set(true);
+    this.error.set(null);
     try {
       const res = await firstValueFrom(this.api.get<Template[]>('/templates'));
       this.templates.set(res);
+    } catch (e: any) {
+      this.error.set(e?.error?.message ?? 'Erro ao carregar templates.');
     } finally { this.loading.set(false); }
   }
 
@@ -83,6 +86,8 @@ export default class TemplatesListComponent implements OnInit {
       try { vars = JSON.parse(this.previewVars()); } catch { /* use empty */ }
       const res = await firstValueFrom(this.api.post<{ html: string }>(`/templates/${this.editing()!.id}/preview`, vars));
       this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(res.html));
+    } catch (e: any) {
+      this.saveError.set(e?.error?.message ?? 'Erro ao renderizar preview.');
     } finally { this.previewing.set(false); }
   }
 }

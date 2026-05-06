@@ -5,6 +5,8 @@
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
   } @else if (!editing()) {
     <!-- Template list -->
     <div class="template-grid">

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TemplatesService } from './templates.service.js';
 import { CreateTemplateDto } from './dto/create-template.dto.js';
+import { UpdateTemplateDto } from './dto/update-template.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -28,13 +29,16 @@ export class TemplatesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza template' })
-  update(@Param('id') id: string, @Body() dto: Partial<CreateTemplateDto>) {
-    return this.templatesService.update(id, dto as any);
+  update(@Param('id') id: string, @Body() dto: UpdateTemplateDto) {
+    return this.templatesService.update(id, dto);
   }
 
   @Post(':id/preview')
   @ApiOperation({ summary: 'Renderiza template com variáveis (preview)' })
-  preview(@Param('id') id: string, @Body() variables: Record<string, unknown>) {
+  preview(
+    @Param('id') id: string,
+    @Body(new ValidationPipe({ transform: false, whitelist: false })) variables: Record<string, unknown>,
+  ) {
     return this.templatesService.preview(id, variables);
   }
 }

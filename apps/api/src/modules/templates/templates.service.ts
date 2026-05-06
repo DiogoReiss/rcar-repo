@@ -2,9 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import Handlebars from 'handlebars';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateTemplateDto } from './dto/create-template.dto.js';
-import { PartialType } from '@nestjs/swagger';
-
-class UpdateTemplateDto extends PartialType(CreateTemplateDto) {}
+import { UpdateTemplateDto } from './dto/update-template.dto.js';
 
 @Injectable()
 export class TemplatesService {
