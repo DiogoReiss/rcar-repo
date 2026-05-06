@@ -1,11 +1,10 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Movimentações de Estoque</h1>
+  <lync-page-header title="Movimentações de Estoque">
     <div class="header-actions">
       <a class="btn-secondary" routerLink="/admin/estoque">← Produtos</a>
       <button class="btn-primary" (click)="showForm.set(true)">+ Nova Movimentação</button>
     </div>
-  </header>
+  </lync-page-header>
 
   @if (showForm()) {
     <div class="form-card" style="margin-bottom:1.5rem">

@@ -1,8 +1,7 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Atendimentos do Dia</h1>
+  <lync-page-header title="Atendimentos do Dia">
     <input type="date" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)" name="date" class="date-picker" />
-  </header>
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>

@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@ang
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ClientesService } from '../clientes.service';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-cliente-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './cliente-form.html',
   styleUrl: './cliente-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

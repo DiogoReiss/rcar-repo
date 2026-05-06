@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 /**
- * Dumb, reusable button. Encapsulates visual variants and loading state.
+ * Reusable branded button with variants, sizes, icon and loading state.
  *
  * Usage:
  *   <lync-btn label="Salvar" [loading]="saving()" (clicked)="onSave()" />
  *   <lync-btn label="Excluir" variant="danger" (clicked)="onDelete()" />
  *   <lync-btn label="Cancelar" variant="secondary" (clicked)="cancel()" />
+ *   <lync-btn label="Ver mais" variant="ghost" size="sm" icon="pi pi-eye" (clicked)="open()" />
  */
 @Component({
   selector: 'lync-btn',
@@ -17,7 +18,8 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 })
 export default class AppButtonComponent {
   readonly label    = input.required<string>();
-  readonly variant  = input<'primary' | 'secondary' | 'danger'>('primary');
+  readonly variant  = input<'primary' | 'secondary' | 'danger' | 'ghost'>('primary');
+  readonly size     = input<'sm' | 'md'>('md');
   readonly icon     = input<string>('');
   readonly loading  = input(false);
   readonly disabled = input(false);
@@ -26,12 +28,16 @@ export default class AppButtonComponent {
   readonly clicked = output<void>();
 
   readonly cssClass = computed(() => {
-    const map: Record<string, string> = {
-      primary:   'btn-primary',
-      secondary: 'btn-secondary',
-      danger:    'btn-primary btn-danger-solid',
-    };
-    return map[this.variant()];
+    const v = this.variant();
+    const s = this.size();
+    return `lbtn lbtn--${v}${s === 'sm' ? ' lbtn--sm' : ''}`;
+  });
+
+  /** Spinner is light on filled buttons, dark on outlined/ghost buttons. */
+  readonly spinnerClass = computed(() => {
+    const v = this.variant();
+    return v === 'secondary' || v === 'ghost'
+      ? 'lbtn-spinner lbtn-spinner--dark'
+      : 'lbtn-spinner';
   });
 }
-

@@ -1,68 +1,409 @@
 @use 'variables' as *;
-@use 'admin' as *;
 
 :host { display: block; }
 
-.dashboard { padding: $spacing-lg; }
-
-.dashboard-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 $spacing-lg;
+.dashboard {
+  padding: $spacing-lg;
+  max-width: 1400px;
 }
 
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+// ─── Skeleton animation ───────────────────────────────────────────────────────
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+%skeleton {
+  background: linear-gradient(90deg, $color-neutral-200 25%, $color-neutral-100 50%, $color-neutral-200 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 12px;
+}
+
+// ─── Page header ─────────────────────────────────────────────────────────────
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: $spacing-md;
   margin-bottom: $spacing-xl;
 }
 
+.dash-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: $color-neutral-900;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.dash-subtitle {
+  font-size: 0.85rem;
+  color: $color-neutral-500;
+  margin: 4px 0 0;
+}
+
+.dash-header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+
+  .btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+}
+
+// ─── KPI grid ────────────────────────────────────────────────────────────────
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.kpi-skeleton {
+  @extend %skeleton;
+  height: 96px;
+}
+
+// Color custom properties per variant
 .kpi-card {
+  --kpi-color:  #{$color-primary};
+  --kpi-bg:     #{rgba($color-primary, 0.08)};
+
+  position: relative;
   display: flex;
   align-items: center;
   gap: $spacing-md;
   background: #fff;
   border-radius: 12px;
-  padding: $spacing-lg;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: $spacing-lg $spacing-md;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
   text-decoration: none;
   color: inherit;
+  border: 1px solid $color-neutral-200;
+  border-top: 3px solid var(--kpi-color);
   transition: box-shadow 0.15s, transform 0.1s;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    text-decoration: none;
   }
+
+  &--blue    { --kpi-color: #{$color-accent};   --kpi-bg: #{rgba($color-accent, 0.08)}; }
+  &--green   { --kpi-color: #{$color-success};  --kpi-bg: #{rgba($color-success, 0.08)}; }
+  &--orange  { --kpi-color: #{$color-primary};  --kpi-bg: #{rgba($color-primary, 0.08)}; }
+  &--purple  { --kpi-color: #7c3aed;            --kpi-bg: rgba(124,58,237,0.08); }
+  &--danger  { --kpi-color: #{$color-danger};   --kpi-bg: #{rgba($color-danger, 0.08)}; }
+  &--success { --kpi-color: #{$color-success};  --kpi-bg: #{rgba($color-success, 0.08)}; }
 }
 
-.kpi-icon {
-  font-size: 1.75rem;
-  color: $color-primary;
-  width: 44px;
-  text-align: center;
+.kpi-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--kpi-bg);
+  color: var(--kpi-color);
+  font-size: 1.35rem;
+  flex-shrink: 0;
 }
 
 .kpi-value {
   font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 800;
+  color: $color-neutral-900;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .kpi-label {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 4px;
+  font-size: 0.78rem;
+  color: $color-neutral-500;
+  margin-top: 5px;
+  font-weight: 500;
 }
 
-.section-title {
-  font-size: 1rem;
+// Pulsing dot for the danger KPI card
+.kpi-alert-dot {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: $color-danger;
+  box-shadow: 0 0 0 0 rgba($color-danger, 0.5);
+  animation: kpi-pulse 1.8s ease-out infinite;
+}
+
+@keyframes kpi-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba($color-danger, 0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba($color-danger, 0); }
+  100% { box-shadow: 0 0 0 0 rgba($color-danger, 0); }
+}
+
+// ─── Quick actions ────────────────────────────────────────────────────────────
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xl;
+}
+
+.quick-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px $spacing-md;
+  background: #fff;
+  border: 1px solid $color-neutral-200;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: $color-neutral-700;
+  text-decoration: none;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  i { font-size: 0.95rem; color: $color-primary; }
+
+  &:hover {
+    background: rgba($color-primary, 0.05);
+    border-color: $color-primary;
+    color: $color-primary-dark;
+    text-decoration: none;
+  }
+}
+
+// ─── Charts ──────────────────────────────────────────────────────────────────
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+}
+
+.chart-skeleton {
+  @extend %skeleton;
+  height: 300px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: $spacing-lg;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  border: 1px solid $color-neutral-200;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.chart-header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.chart-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+
+  &--blue   { background: rgba($color-accent, 0.1);   color: $color-accent; }
+  &--green  { background: rgba($color-success, 0.1);  color: $color-success; }
+  &--orange { background: rgba($color-primary, 0.1);  color: $color-primary; }
+  &--purple { background: rgba(124,58,237,0.1);       color: #7c3aed; }
+}
+
+.chart-title {
+  font-size: 0.88rem;
   font-weight: 600;
-  margin: 0 0 $spacing-md;
+  color: $color-neutral-800;
+  margin: 0;
 }
 
-.alert-section .table-wrapper {
-  max-width: 640px;
+.chart-period {
+  font-size: 0.72rem;
+  color: $color-neutral-400;
+  margin: 2px 0 0;
+}
+
+.chart-body {
+  position: relative;
+  height: 210px;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+// ─── Low-stock alert ─────────────────────────────────────────────────────────
+
+.alert-section {
+  margin-bottom: $spacing-xl;
+}
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  background: #fff8f0;
+  border: 1px solid #fcd9a8;
+  border-left: 4px solid $color-warning;
+  border-radius: 10px;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.alert-icon {
+  font-size: 1.3rem;
+  color: $color-warning;
+  flex-shrink: 0;
+}
+
+.alert-text {
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 0.88rem;
+    color: $color-neutral-900;
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: $color-neutral-500;
+  }
+}
+
+.alert-section .table-wrapper { max-width: 680px; }
+
+// ─── Today strip ─────────────────────────────────────────────────────────────
+
+.today-section {
+  margin-bottom: $spacing-xl;
+}
+
+.today-label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-neutral-400;
+  margin: 0 0 $spacing-sm;
+
+  i { font-size: 0.85rem; color: $color-warning; }
+}
+
+.today-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $spacing-sm;
+}
+
+.today-skeleton {
+  @extend %skeleton;
+  height: 72px;
+  border-radius: 10px;
+}
+
+.today-stat {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: #fff;
+  border: 1px solid $color-neutral-200;
+  border-radius: 10px;
+  padding: $spacing-sm $spacing-md;
+}
+
+.today-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 1rem;
+  flex-shrink: 0;
+
+  &--blue   { background: rgba($color-accent, 0.1);   color: $color-accent; }
+  &--green  { background: rgba($color-success, 0.1);  color: $color-success; }
+  &--orange { background: rgba($color-primary, 0.1);  color: $color-primary; }
+  &--purple { background: rgba(124,58,237,0.1);       color: #7c3aed; }
+}
+
+.today-stat-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: $color-neutral-900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+
+  &--sm {
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
+
+.today-stat-label {
+  font-size: 0.72rem;
+  color: $color-neutral-500;
+  margin-top: 3px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+// ─── Chart extras ────────────────────────────────────────────────────────────
+
+.chart-total {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $color-neutral-700;
+  background: $color-neutral-100;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.chart-body--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-pulse {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  @extend %skeleton;
 }
 

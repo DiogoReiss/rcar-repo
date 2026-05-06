@@ -66,6 +66,25 @@
           <div class="kpi-label">Serviços Ativos</div>
         </div>
       </a>
+
+      <a routerLink="/admin/estoque"
+         [class]="lowStockProducts().length > 0 ? 'kpi-card kpi-card--danger' : 'kpi-card kpi-card--success'"
+         [attr.aria-label]="lowStockProducts().length > 0
+           ? lowStockProducts().length + ' produto(s) com estoque baixo — ver estoque'
+           : 'Estoque saudável — ver estoque'">
+        <div class="kpi-icon-wrap">
+          <i [class]="lowStockProducts().length > 0 ? 'pi pi-exclamation-triangle' : 'pi pi-box'" aria-hidden="true"></i>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ lowStockProducts().length }}</div>
+          <div class="kpi-label">
+            @if (lowStockProducts().length > 0) { Estoque Baixo } @else { Estoque OK }
+          </div>
+        </div>
+        @if (lowStockProducts().length > 0) {
+          <span class="kpi-alert-dot" aria-hidden="true"></span>
+        }
+      </a>
     </div>
 
     <!-- ─── Quick actions ─────────────────────────────────────────── -->    <div class="quick-actions">
@@ -271,47 +290,6 @@
         </div>
       </div>
     }
-
-    <!-- ─── Low stock alert ───────────────────────────────────────── -->
-    @if (lowStockProducts().length > 0) {
-      <div class="alert-section">
-        <div class="alert-banner">
-          <i class="pi pi-exclamation-triangle alert-icon" aria-hidden="true"></i>
-          <div class="alert-text">
-            <strong>{{ lowStockProducts().length }} produto(s) com estoque abaixo do mínimo</strong>
-            <span>Repor antes que impacte os serviços.</span>
-          </div>
-          <a routerLink="/admin/estoque" class="btn-sm">Ver estoque</a>
-        </div>
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>Atual</th>
-                <th>Mínimo</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (p of lowStockProducts(); track p.id) {
-                <tr>
-                  <td>{{ p.nome }}</td>
-                  <td>
-                    <span class="badge badge--danger">{{ p.quantidadeAtual }} {{ p.unidade }}</span>
-                  </td>
-                  <td>{{ p.estoqueMinimo }} {{ p.unidade }}</td>
-                  <td>
-                    <a routerLink="/admin/estoque" class="btn-sm">Repor</a>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    }
-
   }
 </section>
 

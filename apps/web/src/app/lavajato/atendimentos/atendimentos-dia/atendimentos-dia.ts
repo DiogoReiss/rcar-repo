@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { WashSchedule, WashQueueEntry } from '@shared/models/entities.model';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 interface AtendimentosDia { schedules: WashSchedule[]; queues: WashQueueEntry[]; }
 
 @Component({
   selector: 'lync-atendimentos-dia',
-  imports: [FormsModule],
+  imports: [FormsModule, PageHeaderComponent],
   templateUrl: './atendimentos-dia.html',
   styleUrl: './atendimentos-dia.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

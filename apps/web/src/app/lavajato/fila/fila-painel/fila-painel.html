@@ -1,64 +1,149 @@
 <section class="page">
   <lync-page-header title="Fila de Atendimento">
     <div class="header-actions">
-      @if (sseError()) {
-        <span class="sse-error">⚠ SSE desconectado</span>
-      } @else if (lastUpdate()) {
-        <span class="last-update">Atualizado: {{ lastUpdate() }}</span>
-      }
-      <a routerLink="/lavajato/fila/adicionar" class="btn-primary">+ Entrar na Fila</a>
+      <!-- SSE status indicator -->
+      <span class="sse-status" [class.sse-status--error]="sseError()">
+        <span class="sse-dot" aria-hidden="true"></span>
+        @if (sseError()) { Desconectado }
+        @else if (lastUpdate()) { Ao vivo · {{ lastUpdate() }} }
+        @else { Conectando... }
+      </span>
+      <a routerLink="/lavajato/fila/adicionar" class="btn-primary">
+        <i class="pi pi-plus" aria-hidden="true"></i> Entrar na Fila
+      </a>
     </div>
   </lync-page-header>
 
+  <!-- Summary strip -->
+  <div class="fila-summary">
+    <div class="fila-summary-item fila-summary-item--waiting">
+      <span class="fila-summary-value">{{ aguardando().length }}</span>
+      <span class="fila-summary-label">Aguardando</span>
+    </div>
+    <div class="fila-summary-sep" aria-hidden="true"></div>
+    <div class="fila-summary-item fila-summary-item--active">
+      <span class="fila-summary-value">{{ emAtendimento().length }}</span>
+      <span class="fila-summary-label">Em Atendimento</span>
+    </div>
+    <div class="fila-summary-sep" aria-hidden="true"></div>
+    <div class="fila-summary-item fila-summary-item--done">
+      <span class="fila-summary-value">{{ concluidos().length }}</span>
+      <span class="fila-summary-label">Concluídos</span>
+    </div>
+  </div>
+
   @if (loading()) {
-    <div class="loading-state">Carregando fila...</div>
+    <div class="fila-loading">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando fila...
+    </div>
   }
 
-  <div class="fila-columns">
-    <!-- Waiting column -->
-    <div class="fila-col">
-      <h2 class="col-title col-title--waiting">⏳ Aguardando ({{ aguardando().length }})</h2>
+  <div class="fila-board">
 
-      @for (q of aguardando(); track q.id) {
-        <div class="queue-card">
-          <div class="queue-pos">#{{ q.posicao }}</div>
-          <div class="queue-info">
-            <strong>{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
-            <span>{{ q.service?.nome }}</span>
-            @if (q.veiculoPlaca) { <small>🚗 {{ q.veiculoPlaca }}</small> }
+    <!-- ─── Aguardando ───────────────────────────────────────── -->
+    <div class="board-col">
+      <div class="board-col-header board-col-header--waiting">
+        <span class="board-col-icon"><i class="pi pi-clock" aria-hidden="true"></i></span>
+        <span class="board-col-title">Aguardando</span>
+        <span class="board-col-count">{{ aguardando().length }}</span>
+      </div>
+
+      <div class="board-col-body">
+        @for (q of aguardando(); track q.id) {
+          <div class="queue-card queue-card--waiting">
+            <div class="queue-badge queue-badge--waiting">#{{ q.posicao }}</div>
+            <div class="queue-info">
+              <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
+              <span class="queue-service">{{ q.service?.nome }}</span>
+              @if (q.veiculoPlaca) {
+                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
+              }
+              <span class="queue-time"><i class="pi pi-clock" aria-hidden="true"></i> {{ formatEntryTime(q.createdAt) }}</span>
+            </div>
+            <div class="queue-actions">
+              <lync-btn label="Chamar" icon="pi pi-arrow-right" (clicked)="onAdvance(q.id)" />
+            </div>
           </div>
-          <lync-btn label="Chamar" (clicked)="onAdvance(q.id)" />
-        </div>
-      }
-
-      @if (!aguardando().length) {
-        <p class="no-entries">Fila vazia</p>
-      }
+        }
+        @if (!aguardando().length) {
+          <div class="board-empty">
+            <i class="pi pi-check-circle" aria-hidden="true"></i>
+            <span>Fila vazia</span>
+          </div>
+        }
+      </div>
     </div>
 
-    <!-- In-service column -->
-    <div class="fila-col">
-      <h2 class="col-title col-title--active">🔧 Em Atendimento ({{ emAtendimento().length }})</h2>
+    <!-- ─── Em Atendimento ───────────────────────────────────── -->
+    <div class="board-col">
+      <div class="board-col-header board-col-header--active">
+        <span class="board-col-icon"><i class="pi pi-wrench" aria-hidden="true"></i></span>
+        <span class="board-col-title">Em Atendimento</span>
+        <span class="board-col-count">{{ emAtendimento().length }}</span>
+      </div>
 
-      @for (q of emAtendimento(); track q.id) {
-        <div class="queue-card queue-card--active">
-          <div class="queue-pos">#{{ q.posicao }}</div>
-          <div class="queue-info">
-            <strong>{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
-            <span>{{ q.service?.nome }}</span>
-            @if (q.veiculoPlaca) { <small>🚗 {{ q.veiculoPlaca }}</small> }
+      <div class="board-col-body">
+        @for (q of emAtendimento(); track q.id) {
+          <div class="queue-card queue-card--active">
+            <div class="queue-badge queue-badge--active">#{{ q.posicao }}</div>
+            <div class="queue-info">
+              <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
+              <span class="queue-service">{{ q.service?.nome }}</span>
+              @if (q.veiculoPlaca) {
+                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
+              }
+              <span class="queue-time"><i class="pi pi-clock" aria-hidden="true"></i> {{ formatEntryTime(q.createdAt) }}</span>
+            </div>
+            <div class="queue-actions">
+              <lync-btn label="Concluir" icon="pi pi-check" (clicked)="onAdvance(q.id)" />
+              <lync-btn label="Pagamento" icon="pi pi-credit-card" variant="secondary" (clicked)="payingId.set(q.id)" />
+            </div>
           </div>
-          <div class="queue-card-actions">
-            <lync-btn label="✓ Concluir" (clicked)="onAdvance(q.id)" />
-            <lync-btn label="💳 Pagar" variant="secondary" (clicked)="payingId.set(q.id)" />
+        }
+        @if (!emAtendimento().length) {
+          <div class="board-empty">
+            <i class="pi pi-inbox" aria-hidden="true"></i>
+            <span>Nenhum em atendimento</span>
           </div>
-        </div>
-      }
-
-      @if (!emAtendimento().length) {
-        <p class="no-entries">Nenhum em atendimento</p>
-      }
+        }
+      </div>
     </div>
+
+    <!-- ─── Concluídos ───────────────────────────────────────── -->
+    <div class="board-col board-col--done">
+      <div class="board-col-header board-col-header--done">
+        <span class="board-col-icon"><i class="pi pi-check-circle" aria-hidden="true"></i></span>
+        <span class="board-col-title">Concluídos</span>
+        <span class="board-col-count">{{ concluidos().length }}</span>
+      </div>
+
+      <div class="board-col-body">
+        @for (q of concluidos(); track q.id) {
+          <div class="queue-card queue-card--done">
+            <div class="queue-badge queue-badge--done"><i class="pi pi-check" aria-hidden="true"></i></div>
+            <div class="queue-info">
+              <strong class="queue-name">{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
+              <span class="queue-service">{{ q.service?.nome }}</span>
+              @if (q.veiculoPlaca) {
+                <span class="queue-plate"><i class="pi pi-car" aria-hidden="true"></i> {{ q.veiculoPlaca }}</span>
+              }
+              @if (q.concluidoAt) {
+                <span class="queue-time queue-time--done">
+                  <i class="pi pi-check" aria-hidden="true"></i> {{ formatEntryTime(q.concluidoAt) }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+        @if (!concluidos().length) {
+          <div class="board-empty">
+            <i class="pi pi-list" aria-hidden="true"></i>
+            <span>Nenhum concluído ainda</span>
+          </div>
+        }
+      </div>
+    </div>
+
   </div>
 
   <!-- Payment dialog -->

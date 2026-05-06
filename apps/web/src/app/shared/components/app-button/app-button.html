@@ -8,8 +8,7 @@
     <i [class]="icon()" aria-hidden="true"></i>
   }
   @if (loading()) {
-    <span class="btn-spinner" aria-hidden="true"></span>
+    <span [class]="spinnerClass()" aria-hidden="true"></span>
   }
   {{ label() }}
 </button>
-

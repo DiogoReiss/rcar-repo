@@ -1,0 +1,66 @@
+@use 'variables' as *;
+
+// ─── PrimeNG Dialog global overrides ────────────────────────────────────────
+// These live in the global stylesheet because PrimeNG renders the dialog
+// outside the component's root element (in a portal), so ::ng-deep alone
+// would not reach it from inside any single component.
+
+// Overlay / backdrop — standard grey-out
+.p-overlay-mask,
+.p-dialog-mask {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+// Dialog container
+.p-dialog {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid $color-neutral-200;
+  overflow: hidden;
+
+  // Header — compact, white with a primary accent on the left border
+  .p-dialog-header {
+    background: #fff;
+    border-bottom: 2px solid $color-primary;
+    padding: $spacing-sm $spacing-lg;
+
+    .p-dialog-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $color-neutral-900;
+    }
+
+    // Close button
+    .p-dialog-header-icon {
+      color: $color-neutral-500;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+
+      &:hover {
+        background: rgba($color-primary, 0.08);
+        color: $color-primary;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $color-primary;
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  // Content area
+  .p-dialog-content {
+    background: #fff;
+    padding: $spacing-lg;
+    color: $color-neutral-900;
+  }
+
+  // Footer area
+  .p-dialog-footer {
+    background: $color-neutral-50;
+    border-top: 1px solid $color-neutral-200;
+    padding: $spacing-md $spacing-lg;
+  }
+}
+
+

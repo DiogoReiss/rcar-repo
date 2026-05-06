@@ -1,0 +1,22 @@
+@if (totalPages() > 1) {
+  <nav class="pagination" [attr.aria-label]="'Paginação de ' + label()">
+    <button class="btn-sm" [disabled]="page() <= 1" (click)="prev()" aria-label="Página anterior">‹</button>
+
+    @for (p of pages(); track p) {
+      <button
+        class="btn-sm"
+        [class.active]="p === page()"
+        (click)="go(p)"
+        [attr.aria-current]="p === page() ? 'page' : null">
+        {{ p }}
+      </button>
+    }
+
+    <button class="btn-sm" [disabled]="page() >= totalPages()" (click)="next()" aria-label="Próxima página">›</button>
+
+    @if (total()) {
+      <span class="pagination-info">{{ total() }} {{ label() }}</span>
+    }
+  </nav>
+}
+

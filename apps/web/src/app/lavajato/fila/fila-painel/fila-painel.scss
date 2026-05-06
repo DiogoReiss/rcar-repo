@@ -2,41 +2,266 @@
 @use 'variables' as *;
 
 :host { display: block; }
+
 .header-actions { display: flex; gap: $spacing-sm; align-items: center; flex-wrap: wrap; }
-.last-update { font-size: 0.8rem; color: #94a3b8; }
-.sse-error { font-size: 0.8rem; color: $color-warning; font-weight: 500; }
-.loading-state { padding: $spacing-lg $spacing-xl; text-align: center; color: $color-neutral-400; }
 
-.fila-columns { display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-lg; padding: 0 $spacing-lg $spacing-lg; }
+// ─── SSE status indicator ────────────────────────────────────────────────────
+.sse-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: $color-neutral-500;
 
-.fila-col { display: flex; flex-direction: column; gap: $spacing-sm; }
-
-.col-title {
-  font-size: 1rem; font-weight: 700; margin: 0 0 $spacing-sm; padding: $spacing-sm $spacing-md;
-  border-radius: 8px;
-  &--waiting { background: #fef9c3; color: #854d0e; }
-  &--active  { background: #dbeafe; color: #1e40af; }
+  &--error { color: $color-danger; }
+  &--error .sse-dot { background: $color-danger; animation: none; }
 }
 
+.sse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $color-success;
+  box-shadow: 0 0 0 0 rgba($color-success, 0.5);
+  animation: sse-pulse 2s ease-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sse-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba($color-success, 0.5); }
+  70%  { box-shadow: 0 0 0 6px rgba($color-success, 0); }
+  100% { box-shadow: 0 0 0 0 rgba($color-success, 0); }
+}
+
+// ─── Summary strip ───────────────────────────────────────────────────────────
+.fila-summary {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border: 1px solid $color-neutral-200;
+  border-radius: 12px;
+  margin: 0 $spacing-lg $spacing-lg;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.fila-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: $spacing-md $spacing-lg;
+  gap: 2px;
+
+  &--waiting  { border-top: 3px solid $color-warning; }
+  &--active   { border-top: 3px solid $color-info; }
+  &--done     { border-top: 3px solid $color-success; }
+}
+
+.fila-summary-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: $color-neutral-900;
+
+  .fila-summary-item--waiting & { color: $color-warning-dark; }
+  .fila-summary-item--active  & { color: $color-info-dark; }
+  .fila-summary-item--done    & { color: $color-success-dark; }
+}
+
+.fila-summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-neutral-500;
+}
+
+.fila-summary-sep {
+  width: 1px;
+  height: 40px;
+  background: $color-neutral-200;
+  flex-shrink: 0;
+}
+
+// ─── Loading state ────────────────────────────────────────────────────────────
+.fila-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  padding: $spacing-xl;
+  color: $color-neutral-400;
+  font-size: 0.9rem;
+}
+
+// ─── Board ────────────────────────────────────────────────────────────────────
+.fila-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  padding: 0 $spacing-lg $spacing-lg;
+  align-items: start;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+// ─── Board column ─────────────────────────────────────────────────────────────
+.board-col {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: $color-neutral-100;
+  overflow: hidden;
+  min-height: 200px;
+
+  &--done .queue-card { opacity: 0.7; }
+}
+
+.board-col-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &--waiting { background: #fef9c3; color: #854d0e; border-bottom: 2px solid $color-warning-light; }
+  &--active  { background: #dbeafe; color: #1e40af; border-bottom: 2px solid $color-accent-light; }
+  &--done    { background: #dcfce7; color: #166534; border-bottom: 2px solid $color-success-light; }
+}
+
+.board-col-icon { font-size: 0.9rem; }
+.board-col-title { flex: 1; }
+.board-col-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.1);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0 6px;
+}
+
+.board-col-body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  flex: 1;
+}
+
+// ─── Queue card ───────────────────────────────────────────────────────────────
 .queue-card {
-  display: flex; gap: $spacing-sm; align-items: center; background: #fff;
-  border-radius: 10px; padding: $spacing-md; box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-  transition: box-shadow 0.15s;
-  &:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-  &--active { border-left: 4px solid $color-info; }
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  background: #fff;
+  border-radius: 10px;
+  padding: $spacing-sm $spacing-md;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  transition: box-shadow 0.15s, transform 0.1s;
+
+  &:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+
+  &--active { border-left: 3px solid $color-info; }
+  &--done   { border-left: 3px solid $color-success; }
 }
 
-.queue-pos { font-size: 1.25rem; font-weight: 800; color: #94a3b8; min-width: 40px; text-align: center; }
+// ─── Position badge ───────────────────────────────────────────────────────────
+.queue-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 0.82rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+
+  &--waiting { background: rgba($color-warning, 0.12); color: $color-warning-dark; }
+  &--active  { background: rgba($color-info, 0.12);    color: $color-info-dark; }
+  &--done    { background: rgba($color-success, 0.12); color: $color-success-dark; font-size: 1rem; }
+}
+
+// ─── Queue info ───────────────────────────────────────────────────────────────
 .queue-info {
-  flex: 1; display: flex; flex-direction: column; gap: 2px;
-  strong { font-size: 0.95rem; }
-  span   { font-size: 0.82rem; color: #475569; }
-  small  { color: #94a3b8; font-size: 0.78rem; }
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.queue-card-actions { display: flex; flex-direction: column; gap: $spacing-xs; align-items: flex-end; }
 
-.no-entries { color: #94a3b8; text-align: center; padding: $spacing-md; margin: 0; }
+.queue-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-neutral-900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.payment-bar { display: flex; gap: $spacing-sm; align-items: center; padding: $spacing-sm $spacing-md; background: #f0fdf4; border-radius: 8px; margin-top: -$spacing-xs; select { padding: $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; } }
+.queue-service {
+  font-size: 0.8rem;
+  color: $color-neutral-600;
+}
 
-.badge--operador { background: #dbeafe; color: #1e40af; }
+.queue-plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $color-neutral-700;
+  background: $color-neutral-100;
+  border-radius: 5px;
+  padding: 1px 7px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.queue-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: $color-neutral-400;
+  margin-top: 2px;
+
+  &--done { color: $color-success-dark; }
+}
+
+// ─── Queue actions ────────────────────────────────────────────────────────────
+.queue-actions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+// ─── Empty state ─────────────────────────────────────────────────────────────
+.board-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xl $spacing-md;
+  color: $color-neutral-400;
+  font-size: 0.82rem;
+  text-align: center;
+
+  i { font-size: 1.4rem; }
+}

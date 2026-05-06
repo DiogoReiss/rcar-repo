@@ -25,6 +25,11 @@ export class AgendamentoService {
     );
   }
 
+  /** Fetch schedules for a date without touching the shared signal — used by the week view. */
+  fetchSchedules(date: string): Observable<WashSchedule[]> {
+    return this.api.get<WashSchedule[]>(`/lavajato/schedules?date=${date}`);
+  }
+
   create(data: {
     nomeAvulso?: string;
     customerId?: string;

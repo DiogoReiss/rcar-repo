@@ -26,25 +26,23 @@ export class AuthService {
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
+  /** In-memory access token — avoids cookie cross-port issues in dev (localhost:4200 → :3000) */
+  private _accessToken: string | null = null;
+
   constructor() {
     this.tryRestoreUser();
   }
 
-  /** @deprecated use isAuthenticated signal instead */
+  /** Returns the in-memory access token for Bearer auth. Set on login/refresh, cleared on logout. */
   getAccessToken(): string | null {
-    // S5: token is in httpOnly cookie — not readable from JS.
-    // Returning null forces the auth interceptor to rely on withCredentials cookies.
-    return null;
-  }
-
-  getRefreshToken(): string | null {
-    return null; // stored in httpOnly cookie
+    return this._accessToken;
   }
 
   login(credentials: LoginCredentials): Observable<AuthTokens & { user: User }> {
     return this.api.post<AuthTokens & { user: User }>('/auth/login', credentials).pipe(
       tap((res) => {
-        // Tokens are set in httpOnly cookies by the API — just store the user profile
+        // Store access token in memory AND user profile in localStorage
+        this._accessToken = res.accessToken;
         this._currentUser.set(res.user);
         localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(res.user));
       }),
@@ -54,6 +52,7 @@ export class AuthService {
   logout(): void {
     // Call server to clear httpOnly cookies + blacklist refresh token
     this.api.post('/auth/logout', {}).subscribe({ error: () => {} });
+    this._accessToken = null;
     localStorage.removeItem(USER_PROFILE_KEY);
     this._currentUser.set(null);
     this.router.navigate(['/auth/login']);
@@ -61,7 +60,10 @@ export class AuthService {
 
   refreshToken(): Observable<AuthTokens> {
     return this.api.post<AuthTokens>('/auth/refresh', {}).pipe(
-      tap(() => { /* cookies refreshed server-side */ }),
+      tap((res) => {
+        // Update in-memory token after successful refresh
+        this._accessToken = res.accessToken;
+      }),
     );
   }
 

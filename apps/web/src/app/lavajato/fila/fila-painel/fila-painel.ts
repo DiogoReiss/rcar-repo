@@ -38,6 +38,7 @@ export default class FilaPainelComponent implements OnDestroy {
 
   readonly aguardando    = () => this.queue().filter(q => q.status === 'AGUARDANDO');
   readonly emAtendimento = () => this.queue().filter(q => q.status === 'EM_ATENDIMENTO');
+  readonly concluidos    = () => this.queue().filter(q => q.status === 'CONCLUIDO');
 
   constructor() {
     this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe();
@@ -80,5 +81,9 @@ export default class FilaPainelComponent implements OnDestroy {
     } finally {
       this.payLoading.set(false);
     }
+  }
+
+  formatEntryTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 }

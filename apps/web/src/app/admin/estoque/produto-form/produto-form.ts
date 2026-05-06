@@ -4,10 +4,11 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { Product } from '@shared/models/entities.model';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-produto-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './produto-form.html',
   styleUrl: './produto-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

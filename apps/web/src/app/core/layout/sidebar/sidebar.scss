@@ -1,20 +1,23 @@
 @use 'variables' as *;
 
+$sidebar-bg:        #1c1f26;
+$sidebar-text:      #a8b0c0;
+$sidebar-text-hover:#e8ecf2;
+$sidebar-active-bg: rgba(255,255,255,0.07);
+
 :host {
   display: flex;
   flex-direction: column;
   width: $sidebar-width;
   min-height: 0;
-  background: #ffffff;
-  color: $color-neutral-800;
-  border-right: 1px solid $color-neutral-200;
+  background: $sidebar-bg;
+  color: $sidebar-text;
+  border-right: none;
   transition: width 0.2s ease;
   overflow-y: auto;
   overflow-x: hidden;
 
-  &.collapsed {
-    width: $sidebar-collapsed-width;
-  }
+  &.collapsed { width: $sidebar-collapsed-width; }
 }
 
 .sidebar-menu {
@@ -23,41 +26,68 @@
   padding: $spacing-sm 0;
 }
 
-.sidebar-item {
-  margin: 0;
-}
+.sidebar-item { margin: 0; }
 
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  color: $color-neutral-700;
+  padding: 11px $spacing-md;
+  color: $sidebar-text;
   text-decoration: none;
-  border-radius: 6px;
-  margin: 2px $spacing-sm;
+  font-size: 0.875rem;
   font-weight: 500;
-  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 
   &:hover {
-    background: $color-neutral-100;
-    color: $color-primary;
+    background: rgba(255, 255, 255, 0.05);
+    color: $sidebar-text-hover;
   }
 
   &.active {
-    background: rgba($color-primary, 0.1);
-    color: $color-primary-dark;
+    background: $sidebar-active-bg;
+    color: #fff;
+    border-left-color: $color-primary;
     font-weight: 600;
+
+    i { color: $color-primary; }
   }
 
   i {
-    font-size: 1.2rem;
-    width: 24px;
+    font-size: 1rem;
+    width: 20px;
     text-align: center;
+    flex-shrink: 0;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.12s;
+  }
+
+  &:hover i, &.active i { opacity: 1; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: -2px; }
+}
+
+.sidebar-label { white-space: nowrap; }
+
+// ─── Sections ────────────────────────────────────────────────────────────────
+
+.sidebar-section {
+  & + & {
+    margin-top: $spacing-xs;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: $spacing-xs;
   }
 }
 
-.sidebar-label {
+.sidebar-section-title {
+  display: block;
+  padding: $spacing-sm $spacing-md 2px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
   white-space: nowrap;
+  user-select: none;
 }
-

@@ -1,0 +1,24 @@
+@use 'variables' as *;
+
+:host { display: block; }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-top: $spacing-md;
+  flex-wrap: wrap;
+
+  .btn-sm.active {
+    background: $color-primary;
+    color: #fff;
+    border-color: $color-primary;
+  }
+}
+
+.pagination-info {
+  margin-left: $spacing-sm;
+  font-size: 0.8rem;
+  color: $color-neutral-500;
+}
+

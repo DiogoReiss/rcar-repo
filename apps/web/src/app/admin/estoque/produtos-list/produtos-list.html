@@ -1,11 +1,10 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Estoque — Produtos</h1>
+  <lync-page-header title="Estoque — Produtos">
     <div class="header-actions">
       <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Movimentações</a>
-      <a class="btn-primary" routerLink="/admin/estoque/novo">+ Novo Produto</a>
+      <lync-btn label="+ Novo Produto" (clicked)="openNew()" />
     </div>
-  </header>
+  </lync-page-header>
 
   @if (lowStockCount() > 0) {
     <div class="alert-low-stock">
@@ -15,20 +14,13 @@
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Produto</th>
-            <th>Unidade</th>
-            <th>Qtd Atual</th>
-            <th>Estoque Mínimo</th>
-            <th>Custo Unit.</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th>Produto</th><th>Unidade</th><th>Qtd Atual</th>
+            <th>Est. Mínimo</th><th>Custo Unit.</th><th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -37,7 +29,7 @@
               <td>
                 <strong>{{ p.nome }}</strong>
                 @if (p.descricao) { <br><small>{{ p.descricao }}</small> }
-                @if (isLow(p)) { <span class="badge badge--danger" style="margin-left:6px">Estoque baixo</span> }
+                @if (isLow(p)) { <span class="badge badge--danger" style="margin-left:6px">Baixo</span> }
               </td>
               <td>{{ p.unidade }}</td>
               <td>{{ p.quantidadeAtual }}</td>
@@ -45,7 +37,7 @@
               <td>{{ p.custoUnitario != null ? ('R$ ' + p.custoUnitario) : '—' }}</td>
               <td><span class="badge" [class]="p.ativo ? 'badge--success' : 'badge--inactive'">{{ p.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/admin/estoque', p.id, 'editar']" class="btn-sm">Editar</a>
+                <button class="btn-sm" (click)="openEdit(p)">Editar</button>
                 <a [routerLink]="['/admin/estoque/movimentacoes']" [queryParams]="{ productId: p.id }" class="btn-sm">Histórico</a>
               </td>
             </tr>
@@ -57,3 +49,33 @@
     </div>
   }
 </section>
+
+<lync-entity-dialog
+  [title]="dialogTitle()"
+  [visible]="dialogVisible()"
+  [loading]="saving()"
+  (submitted)="onDialogSave()"
+  (cancelled)="closeDialog()"
+  (visibleChange)="dialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Nome" [required]="true" [full]="true">
+      <input [ngModel]="fNome()" (ngModelChange)="fNome.set($event)" name="nome" required />
+    </lync-form-field>
+    <lync-form-field label="Descrição" [full]="true">
+      <textarea [ngModel]="fDescricao()" (ngModelChange)="fDescricao.set($event)" name="descricao"></textarea>
+    </lync-form-field>
+    <lync-form-field label="Unidade" [required]="true" hint="Ex: litro, kg, unidade">
+      <input [ngModel]="fUnidade()" (ngModelChange)="fUnidade.set($event)" name="unidade" required />
+    </lync-form-field>
+    <lync-form-field label="Custo Unitário (R$)">
+      <input type="number" min="0" step="0.01" [ngModel]="fCustoUnitario()" (ngModelChange)="fCustoUnitario.set($event)" name="custo" />
+    </lync-form-field>
+    <lync-form-field label="Quantidade Inicial">
+      <input type="number" min="0" step="0.001" [ngModel]="fQuantidadeAtual()" (ngModelChange)="fQuantidadeAtual.set(+$event)" name="qtd" [disabled]="isEdit()" />
+    </lync-form-field>
+    <lync-form-field label="Estoque Mínimo" [required]="true">
+      <input type="number" min="0" step="0.001" [ngModel]="fEstoqueMinimo()" (ngModelChange)="fEstoqueMinimo.set(+$event)" name="minimo" />
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>

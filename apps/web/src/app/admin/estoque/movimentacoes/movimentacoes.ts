@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
-import { StockMovement } from '@shared/models/entities.model';
+import { StockMovement, PaginatedResponse } from '@shared/models/entities.model';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-movimentacoes',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './movimentacoes.html',
   styleUrl: './movimentacoes.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,8 +41,8 @@ export default class MovimentacoesComponent implements OnInit {
     try {
       const pid = this.productId();
       const path = pid ? `/inventory/movements?productId=${pid}` : '/inventory/movements';
-      const res = await firstValueFrom(this.api.get<StockMovement[]>(path));
-      this.movements.set(res);
+      const res = await firstValueFrom(this.api.get<PaginatedResponse<StockMovement>>(path));
+      this.movements.set(res.data);
     } catch { this.error.set('Erro ao carregar movimentações.'); }
     finally { this.loading.set(false); }
   }

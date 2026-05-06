@@ -1,15 +1,28 @@
 <nav aria-label="Menu de navegação">
-  <ul class="sidebar-menu">
-    @for (item of menuItems; track item.route) {
-      <li class="sidebar-item">
-        <a [routerLink]="item.route" routerLinkActive="active" class="sidebar-link">
-          <i [class]="item.icon"></i>
-          @if (!collapsed()) {
-            <span class="sidebar-label">{{ item.label }}</span>
-          }
-        </a>
-      </li>
-    }
-  </ul>
+  @for (section of menuSections; track section.title) {
+    <div class="sidebar-section">
+      @if (!collapsed()) {
+        <span class="sidebar-section-title">{{ section.title }}</span>
+      }
+      <ul class="sidebar-menu">
+        @for (item of section.items; track item.route) {
+          <li class="sidebar-item">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="sidebar-link"
+              [pTooltip]="item.label"
+              tooltipPosition="right"
+              [tooltipDisabled]="!collapsed()"
+              [attr.aria-label]="item.label">
+              <i [class]="item.icon" aria-hidden="true"></i>
+              @if (!collapsed()) {
+                <span class="sidebar-label">{{ item.label }}</span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
 </nav>
-

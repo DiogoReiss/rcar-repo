@@ -1,13 +1,19 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 /**
- * S5: Tokens are stored in httpOnly cookies, so we only need to ensure
- * `withCredentials: true` is set so cookies are sent cross-origin.
- * The Authorization header approach is kept as a fallback for Swagger/Postman usage
- * but is not needed for browser requests.
+ * S5: Primary auth via in-memory Bearer token (reliable across localhost ports in dev).
+ * Also sets withCredentials so httpOnly cookies are sent for production/server-side validation.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Attach withCredentials so httpOnly cookies are sent with every request
-  const withCreds = req.clone({ withCredentials: true });
-  return next(withCreds);
+  const authService = inject(AuthService);
+  const token = authService.getAccessToken();
+
+  const cloned = req.clone({
+    withCredentials: true,
+    ...(token ? { setHeaders: { Authorization: `Bearer ${token}` } } : {}),
+  });
+
+  return next(cloned);
 };

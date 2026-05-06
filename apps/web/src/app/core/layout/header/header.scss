@@ -14,11 +14,13 @@
   align-items: center;
   justify-content: space-between;
   height: $header-height;
-  padding: 0 $spacing-md;
-  background: #ffffff;
-  border-bottom: 2px solid $color-primary;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 0 $spacing-lg;
+  background: #fff;
+  border-bottom: 1px solid $color-neutral-200;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
 }
+
+// ─── Left ────────────────────────────────────────────────────────────────────
 
 .header-left {
   display: flex;
@@ -26,50 +28,137 @@
   gap: $spacing-md;
 }
 
-.header-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: $color-primary;
-}
+// ─── Shared icon button ───────────────────────────────────────────────────────
 
-.toggle-btn {
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   background: none;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  padding: $spacing-sm;
-  font-size: 1.2rem;
-  color: $color-neutral-700;
-  border-radius: 4px;
+  font-size: 1.05rem;
+  color: $color-neutral-500;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
 
   &:hover {
     background: $color-neutral-100;
-    color: $color-primary;
+    color: $color-neutral-800;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &--danger {
+    &:hover {
+      background: rgba($color-danger, 0.08);
+      color: $color-danger;
+    }
   }
 }
+
+// ─── Brand ───────────────────────────────────────────────────────────────────
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  user-select: none;
+}
+
+.brand-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: $color-primary;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, $color-primary-dark 0%, $color-primary 60%, $color-primary-light 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ─── Right ───────────────────────────────────────────────────────────────────
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: $spacing-md;
+  gap: $spacing-sm;
 }
 
-.user-name {
-  font-size: 0.875rem;
-  color: $color-neutral-700;
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: $color-neutral-200;
+  margin: 0 $spacing-xs;
+  flex-shrink: 0;
 }
 
-.logout-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: $spacing-sm;
-  font-size: 1.1rem;
-  color: $color-neutral-700;
-  border-radius: 4px;
+// ─── User section ────────────────────────────────────────────────────────────
 
-  &:hover {
-    background: rgba($color-danger, 0.08);
-    color: $color-danger;
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    gap: 0;
   }
 }
 
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary-dark, $color-primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+
+  @media (max-width: $breakpoint-sm) { display: none; }
+}
+
+.user-name {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: $color-neutral-800;
+  white-space: nowrap;
+}
+
+.user-role {
+  font-size: 0.68rem;
+  color: $color-neutral-500;
+  font-weight: 400;
+}

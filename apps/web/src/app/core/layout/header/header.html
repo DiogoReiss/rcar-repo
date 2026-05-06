@@ -1,20 +1,49 @@
 <header class="header">
+  <!-- Left: toggle + brand -->
   <div class="header-left">
     <button
       type="button"
-      class="toggle-btn"
+      class="icon-btn"
       (click)="onToggle()"
-      aria-label="Alternar menu lateral">
-      <i class="pi pi-bars"></i>
+      [attr.aria-expanded]="!collapsed()"
+      aria-label="Alternar menu lateral"
+      title="Alternar menu lateral">
+      <i class="pi" [class.pi-bars]="collapsed()" [class.pi-times]="!collapsed()" aria-hidden="true"></i>
     </button>
-    <span class="header-title">RCar</span>
+
+    <a class="brand" routerLink="/admin" aria-label="Ir para o dashboard">
+      <span class="brand-name">RCar</span>
+    </a>
   </div>
 
+  <!-- Right: notifications + user + logout -->
   <div class="header-right">
     @if (currentUser(); as user) {
-      <span class="user-name">{{ user.nome }}</span>
-      <button type="button" class="logout-btn" (click)="logout()" aria-label="Sair">
-        <i class="pi pi-sign-out"></i>
+      <button
+        type="button"
+        class="icon-btn"
+        aria-label="Notificações"
+        title="Notificações">
+        <i class="pi pi-bell" aria-hidden="true"></i>
+      </button>
+
+      <div class="header-divider" aria-hidden="true"></div>
+
+      <div class="user-section">
+        <div class="user-avatar" aria-hidden="true">{{ userInitials(user.nome) }}</div>
+        <div class="user-info" [attr.aria-label]="'Usuário: ' + user.nome">
+          <span class="user-name">{{ user.nome }}</span>
+          <span class="user-role">{{ roleLabel(user.role) }}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="icon-btn icon-btn--danger"
+        (click)="logout()"
+        title="Sair da conta"
+        aria-label="Sair da conta">
+        <i class="pi pi-sign-out" aria-hidden="true"></i>
       </button>
     }
   </div>

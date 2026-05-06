@@ -1,89 +1,122 @@
 <section class="page">
   <lync-page-header title="Agendamentos">
     <div class="header-actions">
-      <input
-        type="date"
-        [ngModel]="selectedDate()"
-        (ngModelChange)="onDateChange($event)"
-        name="date"
-        class="date-picker"
-        aria-label="Selecionar data"
-      />
+      <!-- View toggle -->
+      <div class="view-toggle" role="group" aria-label="Modo de visualização">
+        <button
+          [class]="viewMode() === 'day' ? 'view-btn view-btn--active' : 'view-btn'"
+          (click)="switchView('day')">
+          <i class="pi pi-calendar" aria-hidden="true"></i> Dia
+        </button>
+        <button
+          [class]="viewMode() === 'week' ? 'view-btn view-btn--active' : 'view-btn'"
+          (click)="switchView('week')">
+          <i class="pi pi-table" aria-hidden="true"></i> Semana
+        </button>
+      </div>
+
+      @if (viewMode() === 'day') {
+        <input type="date" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)"
+          name="date" class="date-picker" aria-label="Selecionar data" />
+      }
       <lync-btn label="+ Novo Agendamento" (clicked)="openNew()" />
     </div>
   </lync-page-header>
 
-  <!-- KPI bar -->
-  <div class="kpi-row">
-    <div class="kpi-card kpi-card--pending">
-      <span class="kpi-value">{{ pendingCount() }}</span>
-      <span class="kpi-label">Aguardando</span>
+  <!-- ─── DAY VIEW ────────────────────────────────────────────────── -->
+  @if (viewMode() === 'day') {
+    <div class="kpi-row">
+      <div class="kpi-card kpi-card--pending">
+        <span class="kpi-value">{{ pendingCount() }}</span>
+        <span class="kpi-label">Aguardando</span>
+      </div>
+      <div class="kpi-card kpi-card--active">
+        <span class="kpi-value">{{ activeCount() }}</span>
+        <span class="kpi-label">Em Atendimento</span>
+      </div>
+      <div class="kpi-card kpi-card--done">
+        <span class="kpi-value">{{ doneCount() }}</span>
+        <span class="kpi-label">Concluídos</span>
+      </div>
     </div>
-    <div class="kpi-card kpi-card--active">
-      <span class="kpi-value">{{ activeCount() }}</span>
-      <span class="kpi-label">Em Atendimento</span>
-    </div>
-    <div class="kpi-card kpi-card--done">
-      <span class="kpi-value">{{ doneCount() }}</span>
-      <span class="kpi-label">Concluídos</span>
-    </div>
-  </div>
 
-  <!-- Schedule list -->
-  @if (loading()) {
-    <div class="empty-state">Carregando agendamentos...</div>
-  } @else if (!schedules().length) {
-    <div class="empty-state">Nenhum agendamento para esta data.</div>
-  } @else {
-    <div class="schedule-list">
-      @for (s of schedules(); track s.id) {
-        <div class="schedule-card" [class]="'schedule-card--' + s.status.toLowerCase()">
-          <div class="schedule-time">{{ formatTime(s.dataHora) }}</div>
-
-          <div class="schedule-info">
-            <strong>{{ s.customer?.nome ?? s.nomeAvulso }}</strong>
-            <span>{{ s.service?.nome }} · {{ s.service?.preco | currencyBrl }}</span>
-            @if (s.observacoes) { <small>{{ s.observacoes }}</small> }
-            @if (s.telefone ?? s.customer?.telefone) {
-              <small class="schedule-phone">📞 {{ s.telefone ?? s.customer?.telefone }}</small>
-            }
-          </div>
-
-          <div class="schedule-right">
-            <span class="badge" [class]="statusClass[s.status]">{{ statusLabel[s.status] }}</span>
-            <div class="schedule-actions">
-              @if (s.status === 'AGENDADO') {
-                <button class="btn-sm" (click)="updateStatus(s.id, 'EM_ATENDIMENTO')">▶ Iniciar</button>
-                <button class="btn-sm btn-danger" (click)="confirmCancel(s)">✕ Cancelar</button>
+    @if (loading()) {
+      <div class="empty-state"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando...</div>
+    } @else if (!schedules().length) {
+      <div class="empty-state"><i class="pi pi-calendar-times" aria-hidden="true"></i> Nenhum agendamento para esta data.</div>
+    } @else {
+      <div class="schedule-list">
+        @for (s of schedules(); track s.id) {
+          <div class="schedule-card" [class]="'schedule-card--' + s.status.toLowerCase()">
+            <div class="schedule-time">{{ formatTime(s.dataHora) }}</div>
+            <div class="schedule-info">
+              <strong>{{ s.customer?.nome ?? s.nomeAvulso }}</strong>
+              <span>{{ s.service?.nome }} · {{ s.service?.preco | currencyBrl }}</span>
+              @if (s.observacoes) { <small>{{ s.observacoes }}</small> }
+              @if (s.telefone ?? s.customer?.telefone) {
+                <small class="schedule-phone">📞 {{ s.telefone ?? s.customer?.telefone }}</small>
               }
-              @if (s.status === 'EM_ATENDIMENTO') {
-                <button class="btn-sm btn-success" (click)="updateStatus(s.id, 'CONCLUIDO')">✓ Concluir</button>
-                <button class="btn-sm" (click)="payingId.set(s.id)">💳 Pagar</button>
+            </div>
+            <div class="schedule-right">
+              <span class="badge" [class]="statusClass[s.status]">{{ statusLabel[s.status] }}</span>
+              <div class="schedule-actions">
+                @if (s.status === 'AGENDADO') {
+                  <button class="btn-sm" (click)="updateStatus(s.id, 'EM_ATENDIMENTO')">▶ Iniciar</button>
+                  <button class="btn-sm btn-danger" (click)="confirmCancel(s)">✕ Cancelar</button>
+                }
+                @if (s.status === 'EM_ATENDIMENTO') {
+                  <button class="btn-sm btn-success" (click)="updateStatus(s.id, 'CONCLUIDO')">✓ Concluir</button>
+                  <button class="btn-sm" (click)="payingId.set(s.id)">💳 Pagar</button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ─── WEEK VIEW ────────────────────────────────────────────────── -->
+  @if (viewMode() === 'week') {
+    @if (weekLoading()) {
+      <div class="empty-state"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando semana...</div>
+    } @else {
+      <div class="week-grid">
+        @for (day of currentWeekDays(); track day) {
+          <div class="week-col" [class.week-col--today]="day === today">
+            <button class="week-col-header" (click)="switchToDay(day)" [attr.aria-label]="'Ver dia ' + day">
+              <span class="week-day-name">{{ formatWeekDay(day) }}</span>
+              <span class="week-day-date">{{ formatDayShort(day) }}</span>
+              @if ((weekSchedules()[day] || []).length > 0) {
+                <span class="week-day-badge">{{ (weekSchedules()[day] || []).length }}</span>
+              }
+            </button>
+            <div class="week-slots">
+              @for (s of (weekSchedules()[day] || []); track s.id) {
+                <div class="week-slot" [class]="'week-slot--' + s.status.toLowerCase()">
+                  <span class="week-slot-time">{{ formatTime(s.dataHora) }}</span>
+                  <span class="week-slot-name">{{ s.customer?.nome ?? s.nomeAvulso }}</span>
+                  <span class="week-slot-svc">{{ s.service?.nome }}</span>
+                </div>
+              } @empty {
+                <div class="week-empty">Sem agendamentos</div>
               }
             </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   }
 
   <!-- New schedule dialog -->
-  <lync-entity-dialog
-    title="Novo Agendamento"
-    [visible]="dialogVisible()"
-    [loading]="saving()"
-    (submitted)="onDialogSave()"
-    (cancelled)="dialogVisible.set(false)"
-    (visibleChange)="dialogVisible.set($event)"
-  >
+  <lync-entity-dialog title="Novo Agendamento" [visible]="dialogVisible()" [loading]="saving()"
+    (submitted)="onDialogSave()" (cancelled)="dialogVisible.set(false)" (visibleChange)="dialogVisible.set($event)">
     <div class="form-grid">
       <lync-form-field label="Nome do Cliente" [required]="true">
-        <input name="nome" [ngModel]="fNome()" (ngModelChange)="fNome.set($event)"
-          placeholder="Nome do cliente" required />
+        <input name="nome" [ngModel]="fNome()" (ngModelChange)="fNome.set($event)" placeholder="Nome do cliente" required />
       </lync-form-field>
       <lync-form-field label="Telefone">
-        <input name="tel" [ngModel]="fTelefone()" (ngModelChange)="fTelefone.set($event)"
-          placeholder="(11) 99999-0000" />
+        <input name="tel" [ngModel]="fTelefone()" (ngModelChange)="fTelefone.set($event)" placeholder="(11) 99999-0000" />
       </lync-form-field>
       <lync-form-field label="Serviço" [required]="true">
         <select name="service" [ngModel]="fServiceId()" (ngModelChange)="fServiceId.set($event)">
@@ -93,33 +126,21 @@
         </select>
       </lync-form-field>
       <lync-form-field label="Data e Hora" [required]="true">
-        <input type="datetime-local" name="dt" [ngModel]="fDataHora()"
-          (ngModelChange)="fDataHora.set($event)" required />
+        <input type="datetime-local" name="dt" [ngModel]="fDataHora()" (ngModelChange)="fDataHora.set($event)" required />
       </lync-form-field>
       <lync-form-field label="Observações" [full]="true">
-        <input name="obs" [ngModel]="fObs()" (ngModelChange)="fObs.set($event)"
-          placeholder="Informações adicionais (opcional)" />
+        <input name="obs" [ngModel]="fObs()" (ngModelChange)="fObs.set($event)" placeholder="Informações adicionais (opcional)" />
       </lync-form-field>
     </div>
   </lync-entity-dialog>
 
-  <!-- Cancel confirm dialog -->
   <lync-confirm-dialog
     [open]="cancelTarget() !== null"
     [message]="'Cancelar o agendamento de ' + (cancelTarget()?.customer?.nome ?? cancelTarget()?.nomeAvulso ?? '') + '?'"
-    confirmLabel="Cancelar Agendamento"
-    [loading]="cancelling()"
-    (confirmed)="onConfirmCancel()"
-    (cancelled)="cancelTarget.set(null)"
-  />
+    confirmLabel="Cancelar Agendamento" [danger]="true" [loading]="cancelling()"
+    (confirmed)="onConfirmCancel()" (cancelled)="cancelTarget.set(null)" />
 
-  <!-- Payment dialog -->
-  <lync-payment-dialog
-    [visible]="payingId() !== null"
-    [loading]="payLoading()"
-    title="Registrar Pagamento — Agendamento"
-    (confirmed)="onPay($event)"
-    (cancelled)="payingId.set(null)"
-  />
+  <lync-payment-dialog [visible]="payingId() !== null" [loading]="payLoading()"
+    title="Registrar Pagamento — Agendamento" (confirmed)="onPay($event)" (cancelled)="payingId.set(null)" />
 </section>
 

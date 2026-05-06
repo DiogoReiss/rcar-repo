@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@ang
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FrotaService } from '../frota.service';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
   selector: 'lync-veiculo-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './veiculo-form.html',
   styleUrl: './veiculo-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

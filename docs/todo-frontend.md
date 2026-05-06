@@ -174,8 +174,8 @@
 | 🟢 | 13.3 | Criar `src/app/lavajato/atendimentos/atendimentos-dia/atendimentos-dia.ts` (painel do operador com agendamentos do dia) |
 | 🟢 | 13.4 | Implementar controle de status do agendamento (AGENDADO → EM_ATENDIMENTO → CONCLUIDO/CANCELADO) |
 | 🟢 | 13.5 | Criar service `AgendamentoService` com signals |
-| 🔴 | 13.5 | Criar service `AgendamentoService` com signals |
-| 🔴 | 13.6 | Testes unitários |
+| 🟢 | 13.6 | Adicionar visualização semanal ao calendário (toggle Dia/Semana, grid 7 colunas, `forkJoin` por dia, clique para drill-down) |
+| 🔴 | 13.7 | Testes unitários |
 
 ---
 
@@ -188,7 +188,8 @@
 | 🟢 | 14.3 | Implementar controles de status (AGUARDANDO → EM_ATENDIMENTO → CONCLUIDO) |
 | 🟢 | 14.4 | Criar `src/app/core/services/sse.service.ts` (serviço genérico de conexão SSE nativa) |
 | 🟢 | 14.5 | Criar service `FilaService` com signals + integração SSE |
-| 🔴 | 14.6 | Testes unitários |
+| 🟢 | 14.6 | Redesenho do painel de fila: board Kanban 3 colunas (Aguardando/Em Atendimento/Concluídos), cards com badge de posição circular, horário de entrada, placa estilizada, indicador SSE animado e summary strip de contagens |
+| 🔴 | 14.7 | Testes unitários |
 
 ---
 

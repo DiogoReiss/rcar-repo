@@ -1,8 +1,7 @@
 <section class="page">
-  <header class="page-header">
-    <h1>{{ isEdit() ? 'Editar Cliente' : 'Novo Cliente' }}</h1>
+  <lync-page-header [title]="isEdit() ? 'Editar Cliente' : 'Novo Cliente'">
     <a class="btn-secondary" routerLink="/admin/clientes">← Voltar</a>
-  </header>
+  </lync-page-header>
 
   @if (error()) { <div class="error">{{ error() }}</div> }
 
