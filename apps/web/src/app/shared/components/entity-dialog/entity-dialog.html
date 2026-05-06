@@ -1,0 +1,27 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visibleChange.emit($event)"
+  [header]="title()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: wide() ? '680px' : '480px', maxWidth: '96vw' }"
+  [breakpoints]="{ '768px': '96vw' }"
+  (onHide)="close()"
+>
+  <div class="dialog-body">
+    <ng-content />
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button type="button" class="btn-secondary" (click)="close()" [disabled]="loading()">
+        Cancelar
+      </button>
+      <button type="button" class="btn-primary" (click)="submitted.emit()" [disabled]="loading()">
+        @if (loading()) { Salvando… } @else { Salvar }
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+

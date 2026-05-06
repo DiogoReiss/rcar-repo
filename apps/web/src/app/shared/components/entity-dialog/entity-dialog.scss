@@ -1,0 +1,12 @@
+@use 'variables' as *;
+
+.dialog-body {
+  padding: 0.25rem 0;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+}
+
