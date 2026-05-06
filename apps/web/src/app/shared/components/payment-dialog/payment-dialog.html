@@ -1,0 +1,33 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="!$event && onCancel()"
+  [header]="title()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '380px', maxWidth: '96vw' }"
+>
+  <div class="pay-body">
+    <p class="pay-hint">Selecione o método de pagamento:</p>
+    <div class="pay-methods">
+      @for (m of methods; track m.value) {
+        <label class="pay-option" [class.selected]="selectedMethod === m.value">
+          <input type="radio" name="payMethod" [value]="m.value" [(ngModel)]="selectedMethod" />
+          {{ m.label }}
+        </label>
+      }
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="pay-footer">
+      <button type="button" class="btn-secondary" (click)="onCancel()" [disabled]="loading()">
+        Cancelar
+      </button>
+      <button type="button" class="btn-primary" (click)="onConfirm()" [disabled]="loading()">
+        @if (loading()) { Registrando… } @else { Confirmar Pagamento }
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+

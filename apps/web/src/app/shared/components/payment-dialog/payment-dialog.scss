@@ -1,0 +1,54 @@
+@use 'variables' as *;
+
+.pay-body {
+  padding: $spacing-md 0 $spacing-sm;
+}
+
+.pay-hint {
+  font-size: 0.9375rem;
+  color: $color-neutral-600;
+  margin: 0 0 $spacing-md;
+}
+
+.pay-methods {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.pay-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border: 2px solid $color-neutral-200;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  transition: border-color 0.15s, background 0.15s;
+
+  input[type='radio'] {
+    accent-color: $color-primary;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.selected {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.04);
+    font-weight: 500;
+  }
+
+  &:hover:not(.selected) {
+    border-color: $color-neutral-400;
+  }
+}
+
+.pay-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-neutral-200;
+}
+
