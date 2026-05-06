@@ -1,23 +1,16 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Serviços</h1>
-    <a class="btn-primary" routerLink="/admin/servicos/novo">+ Novo Serviço</a>
-  </header>
+  <lync-page-header title="Serviços">
+    <lync-btn label="+ Novo Serviço" (clicked)="openNew()" />
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>Preço</th>
-            <th>Duração</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th>Nome</th><th>Preço</th><th>Duração</th><th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -31,8 +24,8 @@
               <td>{{ s.duracaoMin }} min</td>
               <td><span class="badge" [class]="s.ativo ? 'badge--success' : 'badge--inactive'">{{ s.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/admin/servicos', s.id, 'editar']" class="btn-sm">Editar</a>
-                <button class="btn-sm" [class.btn-danger]="s.ativo" (click)="onToggle(s)" [disabled]="toggling() === s.id">
+                <button class="btn-sm" (click)="openEdit(s)">Editar</button>
+                <button class="btn-sm" [class.btn-danger]="s.ativo" (click)="confirmToggle(s)" [disabled]="toggling() === s.id">
                   {{ toggling() === s.id ? '...' : (s.ativo ? 'Desativar' : 'Ativar') }}
                 </button>
               </td>
@@ -46,3 +39,35 @@
   }
 </section>
 
+<lync-entity-dialog
+  [title]="dialogTitle()"
+  [visible]="dialogVisible()"
+  [loading]="saving()"
+  (submitted)="onDialogSave()"
+  (cancelled)="closeDialog()"
+  (visibleChange)="dialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Nome" [required]="true" [full]="true">
+      <input [ngModel]="fNome()" (ngModelChange)="fNome.set($event)" name="nome" required />
+    </lync-form-field>
+    <lync-form-field label="Descrição" [full]="true">
+      <textarea [ngModel]="fDescricao()" (ngModelChange)="fDescricao.set($event)" name="descricao"></textarea>
+    </lync-form-field>
+    <lync-form-field label="Preço (R$)" [required]="true">
+      <input type="number" min="0" step="0.01" [ngModel]="fPreco()" (ngModelChange)="fPreco.set(+$event)" name="preco" required />
+    </lync-form-field>
+    <lync-form-field label="Duração (min)" [required]="true">
+      <input type="number" min="5" [ngModel]="fDuracao()" (ngModelChange)="fDuracao.set(+$event)" name="duracao" required />
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>
+
+<lync-confirm-dialog
+  [open]="!!confirmTarget()"
+  [message]="(confirmTarget()?.ativo ? 'Desativar' : 'Ativar') + ' o serviço ' + (confirmTarget()?.nome ?? '') + '?'"
+  [confirmLabel]="confirmTarget()?.ativo ? 'Desativar' : 'Ativar'"
+  [danger]="!!confirmTarget()?.ativo"
+  (confirmed)="onConfirmToggle()"
+  (cancelled)="confirmTarget.set(null)"
+/>

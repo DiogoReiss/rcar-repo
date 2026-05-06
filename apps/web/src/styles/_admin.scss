@@ -79,6 +79,13 @@
   &:hover { background: rgba($color-danger, 0.06); }
 }
 
+.btn-danger-solid {
+  background: $color-danger !important;
+  color: #fff !important;
+  border: none !important;
+  &:hover:not(:disabled) { background: $color-danger-dark !important; }
+}
+
 // ─── Table ──────────────────────────────────────────────────────────────────
 .table-wrapper {
   background: #fff;

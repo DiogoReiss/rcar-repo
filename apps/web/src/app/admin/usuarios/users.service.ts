@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, tap, finalize } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { User } from '@shared/models/entities.model';
 
@@ -7,38 +7,33 @@ import { User } from '@shared/models/entities.model';
 export class UsersService {
   private readonly api = inject(ApiService);
 
-  readonly users = signal<User[]>([]);
+  readonly users   = signal<User[]>([]);
   readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
 
-  async load() {
+  // A12: Returns Observable — callers use takeUntilDestroyed
+  load(): Observable<User[]> {
     this.loading.set(true);
-    this.error.set(null);
-    try {
-      const res = await firstValueFrom(this.api.get<User[]>('/users'));
-      this.users.set(res);
-    } catch {
-      this.error.set('Erro ao carregar usuários.');
-    } finally {
-      this.loading.set(false);
-    }
+    return this.api.get<User[]>('/users').pipe(
+      tap(res => this.users.set(res)),
+      finalize(() => this.loading.set(false)),
+    );
   }
 
-  async create(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> & { senha: string }) {
-    const res = await firstValueFrom(this.api.post<User>('/users', data));
-    this.users.update(u => [...u, res]);
-    return res;
+  create(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> & { senha: string }): Observable<User> {
+    return this.api.post<User>('/users', data).pipe(
+      tap(res => this.users.update(u => [...u, res])),
+    );
   }
 
-  async update(id: string, data: Partial<User> & { senha?: string }) {
-    const res = await firstValueFrom(this.api.patch<User>(`/users/${id}`, data));
-    this.users.update(u => u.map(x => x.id === id ? res : x));
-    return res;
+  update(id: string, data: Partial<User> & { senha?: string }): Observable<User> {
+    return this.api.patch<User>(`/users/${id}`, data).pipe(
+      tap(res => this.users.update(u => u.map(x => x.id === id ? res : x))),
+    );
   }
 
-  async remove(id: string) {
-    await firstValueFrom(this.api.delete(`/users/${id}`));
-    this.users.update(u => u.filter(x => x.id !== id));
+  remove(id: string): Observable<unknown> {
+    return this.api.delete(`/users/${id}`).pipe(
+      tap(() => this.users.update(u => u.filter(x => x.id !== id))),
+    );
   }
 }
-

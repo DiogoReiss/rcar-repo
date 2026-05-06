@@ -1,13 +1,10 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Usuários</h1>
-    <a class="btn-primary" routerLink="/admin/usuarios/novo">+ Novo Usuário</a>
-  </header>
+  <lync-page-header title="Usuários">
+    <lync-btn label="+ Novo Usuário" (clicked)="openNew()" />
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
@@ -24,7 +21,7 @@
               <td><span class="badge" [class]="'badge--' + user.role.toLowerCase()">{{ roleLabel(user.role) }}</span></td>
               <td><span class="badge" [class]="user.ativo ? 'badge--success' : 'badge--inactive'">{{ user.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/admin/usuarios', user.id, 'editar']" class="btn-sm">Editar</a>
+                <button class="btn-sm" (click)="openEdit(user)">Editar</button>
                 <button class="btn-sm btn-danger" (click)="onRemoveClick(user)" [disabled]="removing() === user.id">
                   {{ removing() === user.id ? '...' : 'Desativar' }}
                 </button>
@@ -37,13 +34,39 @@
       </table>
     </div>
   }
-
-  <lync-confirm-dialog
-    [open]="!!confirmTarget()"
-    [message]="'Desativar o usuário ' + (confirmTarget()?.nome ?? '') + '?'"
-    confirmLabel="Desativar"
-    (confirmed)="onConfirmRemove()"
-    (cancelled)="onCancelRemove()"
-  />
 </section>
 
+<lync-entity-dialog
+  [title]="dialogTitle()"
+  [visible]="dialogVisible()"
+  [loading]="saving()"
+  (submitted)="onDialogSave()"
+  (cancelled)="closeDialog()"
+  (visibleChange)="dialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Nome" [required]="true">
+      <input type="text" [ngModel]="fNome()" (ngModelChange)="fNome.set($event)" name="nome" required />
+    </lync-form-field>
+    <lync-form-field label="E-mail" [required]="true">
+      <input type="email" [ngModel]="fEmail()" (ngModelChange)="fEmail.set($event)" name="email" required />
+    </lync-form-field>
+    <lync-form-field [label]="isEdit() ? 'Nova Senha (opcional)' : 'Senha'" [required]="!isEdit()">
+      <input type="password" [ngModel]="fSenha()" (ngModelChange)="fSenha.set($event)" name="senha" [required]="!isEdit()" minlength="6" />
+    </lync-form-field>
+    <lync-form-field label="Perfil">
+      <select [ngModel]="fRole()" (ngModelChange)="fRole.set($event)" name="role">
+        <option value="OPERADOR">Operador</option>
+        <option value="GESTOR_GERAL">Gestor Geral</option>
+      </select>
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>
+
+<lync-confirm-dialog
+  [open]="!!confirmTarget()"
+  [message]="'Desativar o usuário ' + (confirmTarget()?.nome ?? '') + '?'"
+  confirmLabel="Desativar"
+  (confirmed)="onConfirmRemove()"
+  (cancelled)="onCancelRemove()"
+  />

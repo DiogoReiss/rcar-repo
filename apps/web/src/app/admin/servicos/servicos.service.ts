@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, tap, finalize, map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { WashService as WashServiceModel } from '@shared/models/entities.model';
 
@@ -8,33 +8,31 @@ export class ServicosService {
   private readonly api = inject(ApiService);
 
   readonly servicos = signal<WashServiceModel[]>([]);
-  readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
+  readonly loading  = signal(false);
 
-  async load(includeInactive = false) {
+  // A12: Returns Observable — callers use takeUntilDestroyed
+  load(includeInactive = false): Observable<WashServiceModel[]> {
+    const path = includeInactive ? '/wash/services?includeInactive=true' : '/wash/services';
     this.loading.set(true);
-    this.error.set(null);
-    try {
-      const path = includeInactive ? '/wash/services?includeInactive=true' : '/wash/services';
-      const res = await firstValueFrom(this.api.get<WashServiceModel[]>(path));
-      this.servicos.set(res);
-    } catch {
-      this.error.set('Erro ao carregar serviços.');
-    } finally {
-      this.loading.set(false);
-    }
+    return this.api.get<unknown>(path).pipe(
+      tap((res) => {
+        const items = Array.isArray(res) ? (res as WashServiceModel[]) : ((res as { data: WashServiceModel[] }).data ?? []);
+        this.servicos.set(items);
+      }),
+      finalize(() => this.loading.set(false)),
+      map(() => this.servicos()),
+    );
   }
 
-  async create(data: Pick<WashServiceModel, 'nome' | 'descricao' | 'preco' | 'duracaoMin'>) {
-    const res = await firstValueFrom(this.api.post<WashServiceModel>('/wash/services', data));
-    this.servicos.update(s => [...s, res]);
-    return res;
+  create(data: Pick<WashServiceModel, 'nome' | 'descricao' | 'preco' | 'duracaoMin'>): Observable<WashServiceModel> {
+    return this.api.post<WashServiceModel>('/wash/services', data).pipe(
+      tap(res => this.servicos.update(s => [...s, res])),
+    );
   }
 
-  async update(id: string, data: Partial<WashServiceModel>) {
-    const res = await firstValueFrom(this.api.patch<WashServiceModel>(`/wash/services/${id}`, data));
-    this.servicos.update(s => s.map(x => x.id === id ? res : x));
-    return res;
+  update(id: string, data: Partial<WashServiceModel>): Observable<WashServiceModel> {
+    return this.api.patch<WashServiceModel>(`/wash/services/${id}`, data).pipe(
+      tap(res => this.servicos.update(s => s.map(x => x.id === id ? res : x))),
+    );
   }
 }
-

@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, tap, finalize, map } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { Vehicle } from '@shared/models/entities.model';
 
@@ -8,38 +8,37 @@ export class FrotaService {
   private readonly api = inject(ApiService);
 
   readonly veiculos = signal<Vehicle[]>([]);
-  readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
+  readonly loading  = signal(false);
 
-  async load(status?: string) {
+  // A12/A18: Returns Observable — callers use takeUntilDestroyed for lifecycle management
+  load(status?: string): Observable<Vehicle[]> {
+    const path = status ? `/fleet?status=${status}` : '/fleet';
     this.loading.set(true);
-    this.error.set(null);
-    try {
-      const path = status ? `/fleet?status=${status}` : '/fleet';
-      const res = await firstValueFrom(this.api.get<Vehicle[]>(path));
-      this.veiculos.set(res);
-    } catch {
-      this.error.set('Erro ao carregar frota.');
-    } finally {
-      this.loading.set(false);
-    }
+    return this.api.get<unknown>(path).pipe(
+      tap((res) => {
+        const items = Array.isArray(res) ? (res as Vehicle[]) : ((res as { data: Vehicle[] }).data ?? []);
+        this.veiculos.set(items);
+      }),
+      finalize(() => this.loading.set(false)),
+      map(() => this.veiculos()),
+    );
   }
 
-  async create(data: Omit<Vehicle, 'id' | 'createdAt'>) {
-    const res = await firstValueFrom(this.api.post<Vehicle>('/fleet', data));
-    this.veiculos.update(v => [...v, res]);
-    return res;
+  create(data: Omit<Vehicle, 'id' | 'createdAt'>): Observable<Vehicle> {
+    return this.api.post<Vehicle>('/fleet', data).pipe(
+      tap(res => this.veiculos.update(v => [...v, res])),
+    );
   }
 
-  async update(id: string, data: Partial<Vehicle>) {
-    const res = await firstValueFrom(this.api.patch<Vehicle>(`/fleet/${id}`, data));
-    this.veiculos.update(v => v.map(x => x.id === id ? res : x));
-    return res;
+  update(id: string, data: Partial<Vehicle>): Observable<Vehicle> {
+    return this.api.patch<Vehicle>(`/fleet/${id}`, data).pipe(
+      tap(res => this.veiculos.update(v => v.map(x => x.id === id ? res : x))),
+    );
   }
 
-  async remove(id: string) {
-    await firstValueFrom(this.api.delete(`/fleet/${id}`));
-    this.veiculos.update(v => v.filter(x => x.id !== id));
+  remove(id: string): Observable<unknown> {
+    return this.api.delete(`/fleet/${id}`).pipe(
+      tap(() => this.veiculos.update(v => v.filter(x => x.id !== id))),
+    );
   }
 }
-

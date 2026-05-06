@@ -1,2 +1,22 @@
 @use 'admin' as *;
+@use 'variables' as *;
 
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  margin-top: $spacing-md;
+
+  .btn-sm.active {
+    background: $color-primary;
+    color: #fff;
+    border-color: $color-primary;
+  }
+}
+
+.pagination-info {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: #64748b;
+}

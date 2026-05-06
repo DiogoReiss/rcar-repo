@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '@core/services/api.service';
-import { firstValueFrom } from 'rxjs';
+import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 interface Template {
   id: string; nome: string; tipo: string;
@@ -11,23 +12,21 @@ interface Template {
 
 @Component({
   selector: 'lync-templates-list',
-  imports: [FormsModule],
+  imports: [FormsModule, PageHeaderComponent],
   templateUrl: './templates-list.html',
   styleUrl: './templates-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class TemplatesListComponent implements OnInit {
+export default class TemplatesListComponent {
   private readonly api = inject(ApiService);
   private readonly sanitizer = inject(DomSanitizer);
 
   readonly templates = signal<Template[]>([]);
   readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
 
   // Editor state
   readonly editing = signal<Template | null>(null);
   readonly saving = signal(false);
-  readonly saveError = signal<string | null>(null);
   readonly editName = signal('');
   readonly editHtml = signal('');
   readonly editVars = signal('');
@@ -43,17 +42,18 @@ export default class TemplatesListComponent implements OnInit {
     RECIBO_LOCACAO: 'Recibo Locação',
   };
 
-  ngOnInit() { this.load(); }
+  constructor() {
+    this.load();
+  }
 
-  async load() {
+  load() {
     this.loading.set(true);
-    this.error.set(null);
-    try {
-      const res = await firstValueFrom(this.api.get<Template[]>('/templates'));
-      this.templates.set(res);
-    } catch (e: any) {
-      this.error.set(e?.error?.message ?? 'Erro ao carregar templates.');
-    } finally { this.loading.set(false); }
+    this.api.get<Template[]>('/templates')
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (res) => { this.templates.set(res); this.loading.set(false); },
+        error: () => this.loading.set(false),
+      });
   }
 
   startEdit(t: Template) {
@@ -62,32 +62,28 @@ export default class TemplatesListComponent implements OnInit {
     this.editHtml.set(t.conteudoHtml);
     this.editVars.set(t.variaveis.join(', '));
     this.previewHtml.set(null);
-    this.saveError.set(null);
   }
 
-  async onSave() {
-    this.saving.set(true); this.saveError.set(null);
-    try {
-      const vars = this.editVars().split(',').map(v => v.trim()).filter(Boolean);
-      await firstValueFrom(this.api.patch(`/templates/${this.editing()!.id}`, {
-        nome: this.editName(), conteudoHtml: this.editHtml(), variaveis: vars,
-      }));
-      this.editing.set(null);
-      await this.load();
-    } catch (e: any) {
-      this.saveError.set(e?.error?.message ?? 'Erro ao salvar.');
-    } finally { this.saving.set(false); }
+  onSave() {
+    this.saving.set(true);
+    const vars = this.editVars().split(',').map(v => v.trim()).filter(Boolean);
+    this.api.patch(`/templates/${this.editing()!.id}`, {
+      nome: this.editName(), conteudoHtml: this.editHtml(), variaveis: vars,
+    }).pipe(takeUntilDestroyed()).subscribe({
+      next: () => { this.editing.set(null); this.saving.set(false); this.load(); },
+      error: () => this.saving.set(false),
+    });
   }
 
-  async onPreview() {
+  onPreview() {
     this.previewing.set(true);
-    try {
-      let vars: Record<string, unknown> = {};
-      try { vars = JSON.parse(this.previewVars()); } catch { /* use empty */ }
-      const res = await firstValueFrom(this.api.post<{ html: string }>(`/templates/${this.editing()!.id}/preview`, vars));
-      this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(res.html));
-    } catch (e: any) {
-      this.saveError.set(e?.error?.message ?? 'Erro ao renderizar preview.');
-    } finally { this.previewing.set(false); }
+    let vars: Record<string, unknown> = {};
+    try { vars = JSON.parse(this.previewVars()); } catch { /* use empty */ }
+    this.api.post<{ html: string }>(`/templates/${this.editing()!.id}/preview`, vars)
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (res) => { this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(res.html)); this.previewing.set(false); },
+        error: () => this.previewing.set(false),
+      });
   }
 }

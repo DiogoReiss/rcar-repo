@@ -1,30 +1,24 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Clientes</h1>
-    <a class="btn-primary" routerLink="/admin/clientes/novo">+ Novo Cliente</a>
-  </header>
+  <lync-page-header title="Clientes">
+    <lync-btn label="+ Novo Cliente" (clicked)="openNew()" />
+  </lync-page-header>
 
   <div class="search-bar">
     <input type="search" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
-      [ngModel]="search()" (ngModelChange)="search.set($event)" name="search" (keyup.enter)="onSearch()" />
+      [ngModel]="search()" (ngModelChange)="search.set($event)" name="search"
+      (keyup.enter)="onSearch()" />
     <button class="btn-primary" (click)="onSearch()">Buscar</button>
   </div>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>Tipo</th>
-            <th>CPF/CNPJ</th>
-            <th>Contato</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th>Nome</th><th>Tipo</th><th>CPF/CNPJ</th>
+            <th>Contato</th><th>Status</th><th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -36,7 +30,7 @@
               <td>{{ c.email ?? c.telefone ?? '—' }}</td>
               <td><span class="badge" [class]="c.ativo ? 'badge--success' : 'badge--inactive'">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/admin/clientes', c.id, 'editar']" class="btn-sm">Editar</a>
+                <button class="btn-sm" (click)="openEdit(c)">Editar</button>
               </td>
             </tr>
           } @empty {
@@ -45,6 +39,60 @@
         </tbody>
       </table>
     </div>
+
+    <lync-pagination
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [total]="total()"
+      label="resultado(s)"
+      (pageChange)="goToPage($event)"
+    />
   }
 </section>
 
+<lync-entity-dialog
+  [title]="dialogTitle()"
+  [visible]="dialogVisible()"
+  [loading]="saving()"
+  [wide]="true"
+  (submitted)="onDialogSave()"
+  (cancelled)="closeDialog()"
+  (visibleChange)="dialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Tipo">
+      <select [ngModel]="fTipo()" (ngModelChange)="fTipo.set($event)" name="tipo" [disabled]="isEdit()">
+        <option value="PF">Pessoa Física</option>
+        <option value="PJ">Pessoa Jurídica</option>
+      </select>
+    </lync-form-field>
+    <lync-form-field label="Nome / Razão Social" [required]="true">
+      <input [ngModel]="fNome()" (ngModelChange)="fNome.set($event)" name="nome" required />
+    </lync-form-field>
+    <lync-form-field [label]="fTipo() === 'PF' ? 'CPF' : 'CNPJ'" [required]="true">
+      <input [ngModel]="fCpfCnpj()" (ngModelChange)="fCpfCnpj.set($event)" name="cpfCnpj" required [disabled]="isEdit()" />
+    </lync-form-field>
+    <lync-form-field label="E-mail">
+      <input type="email" [ngModel]="fEmail()" (ngModelChange)="fEmail.set($event)" name="email" />
+    </lync-form-field>
+    <lync-form-field label="Telefone">
+      <input [ngModel]="fTelefone()" (ngModelChange)="fTelefone.set($event)" name="telefone" />
+    </lync-form-field>
+    @if (fTipo() === 'PF') {
+      <lync-form-field label="CNH">
+        <input [ngModel]="fCnh()" (ngModelChange)="fCnh.set($event)" name="cnh" />
+      </lync-form-field>
+      <lync-form-field label="Validade CNH">
+        <input type="date" [ngModel]="fCnhValidade()" (ngModelChange)="fCnhValidade.set($event)" name="cnhValidade" />
+      </lync-form-field>
+    }
+    @if (fTipo() === 'PJ') {
+      <lync-form-field label="Razão Social">
+        <input [ngModel]="fRazaoSocial()" (ngModelChange)="fRazaoSocial.set($event)" name="razaoSocial" />
+      </lync-form-field>
+      <lync-form-field label="Responsável">
+        <input [ngModel]="fResponsavel()" (ngModelChange)="fResponsavel.set($event)" name="responsavel" />
+      </lync-form-field>
+    }
+  </div>
+</lync-entity-dialog>

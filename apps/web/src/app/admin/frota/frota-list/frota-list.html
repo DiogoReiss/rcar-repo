@@ -1,25 +1,17 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Frota</h1>
-    <a class="btn-primary" routerLink="/admin/frota/novo">+ Novo Veículo</a>
-  </header>
+  <lync-page-header title="Frota">
+    <lync-btn label="+ Novo Veículo" (clicked)="openNew()" />
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Placa</th>
-            <th>Modelo</th>
-            <th>Ano</th>
-            <th>Categoria</th>
-            <th>Status</th>
-            <th>KM</th>
-            <th>Ações</th>
+            <th>Placa</th><th>Modelo</th><th>Ano</th>
+            <th>Categoria</th><th>Status</th><th>KM</th><th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -32,7 +24,7 @@
               <td><span class="badge" [class]="statusClass(v.status)">{{ statusLabel(v.status) }}</span></td>
               <td>{{ v.kmAtual.toLocaleString('pt-BR') }}</td>
               <td class="actions">
-                <a [routerLink]="['/admin/frota', v.id, 'editar']" class="btn-sm">Editar</a>
+                <button class="btn-sm" (click)="openEdit(v)">Editar</button>
               </td>
             </tr>
           } @empty {
@@ -44,3 +36,40 @@
   }
 </section>
 
+<lync-entity-dialog
+  [title]="dialogTitle()"
+  [visible]="dialogVisible()"
+  [loading]="saving()"
+  [wide]="true"
+  (submitted)="onDialogSave()"
+  (cancelled)="closeDialog()"
+  (visibleChange)="dialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Placa" [required]="true">
+      <input [ngModel]="fPlaca()" (ngModelChange)="fPlaca.set($event)" name="placa" placeholder="ABC-1234" [disabled]="isEdit()" />
+    </lync-form-field>
+    <lync-form-field label="Modelo" [required]="true">
+      <input [ngModel]="fModelo()" (ngModelChange)="fModelo.set($event)" name="modelo" required />
+    </lync-form-field>
+    <lync-form-field label="Cor" [required]="true">
+      <input [ngModel]="fCor()" (ngModelChange)="fCor.set($event)" name="cor" required />
+    </lync-form-field>
+    <lync-form-field label="Ano" [required]="true">
+      <input type="number" [ngModel]="fAno()" (ngModelChange)="fAno.set(+$event)" name="ano" min="2000" required />
+    </lync-form-field>
+    <lync-form-field label="Categoria">
+      <select [ngModel]="fCategoria()" (ngModelChange)="fCategoria.set($event)" name="categoria">
+        @for (cat of categorias; track cat) { <option [value]="cat">{{ catLabel(cat) }}</option> }
+      </select>
+    </lync-form-field>
+    <lync-form-field label="Status">
+      <select [ngModel]="fStatus()" (ngModelChange)="fStatus.set($event)" name="status">
+        @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+      </select>
+    </lync-form-field>
+    <lync-form-field label="KM Atual">
+      <input type="number" [ngModel]="fKm()" (ngModelChange)="fKm.set(+$event)" name="km" min="0" />
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>

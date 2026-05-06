@@ -1,12 +1,8 @@
 <section class="page">
-  <header class="page-header">
-    <h1>Templates de Documentos</h1>
-  </header>
+  <lync-page-header title="Templates de Documentos" />
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
-  } @else if (error()) {
-    <div class="error">{{ error() }}</div>
   } @else if (!editing()) {
     <!-- Template list -->
     <div class="template-grid">
@@ -35,7 +31,6 @@
           <button class="btn-secondary" (click)="editing.set(null)">← Voltar</button>
         </div>
 
-        @if (saveError()) { <div class="error">{{ saveError() }}</div> }
 
         <div class="form-field">
           <label>Nome</label>
