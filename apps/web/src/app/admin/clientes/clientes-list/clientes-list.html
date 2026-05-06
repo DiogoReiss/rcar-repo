@@ -7,7 +7,7 @@
     <input type="search" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
       [ngModel]="search()" (ngModelChange)="search.set($event)" name="search"
       (keyup.enter)="onSearch()" />
-    <button class="btn-primary" (click)="onSearch()">Buscar</button>
+    <lync-btn label="Buscar" (clicked)="onSearch()" />
   </div>
 
   @if (loading()) {
@@ -96,3 +96,93 @@
     }
   </div>
 </lync-entity-dialog>
+
+<!-- Customer history dialog -->
+@if (detailData(); as d) {
+  <p-dialog
+    [visible]="true"
+    (visibleChange)="!$event && closeDetail()"
+    [header]="d.customer.nome"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '680px', maxWidth: '96vw' }"
+    [breakpoints]="{ '768px': '96vw' }"
+    (onHide)="closeDetail()"
+  >
+    @if (detailLoading()) {
+      <div class="cd-loading"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando histórico...</div>
+    } @else {
+      <div class="cd-grid">
+        <section class="cd-card">
+          <h3 class="cd-section-title">Dados do Cliente</h3>
+          <dl class="cd-info">
+            <dt>Tipo</dt>
+            <dd><span class="badge" [class]="'badge--' + d.customer.tipo">{{ d.customer.tipo === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica' }}</span></dd>
+            <dt>CPF/CNPJ</dt>    <dd>{{ d.customer.cpfCnpj }}</dd>
+            <dt>E-mail</dt>      <dd>{{ d.customer.email ?? '—' }}</dd>
+            <dt>Telefone</dt>    <dd>{{ d.customer.telefone ?? '—' }}</dd>
+            @if (d.customer.tipo === 'PF') {
+              <dt>CNH</dt>          <dd>{{ d.customer.cnh ?? '—' }}</dd>
+              <dt>Validade CNH</dt> <dd>{{ d.customer.cnhValidade | dateBr }}</dd>
+            } @else {
+              <dt>Razão Social</dt> <dd>{{ d.customer.razaoSocial ?? '—' }}</dd>
+              <dt>Responsável</dt>  <dd>{{ d.customer.responsavel ?? '—' }}</dd>
+            }
+            <dt>Status</dt>
+            <dd><span class="badge" [class]="d.customer.ativo ? 'badge--success' : 'badge--inactive'">{{ d.customer.ativo ? 'Ativo' : 'Inativo' }}</span></dd>
+          </dl>
+        </section>
+
+        <section class="cd-card">
+          <h3 class="cd-section-title">Histórico de Lavagens</h3>
+          @if (!d.schedules.length) {
+            <p class="cd-empty">Nenhuma lavagem registrada.</p>
+          } @else {
+            <ul class="cd-history">
+              @for (s of d.schedules; track s.id) {
+                <li class="cd-history-item">
+                  <div class="cd-history-main">
+                    <span>{{ s.service?.nome ?? 'Serviço' }}</span>
+                    <span class="badge" [class]="scheduleStatusClass[s.status]">{{ s.status }}</span>
+                  </div>
+                  <div class="cd-history-sub">{{ s.dataHora | dateBr:'datetime' }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="cd-card">
+          <h3 class="cd-section-title">Histórico de Contratos</h3>
+          @if (!d.contracts.length) {
+            <p class="cd-empty">Nenhum contrato registrado.</p>
+          } @else {
+            <ul class="cd-history">
+              @for (c of d.contracts; track c.id) {
+                <li class="cd-history-item">
+                  <div class="cd-history-main">
+                    <span>{{ c.vehicle?.modelo ?? 'Veículo' }} — {{ c.vehicle?.placa }}</span>
+                    <span class="badge" [class]="contractStatusClass[c.status]">{{ c.status }}</span>
+                  </div>
+                  <div class="cd-history-sub">
+                    {{ c.dataRetirada | dateBr }} → {{ c.dataDevolucao | dateBr }} ·
+                    {{ c.valorTotal | currencyBrl }}
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+    }
+
+    <ng-template pTemplate="footer">
+      <div class="cd-footer">
+        <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
+        <lync-btn label="Editar" icon="pi pi-pencil" (clicked)="closeDetail(); openEdit(d.customer)" />
+      </div>
+    </ng-template>
+  </p-dialog>
+}
+
