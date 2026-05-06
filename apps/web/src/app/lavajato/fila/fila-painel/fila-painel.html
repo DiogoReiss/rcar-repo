@@ -13,23 +13,6 @@
     </div>
   </lync-page-header>
 
-  <!-- Summary strip -->
-  <div class="fila-summary">
-    <div class="fila-summary-item fila-summary-item--waiting">
-      <span class="fila-summary-value">{{ aguardando().length }}</span>
-      <span class="fila-summary-label">Aguardando</span>
-    </div>
-    <div class="fila-summary-sep" aria-hidden="true"></div>
-    <div class="fila-summary-item fila-summary-item--active">
-      <span class="fila-summary-value">{{ emAtendimento().length }}</span>
-      <span class="fila-summary-label">Em Atendimento</span>
-    </div>
-    <div class="fila-summary-sep" aria-hidden="true"></div>
-    <div class="fila-summary-item fila-summary-item--done">
-      <span class="fila-summary-value">{{ concluidos().length }}</span>
-      <span class="fila-summary-label">Concluídos</span>
-    </div>
-  </div>
 
   @if (loading()) {
     <div class="fila-loading">
@@ -218,17 +201,16 @@
 
       <ng-template pTemplate="footer">
         <div class="detail-footer">
-          <button type="button" class="btn-secondary" (click)="closeDetail()">Fechar</button>
+          <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
           @if (detailCanPay) {
-            <button type="button" class="btn-secondary" (click)="openPayFromDetail()">
-              <i class="pi pi-credit-card" aria-hidden="true"></i> Pagar
-            </button>
+            <lync-btn label="Pagar" variant="secondary" icon="pi pi-credit-card" (clicked)="openPayFromDetail()" />
           }
           @if (detailCanAdvance) {
-            <button type="button" class="btn-primary" (click)="onAdvanceDetail()">
-              <i class="pi pi-arrow-right" aria-hidden="true"></i>
-              {{ q.status === 'AGUARDANDO' ? 'Chamar' : 'Concluir' }}
-            </button>
+            <lync-btn
+              [label]="q.status === 'AGUARDANDO' ? 'Chamar' : 'Concluir'"
+              icon="pi pi-arrow-right"
+              (clicked)="onAdvanceDetail()"
+            />
           }
         </div>
       </ng-template>

@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { MenuItem } from 'primeng/api';
 import { ClientesService } from '../clientes.service';
 import { Customer } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -9,16 +11,18 @@ import PaginationComponent from '@shared/components/pagination/pagination';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import RowMenuComponent from '@shared/components/row-menu/row-menu';
 
 @Component({
   selector: 'lync-clientes-list',
-  imports: [FormsModule, PageHeaderComponent, PaginationComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent],
+  imports: [FormsModule, PageHeaderComponent, PaginationComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent],
   templateUrl: './clientes-list.html',
   styleUrl: './clientes-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ClientesListComponent {
   private readonly clientesService = inject(ClientesService);
+  private readonly router          = inject(Router);
 
   readonly clientes   = this.clientesService.clientes;
   readonly loading    = this.clientesService.loading;
@@ -83,6 +87,13 @@ export default class ClientesListComponent {
   }
 
   closeDialog() { this.dialogVisible.set(false); }
+
+  getRowMenuItems(c: Customer): MenuItem[] {
+    return [
+      { label: 'Editar',        icon: 'pi pi-pencil', command: () => this.openEdit(c) },
+      { label: 'Ver Histórico', icon: 'pi pi-history', command: () => this.router.navigate(['/admin/clientes', c.id]) },
+    ];
+  }
 
   async onDialogSave() {
     this.saving.set(true);

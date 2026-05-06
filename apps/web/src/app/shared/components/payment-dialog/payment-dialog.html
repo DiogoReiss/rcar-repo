@@ -21,12 +21,12 @@
 
   <ng-template pTemplate="footer">
     <div class="pay-footer">
-      <button type="button" class="btn-secondary" (click)="onCancel()" [disabled]="loading()">
-        Cancelar
-      </button>
-      <button type="button" class="btn-primary" (click)="onConfirm()" [disabled]="loading()">
-        @if (loading()) { Registrando… } @else { Confirmar Pagamento }
-      </button>
+      <lync-btn label="Cancelar" variant="secondary" [disabled]="loading()" (clicked)="onCancel()" />
+      <lync-btn
+        [label]="loading() ? 'Registrando…' : 'Confirmar Pagamento'"
+        [loading]="loading()"
+        (clicked)="onConfirm()"
+      />
     </div>
   </ng-template>
 </p-dialog>

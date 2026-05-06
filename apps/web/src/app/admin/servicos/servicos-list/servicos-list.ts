@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ServicosService } from '../servicos.service';
 import { WashService } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -10,10 +10,11 @@ import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialo
 import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import RowMenuComponent from '@shared/components/row-menu/row-menu';
 
 @Component({
   selector: 'lync-servicos-list',
-  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, ConfirmDialogComponent, AppButtonComponent, FormFieldComponent],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, ConfirmDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent],
   templateUrl: './servicos-list.html',
   styleUrl: './servicos-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,5 +96,18 @@ export default class ServicosListComponent {
 
   formatPrice(val: number) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+  }
+
+  getRowMenuItems(s: WashService): MenuItem[] {
+    return [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.openEdit(s) },
+      { separator: true },
+      {
+        label: s.ativo ? 'Desativar' : 'Ativar',
+        icon: s.ativo ? 'pi pi-eye-slash' : 'pi pi-eye',
+        styleClass: s.ativo ? 'menu-item--danger' : '',
+        command: () => this.confirmToggle(s),
+      },
+    ];
   }
 }

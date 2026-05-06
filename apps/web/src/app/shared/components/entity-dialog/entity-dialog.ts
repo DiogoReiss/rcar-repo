@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
+import AppButtonComponent from '@shared/components/app-button/app-button';
 
 /**
  * Generic create / edit modal wrapper backed by PrimeNG p-dialog.
@@ -18,7 +19,7 @@ import { DialogModule } from 'primeng/dialog';
  */
 @Component({
   selector: 'lync-entity-dialog',
-  imports: [DialogModule],
+  imports: [DialogModule, AppButtonComponent],
   templateUrl: './entity-dialog.html',
   styleUrl: './entity-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

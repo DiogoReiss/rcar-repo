@@ -15,12 +15,8 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <button type="button" class="btn-secondary" (click)="close()" [disabled]="loading()">
-        Cancelar
-      </button>
-      <button type="button" class="btn-primary" (click)="submitted.emit()" [disabled]="loading()">
-        @if (loading()) { Salvando… } @else { Salvar }
-      </button>
+      <lync-btn label="Cancelar" variant="secondary" (clicked)="close()" [disabled]="loading()" />
+      <lync-btn [label]="loading() ? 'Salvando…' : 'Salvar'" [loading]="loading()" (clicked)="submitted.emit()" />
     </div>
   </ng-template>
 </p-dialog>

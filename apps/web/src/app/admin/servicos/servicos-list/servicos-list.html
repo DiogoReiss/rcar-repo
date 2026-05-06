@@ -24,10 +24,7 @@
               <td>{{ s.duracaoMin }} min</td>
               <td><span class="badge" [class]="s.ativo ? 'badge--success' : 'badge--inactive'">{{ s.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <button class="btn-sm" (click)="openEdit(s)">Editar</button>
-                <button class="btn-sm" [class.btn-danger]="s.ativo" (click)="confirmToggle(s)" [disabled]="toggling() === s.id">
-                  {{ toggling() === s.id ? '...' : (s.ativo ? 'Desativar' : 'Ativar') }}
-                </button>
+                <lync-row-menu [items]="getRowMenuItems(s)" />
               </td>
             </tr>
           } @empty {

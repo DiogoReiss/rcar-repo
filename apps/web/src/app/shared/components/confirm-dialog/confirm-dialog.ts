@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
+import AppButtonComponent from '@shared/components/app-button/app-button';
 
 /**
  * Accessible confirm / destructive-action dialog backed by PrimeNG p-dialog.
@@ -14,7 +15,7 @@ import { DialogModule } from 'primeng/dialog';
  */
 @Component({
   selector: 'lync-confirm-dialog',
-  imports: [DialogModule],
+  imports: [DialogModule, AppButtonComponent],
   templateUrl: './confirm-dialog.html',
   styleUrl: './confirm-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

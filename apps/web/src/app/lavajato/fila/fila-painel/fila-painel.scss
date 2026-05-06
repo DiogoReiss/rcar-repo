@@ -34,59 +34,6 @@
   100% { box-shadow: 0 0 0 0 rgba($color-success, 0); }
 }
 
-// ─── Summary strip ───────────────────────────────────────────────────────────
-.fila-summary {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: #fff;
-  border: 1px solid $color-neutral-200;
-  border-radius: 12px;
-  margin: 0 $spacing-lg $spacing-lg;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.fila-summary-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  padding: $spacing-md $spacing-lg;
-  gap: 2px;
-
-  &--waiting  { border-top: 3px solid $color-warning; }
-  &--active   { border-top: 3px solid $color-info; }
-  &--done     { border-top: 3px solid $color-success; }
-}
-
-.fila-summary-value {
-  font-size: 1.75rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: $color-neutral-900;
-
-  .fila-summary-item--waiting & { color: $color-warning-dark; }
-  .fila-summary-item--active  & { color: $color-info-dark; }
-  .fila-summary-item--done    & { color: $color-success-dark; }
-}
-
-.fila-summary-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: $color-neutral-500;
-}
-
-.fila-summary-sep {
-  width: 1px;
-  height: 40px;
-  background: $color-neutral-200;
-  flex-shrink: 0;
-}
 
 // ─── Loading state ────────────────────────────────────────────────────────────
 .fila-loading {

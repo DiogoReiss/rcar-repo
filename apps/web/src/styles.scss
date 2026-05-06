@@ -35,3 +35,45 @@ a {
   background: rgba($color-primary, 0.2);
   color: $color-primary-darker;
 }
+
+// ─── Global form input baseline ──────────────────────────────────────────────
+// Applied globally so projected content inside lync-form-field is always
+// styled consistently without needing ::ng-deep hacks.
+// stylelint-disable-next-line selector-max-pseudo-class
+input:not([type='checkbox']):not([type='radio']):not([type='submit']):not([type='button']):not([type='range']):not([type='color']):not([type='file']),
+select,
+textarea {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $color-neutral-300;
+  border-radius: 8px;
+  font-size: $font-size-base;
+  font-family: $font-family-base;
+  background: #fff;
+  color: $color-neutral-900;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  }
+
+  &:disabled {
+    background: $color-neutral-100;
+    color: $color-neutral-500;
+    cursor: not-allowed;
+  }
+
+  &::placeholder { color: $color-neutral-400; }
+}
+
+textarea { min-height: 80px; resize: vertical; }
+
+// ─── PrimeNG context menu danger item ────────────────────────────────────────
+.p-menu .menu-item--danger .p-menuitem-link {
+  color: #dc2626 !important;
+  .p-menuitem-icon { color: #dc2626 !important; }
+  &:hover { background: #fef2f2 !important; }
+}
+

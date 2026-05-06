@@ -21,10 +21,7 @@
               <td><span class="badge" [class]="'badge--' + user.role.toLowerCase()">{{ roleLabel(user.role) }}</span></td>
               <td><span class="badge" [class]="user.ativo ? 'badge--success' : 'badge--inactive'">{{ user.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <button class="btn-sm" (click)="openEdit(user)">Editar</button>
-                <button class="btn-sm btn-danger" (click)="onRemoveClick(user)" [disabled]="removing() === user.id">
-                  {{ removing() === user.id ? '...' : 'Desativar' }}
-                </button>
+                <lync-row-menu [items]="getRowMenuItems(user)" />
               </td>
             </tr>
           } @empty {

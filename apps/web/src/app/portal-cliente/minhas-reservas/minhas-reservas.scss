@@ -73,7 +73,6 @@
 
 .book-form {
   display: flex; flex-direction: column; gap: $spacing-md;
-  select, input[type="date"] { width: 100%; padding: $spacing-sm; border: 1px solid $color-neutral-300; border-radius: 6px; font-size: $font-size-base; background: #fff; &:focus { outline: none; border-color: $color-primary; } }
 }
 
 .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-md; }

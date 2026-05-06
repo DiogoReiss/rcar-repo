@@ -11,17 +11,13 @@
 
   <ng-template pTemplate="footer">
     <div class="confirm-footer">
-      <button type="button" class="btn-secondary" (click)="cancelled.emit()" [disabled]="loading()">
-        {{ cancelLabel() }}
-      </button>
-      <button
-        type="button"
-        [class]="danger() ? 'btn-primary btn-danger-solid' : 'btn-primary'"
-        (click)="confirmed.emit()"
-        [disabled]="loading()"
-      >
-        @if (loading()) { … } @else { {{ confirmLabel() }} }
-      </button>
+      <lync-btn [label]="cancelLabel()" variant="secondary" [disabled]="loading()" (clicked)="cancelled.emit()" />
+      <lync-btn
+        [label]="loading() ? '…' : confirmLabel()"
+        [variant]="danger() ? 'danger' : 'primary'"
+        [loading]="loading()"
+        (clicked)="confirmed.emit()"
+      />
     </div>
   </ng-template>
 </p-dialog>

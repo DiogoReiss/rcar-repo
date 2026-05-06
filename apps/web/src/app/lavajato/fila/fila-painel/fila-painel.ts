@@ -7,15 +7,15 @@ import { Dialog } from 'primeng/dialog';
 import { FilaService } from '../fila.service';
 import { PaymentMethod, WashQueueEntry } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
-import AppButtonComponent from '@shared/components/app-button/app-button';
 import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
+import AppButtonComponent from '@shared/components/app-button/app-button';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 
 const STATUS_ORDER = ['AGUARDANDO', 'EM_ATENDIMENTO', 'CONCLUIDO'] as const;
 
 @Component({
   selector: 'lync-fila-painel',
-  imports: [RouterLink, PageHeaderComponent, AppButtonComponent, PaymentDialogComponent, Dialog, CurrencyBrlPipe],
+  imports: [RouterLink, PageHeaderComponent, PaymentDialogComponent, Dialog, AppButtonComponent, CurrencyBrlPipe],
   templateUrl: './fila-painel.html',
   styleUrl: './fila-painel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

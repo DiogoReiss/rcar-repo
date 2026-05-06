@@ -304,3 +304,7 @@
 | 🔴 | 23.7 | Migrar inputs de lavajato/agendamento e aluguel/reserva para `FormFieldComponent` |
 | 🟢 | 23.8 | Implementar `SuccessToastService` ou usar `MessageService` diretamente para toasts de sucesso em ações CRUD |
 | 🔴 | 23.9 | Adicionar `ToastModule` ao mock mode para validar sem API real |
+| 🟢 | 23.10 | **Context menu nas tabelas**: coluna Ações das tabelas admin e contrato-list usa `RowMenuComponent` (`lync-row-menu`) com `p-menu popup` em vez de botões inline; `RowMenuComponent` criado em `shared/components/row-menu/` |
+| 🟢 | 23.11 | **Botões padronizados nos dialogs**: `ConfirmDialogComponent`, `PaymentDialogComponent` e o detail dialog da fila migrados para `lync-btn` (variant primary/secondary/danger); eliminados `<button class="btn-*">` ad-hoc nos footers de dialog |
+| 🟢 | 23.12 | **Contrato-list refatorado**: ações inline (Abertura/Cancelar/Devolução/Pagar) movidas para context menu; formulário de abertura convertido para `EntityDialogComponent`; pagamento usa `PaymentDialogComponent`; `MessageService` injetado para toasts de sucesso |
+| 🟢 | 23.13 | **Fila kanban sem summary strip duplicado**: contagens por status exibidas exclusivamente nos cabeçalhos das colunas board (badge `board-col-count`); sem KPI row separado para evitar duplicação |

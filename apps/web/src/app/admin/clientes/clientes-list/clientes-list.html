@@ -30,7 +30,7 @@
               <td>{{ c.email ?? c.telefone ?? '—' }}</td>
               <td><span class="badge" [class]="c.ativo ? 'badge--success' : 'badge--inactive'">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <button class="btn-sm" (click)="openEdit(c)">Editar</button>
+                <lync-row-menu [items]="getRowMenuItems(c)" />
               </td>
             </tr>
           } @empty {

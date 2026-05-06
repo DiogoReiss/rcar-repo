@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { PaymentMethod } from '@shared/models/entities.model';
+import AppButtonComponent from '@shared/components/app-button/app-button';
 
 /**
  * Reusable payment method selection dialog.
@@ -16,7 +17,7 @@ import { PaymentMethod } from '@shared/models/entities.model';
  */
 @Component({
   selector: 'lync-payment-dialog',
-  imports: [FormsModule, DialogModule],
+  imports: [FormsModule, DialogModule, AppButtonComponent],
   templateUrl: './payment-dialog.html',
   styleUrl: './payment-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

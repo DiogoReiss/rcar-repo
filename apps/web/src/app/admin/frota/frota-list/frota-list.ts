@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { FrotaService } from '../frota.service';
 import { Vehicle } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import RowMenuComponent from '@shared/components/row-menu/row-menu';
 
 const STATUS_LABELS: Record<string, string> = {
   DISPONIVEL: 'Disponível', ALUGADO: 'Alugado',
@@ -21,14 +23,15 @@ const CAT_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'lync-frota-list',
-  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent],
   templateUrl: './frota-list.html',
   styleUrl: './frota-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FrotaListComponent {
   private readonly frotaService = inject(FrotaService);
-  private readonly toast = inject(MessageService);
+  private readonly toast        = inject(MessageService);
+  private readonly router       = inject(Router);
 
   readonly veiculos = this.frotaService.veiculos;
   readonly loading  = this.frotaService.loading;
@@ -78,6 +81,13 @@ export default class FrotaListComponent {
   }
 
   closeDialog() { this.dialogVisible.set(false); }
+
+  getRowMenuItems(v: Vehicle): MenuItem[] {
+    return [
+      { label: 'Editar',        icon: 'pi pi-pencil', command: () => this.openEdit(v) },
+      { label: 'Ver Detalhes',  icon: 'pi pi-eye',    command: () => this.router.navigate(['/admin/frota', v.id]) },
+    ];
+  }
 
   async onDialogSave() {
     this.saving.set(true);

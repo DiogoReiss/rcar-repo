@@ -37,8 +37,7 @@
               <td>{{ p.custoUnitario != null ? ('R$ ' + p.custoUnitario) : '—' }}</td>
               <td><span class="badge" [class]="p.ativo ? 'badge--success' : 'badge--inactive'">{{ p.ativo ? 'Ativo' : 'Inativo' }}</span></td>
               <td class="actions">
-                <button class="btn-sm" (click)="openEdit(p)">Editar</button>
-                <a [routerLink]="['/admin/estoque/movimentacoes']" [queryParams]="{ productId: p.id }" class="btn-sm">Histórico</a>
+                <lync-row-menu [items]="getRowMenuItems(p)" />
               </td>
             </tr>
           } @empty {

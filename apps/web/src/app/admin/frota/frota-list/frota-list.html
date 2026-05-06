@@ -24,7 +24,7 @@
               <td><span class="badge" [class]="statusClass(v.status)">{{ statusLabel(v.status) }}</span></td>
               <td>{{ v.kmAtual.toLocaleString('pt-BR') }}</td>
               <td class="actions">
-                <button class="btn-sm" (click)="openEdit(v)">Editar</button>
+                <lync-row-menu [items]="getRowMenuItems(v)" />
               </td>
             </tr>
           } @empty {

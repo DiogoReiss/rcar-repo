@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { UsersService } from '../users.service';
 import { User } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -10,6 +10,7 @@ import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialo
 import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import RowMenuComponent from '@shared/components/row-menu/row-menu';
 
 const ROLE_LABELS: Record<string, string> = {
   GESTOR_GERAL: 'Gestor',
@@ -19,7 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'lync-usuarios-list',
-  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, ConfirmDialogComponent, AppButtonComponent, FormFieldComponent],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, ConfirmDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent],
   templateUrl: './usuarios-list.html',
   styleUrl: './usuarios-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -101,4 +102,12 @@ export default class UsuariosListComponent {
   }
 
   onCancelRemove() { this.confirmTarget.set(null); }
+
+  getRowMenuItems(u: User): MenuItem[] {
+    return [
+      { label: 'Editar',    icon: 'pi pi-pencil', command: () => this.openEdit(u) },
+      { separator: true },
+      { label: 'Desativar', icon: 'pi pi-ban', styleClass: 'menu-item--danger', command: () => this.onRemoveClick(u) },
+    ];
+  }
 }
