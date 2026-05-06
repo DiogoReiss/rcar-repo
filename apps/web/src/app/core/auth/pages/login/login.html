@@ -59,10 +59,16 @@
 
     @if (isMock) {
       <div class="quick-access">
-        <p class="quick-label">Acesso rápido (mock)</p>
+        <p class="quick-label">Acesso rápido (mock) — clique para entrar direto</p>
         <div class="quick-btns">
           @for (u of quickUsers; track u.email) {
-            <button type="button" class="quick-btn" (click)="fillQuick(u)">
+            <button
+              type="button"
+              class="quick-btn"
+              [class.quick-btn--cliente]="u.label === 'Cliente'"
+              (click)="quickLogin(u)"
+              [disabled]="loading()"
+            >
               <i [class]="u.icon" aria-hidden="true"></i>
               {{ u.label }}
             </button>

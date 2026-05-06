@@ -27,9 +27,10 @@ export default class LoginComponent {
     { label: 'Cliente',  email: 'cliente@rcar.dev',  senha: 'cliente123',  icon: 'pi pi-user' },
   ];
 
-  fillQuick(u: { email: string; senha: string }) {
+  quickLogin(u: { email: string; senha: string }) {
     this.email.set(u.email);
     this.senha.set(u.senha);
+    this.onSubmit();
   }
 
   onSubmit(): void {

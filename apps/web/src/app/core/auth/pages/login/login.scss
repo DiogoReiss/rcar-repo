@@ -153,10 +153,27 @@
 
   i { font-size: 0.75rem; color: $color-primary; }
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: rgba($color-primary, 0.06);
     border-color: $color-primary;
     color: $color-primary-dark;
+  }
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  // Cliente button — more prominent
+  &--cliente {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: #fff;
+    font-weight: 700;
+    i { color: #fff; }
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+      border-color: $color-primary-dark;
+      color: #fff;
+    }
   }
 }
 
