@@ -8,6 +8,7 @@ import { CustomersModule } from './modules/customers/customers.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
 import { WashModule } from './modules/wash/wash.module.js';
 import { LavajatoModule } from './modules/lavajato/lavajato.module.js';
+import { RentalModule } from './modules/rental/rental.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { LavajatoModule } from './modules/lavajato/lavajato.module.js';
     FleetModule,
     WashModule,
     LavajatoModule,
+    RentalModule,
   ],
   controllers: [],
   providers: [],
