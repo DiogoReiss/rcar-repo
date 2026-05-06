@@ -1,0 +1,92 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Agendamentos</h1>
+    <div class="header-actions">
+      <input type="date" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)" name="date" class="date-picker" />
+      <button class="btn-primary" (click)="showForm.set(true)">+ Novo Agendamento</button>
+    </div>
+  </header>
+
+  @if (showForm()) {
+    <div class="form-card" style="margin-bottom:1.5rem">
+      <h3 style="margin:0 0 1rem;font-size:1rem">Novo Agendamento</h3>
+      @if (formError()) { <div class="error">{{ formError() }}</div> }
+      <form (ngSubmit)="onSubmit()" class="form-grid">
+        <div class="form-field">
+          <label>Nome do Cliente</label>
+          <input [ngModel]="formNome()" (ngModelChange)="formNome.set($event)" name="nome" required placeholder="Nome ou telefone" />
+        </div>
+        <div class="form-field">
+          <label>Telefone</label>
+          <input [ngModel]="formTelefone()" (ngModelChange)="formTelefone.set($event)" name="tel" placeholder="(11) 99999-0000" />
+        </div>
+        <div class="form-field">
+          <label>Serviço</label>
+          <select [ngModel]="formServiceId()" (ngModelChange)="formServiceId.set($event)" name="service">
+            @for (s of services(); track s.id) { <option [value]="s.id">{{ s.nome }} — {{ formatPrice(s.preco) }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Data e Hora</label>
+          <input type="datetime-local" [ngModel]="formDataHora()" (ngModelChange)="formDataHora.set($event)" name="dt" required />
+        </div>
+        <div class="form-field full">
+          <label>Observações</label>
+          <input [ngModel]="formObs()" (ngModelChange)="formObs.set($event)" name="obs" />
+        </div>
+        <div class="form-actions full">
+          <button type="submit" class="btn-primary" [disabled]="formLoading()">{{ formLoading() ? 'Salvando...' : 'Agendar' }}</button>
+          <button type="button" class="btn-secondary" (click)="showForm.set(false)">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else if (!schedules().length) {
+    <div class="empty-state">Nenhum agendamento para esta data.</div>
+  } @else {
+    <div class="schedule-list">
+      @for (s of schedules(); track s.id) {
+        <div class="schedule-card" [class]="'schedule-card--' + s.status.toLowerCase()">
+          <div class="schedule-time">{{ formatTime(s.dataHora) }}</div>
+          <div class="schedule-info">
+            <strong>{{ s.customer?.nome ?? s.nomeAvulso }}</strong>
+            <span>{{ s.service?.nome }}</span>
+            @if (s.observacoes) { <small>{{ s.observacoes }}</small> }
+          </div>
+          <div class="schedule-right">
+            <span class="badge" [class]="statusClass[s.status]">{{ statusLabel[s.status] }}</span>
+            <div class="schedule-actions">
+              @if (s.status === 'AGENDADO') {
+                <button class="btn-sm" (click)="updateStatus(s.id, 'EM_ATENDIMENTO')">Iniciar</button>
+                <button class="btn-sm btn-danger" (click)="updateStatus(s.id, 'CANCELADO')">Cancelar</button>
+              }
+              @if (s.status === 'EM_ATENDIMENTO') {
+                <button class="btn-sm" (click)="updateStatus(s.id, 'CONCLUIDO')">Concluir</button>
+                <button class="btn-sm" (click)="payingId.set(s.id)">Pagamento</button>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (payingId() === s.id) {
+          <div class="payment-bar">
+            <select [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" name="pay">
+              <option value="PIX">PIX</option>
+              <option value="DINHEIRO">Dinheiro</option>
+              <option value="CARTAO_CREDITO">Cartão Crédito</option>
+              <option value="CARTAO_DEBITO">Cartão Débito</option>
+            </select>
+            <button class="btn-primary" (click)="onPay(s.id)">Confirmar Pagamento</button>
+            <button class="btn-secondary" (click)="payingId.set(null)">Cancelar</button>
+          </div>
+        }
+      }
+    </div>
+  }
+</section>
+

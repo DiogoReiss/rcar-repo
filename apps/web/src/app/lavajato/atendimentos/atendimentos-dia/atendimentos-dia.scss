@@ -1,0 +1,12 @@
+@use 'admin' as *;
+@use 'variables' as *;
+
+:host { display: block; }
+.date-picker { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; }
+
+.kpi-row { display: flex; gap: $spacing-md; margin-bottom: $spacing-lg; flex-wrap: wrap; }
+.kpi-card { background: #fff; border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08); min-width: 140px; .kpi-value { font-size: 1.8rem; font-weight: 700; color: $color-primary; } .kpi-label { font-size: 0.8rem; color: #64748b; } }
+
+.section-title { font-size: 1rem; font-weight: 600; margin: 0 0 $spacing-sm; }
+.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; }
+

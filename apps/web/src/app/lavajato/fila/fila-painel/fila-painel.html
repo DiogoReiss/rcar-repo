@@ -1,0 +1,86 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Fila de Atendimento</h1>
+    <div class="header-actions">
+      @if (lastUpdate()) { <span class="last-update">Atualizado: {{ lastUpdate() }}</span> }
+      <button class="btn-primary" (click)="showForm.set(true)">+ Entrar na Fila</button>
+    </div>
+  </header>
+
+  @if (showForm()) {
+    <div class="form-card" style="margin-bottom:1.5rem">
+      @if (formError()) { <div class="error">{{ formError() }}</div> }
+      <form (ngSubmit)="onAddToQueue()" class="form-grid">
+        <div class="form-field">
+          <label>Nome</label>
+          <input [ngModel]="formNome()" (ngModelChange)="formNome.set($event)" name="nome" required />
+        </div>
+        <div class="form-field">
+          <label>Serviço</label>
+          <select [ngModel]="formServiceId()" (ngModelChange)="formServiceId.set($event)" name="srv">
+            @for (s of services(); track s.id) { <option [value]="s.id">{{ s.nome }}</option> }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Placa (opcional)</label>
+          <input [ngModel]="formPlaca()" (ngModelChange)="formPlaca.set($event)" name="placa" />
+        </div>
+        <div class="form-actions full">
+          <button type="submit" class="btn-primary" [disabled]="formLoading()">{{ formLoading() ? '...' : 'Entrar na Fila' }}</button>
+          <button type="button" class="btn-secondary" (click)="showForm.set(false)">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="fila-columns">
+    <div class="fila-col">
+      <h2 class="col-title col-title--waiting">⏳ Aguardando ({{ aguardando().length }})</h2>
+      @for (q of aguardando(); track q.id) {
+        <div class="queue-card">
+          <div class="queue-pos">#{{ q.posicao }}</div>
+          <div class="queue-info">
+            <strong>{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
+            <span>{{ q.service?.nome }}</span>
+            @if (q.veiculoPlaca) { <small>{{ q.veiculoPlaca }}</small> }
+          </div>
+          <button class="btn-sm" (click)="onAdvance(q.id)">Chamar</button>
+        </div>
+      }
+      @if (!aguardando().length) { <p class="no-entries">Fila vazia</p> }
+    </div>
+
+    <div class="fila-col">
+      <h2 class="col-title col-title--active">🔧 Em Atendimento ({{ emAtendimento().length }})</h2>
+      @for (q of emAtendimento(); track q.id) {
+        <div class="queue-card queue-card--active">
+          <div class="queue-pos">#{{ q.posicao }}</div>
+          <div class="queue-info">
+            <strong>{{ q.customer?.nome ?? q.nomeAvulso }}</strong>
+            <span>{{ q.service?.nome }}</span>
+            @if (q.veiculoPlaca) { <small>{{ q.veiculoPlaca }}</small> }
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="btn-sm" (click)="onAdvance(q.id)">Concluir</button>
+            <button class="btn-sm" (click)="payingId.set(q.id)">Pagar</button>
+          </div>
+        </div>
+
+        @if (payingId() === q.id) {
+          <div class="payment-bar">
+            <select [ngModel]="payMethod()" (ngModelChange)="payMethod.set($event)" name="pay">
+              <option value="PIX">PIX</option>
+              <option value="DINHEIRO">Dinheiro</option>
+              <option value="CARTAO_CREDITO">Cartão Crédito</option>
+              <option value="CARTAO_DEBITO">Cartão Débito</option>
+            </select>
+            <button class="btn-primary" (click)="onPay(q.id)">Confirmar</button>
+            <button class="btn-secondary" (click)="payingId.set(null)">✕</button>
+          </div>
+        }
+      }
+      @if (!emAtendimento().length) { <p class="no-entries">Nenhum em atendimento</p> }
+    </div>
+  </div>
+</section>
+

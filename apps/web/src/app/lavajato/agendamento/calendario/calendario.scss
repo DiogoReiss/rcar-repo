@@ -1,0 +1,30 @@
+@use 'admin' as *;
+@use 'variables' as *;
+
+:host { display: block; }
+.header-actions { display: flex; gap: $spacing-sm; align-items: center; }
+.date-picker { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; font-size: $font-size-base; }
+
+.schedule-list { display: flex; flex-direction: column; gap: $spacing-sm; }
+
+.schedule-card {
+  display: flex; gap: $spacing-md; align-items: flex-start;
+  background: #fff; border-radius: 10px; padding: $spacing-md;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-left: 4px solid #e2e8f0;
+
+  &--agendado    { border-left-color: $color-warning; }
+  &--em_atendimento { border-left-color: $color-info; }
+  &--concluido   { border-left-color: $color-success; opacity: 0.75; }
+  &--cancelado   { border-left-color: #cbd5e1; opacity: 0.55; }
+}
+.schedule-time { font-size: 1.25rem; font-weight: 700; color: $color-primary; min-width: 56px; }
+.schedule-info { flex: 1; display: flex; flex-direction: column; gap: 2px; strong { font-size: 0.95rem; } span { font-size: 0.85rem; color: #475569; } small { color: #94a3b8; font-size: 0.78rem; } }
+.schedule-right { display: flex; flex-direction: column; align-items: flex-end; gap: $spacing-xs; }
+.schedule-actions { display: flex; gap: $spacing-xs; }
+
+.payment-bar { display: flex; gap: $spacing-sm; align-items: center; padding: $spacing-sm $spacing-md; background: #f0fdf4; border-radius: 8px; select { padding: $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; } }
+
+.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; }
+
+.badge--operador { background: #dbeafe; color: #1e40af; }
+

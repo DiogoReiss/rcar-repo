@@ -1,0 +1,59 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Atendimentos do Dia</h1>
+    <input type="date" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)" name="date" class="date-picker" />
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Carregando...</div>
+  } @else {
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-value">{{ total() }}</div><div class="kpi-label">Atendimentos</div></div>
+      <div class="kpi-card"><div class="kpi-value">{{ formatPrice(revenue()) }}</div><div class="kpi-label">Receita Estimada</div></div>
+      <div class="kpi-card"><div class="kpi-value">{{ data().schedules.length }}</div><div class="kpi-label">Via Agendamento</div></div>
+      <div class="kpi-card"><div class="kpi-value">{{ data().queues.length }}</div><div class="kpi-label">Walk-in (Fila)</div></div>
+    </div>
+
+    @if (data().schedules.length) {
+      <h2 class="section-title">Agendamentos Concluídos</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Hora</th><th>Cliente</th><th>Serviço</th></tr></thead>
+          <tbody>
+            @for (s of data().schedules; track s.id) {
+              <tr>
+                <td>{{ formatTime(s.dataHora) }}</td>
+                <td>{{ s.customer?.nome ?? s.nomeAvulso }}</td>
+                <td>{{ s.service?.nome }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (data().queues.length) {
+      <h2 class="section-title" style="margin-top:1.5rem">Walk-in Concluídos</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Pos.</th><th>Cliente</th><th>Serviço</th><th>Placa</th></tr></thead>
+          <tbody>
+            @for (q of data().queues; track q.id) {
+              <tr>
+                <td>#{{ q.posicao }}</td>
+                <td>{{ q.customer?.nome ?? q.nomeAvulso }}</td>
+                <td>{{ q.service?.nome }}</td>
+                <td>{{ q.veiculoPlaca ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!total()) {
+      <div class="empty-state">Nenhum atendimento concluído nesta data.</div>
+    }
+  }
+</section>
+

@@ -73,3 +73,34 @@ export interface StockMovement {
   product?: { nome: string; unidade: string };
 }
 
+export type WashScheduleStatus = 'AGENDADO' | 'EM_ATENDIMENTO' | 'CONCLUIDO' | 'CANCELADO';
+export type WashQueueStatus = 'AGUARDANDO' | 'EM_ATENDIMENTO' | 'CONCLUIDO';
+export type PaymentMethod = 'DINHEIRO' | 'PIX' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO';
+
+export interface WashSchedule {
+  id: string;
+  customerId?: string;
+  nomeAvulso?: string;
+  telefone?: string;
+  serviceId: string;
+  dataHora: string;
+  status: WashScheduleStatus;
+  observacoes?: string;
+  service?: WashService;
+  customer?: { id: string; nome: string; telefone?: string };
+}
+
+export interface WashQueueEntry {
+  id: string;
+  customerId?: string;
+  nomeAvulso?: string;
+  serviceId: string;
+  veiculoPlaca?: string;
+  status: WashQueueStatus;
+  posicao: number;
+  createdAt: string;
+  concluidoAt?: string;
+  service?: WashService;
+  customer?: { id: string; nome: string };
+}
+
