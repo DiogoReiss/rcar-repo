@@ -1,17 +1,10 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
+import { AuthService } from '@core/auth/services/auth.service';
 
-interface MenuItem {
-  label: string;
-  icon: string;
-  route: string;
-}
-
-interface MenuSection {
-  title: string;
-  items: MenuItem[];
-}
+interface MenuItem  { label: string; icon: string; route: string; }
+interface MenuSection { title: string; items: MenuItem[]; }
 
 @Component({
   selector: 'lync-sidebar',
@@ -28,7 +21,10 @@ interface MenuSection {
 export default class SidebarComponent {
   readonly collapsed = input(false);
 
-  readonly menuSections: MenuSection[] = [
+  private readonly authService = inject(AuthService);
+  private readonly currentUser = this.authService.currentUser;
+
+  private readonly adminSections: MenuSection[] = [
     {
       title: 'Geral',
       items: [
@@ -61,4 +57,20 @@ export default class SidebarComponent {
       ],
     },
   ];
+
+  private readonly portalSections: MenuSection[] = [
+    {
+      title: 'Minha Conta',
+      items: [
+        { label: 'Agendamentos', icon: 'pi pi-calendar',   route: '/portal/meus-agendamentos' },
+        { label: 'Reservas',     icon: 'pi pi-car',        route: '/portal/minhas-reservas' },
+        { label: 'Documentos',   icon: 'pi pi-file',       route: '/portal/meus-documentos' },
+        { label: 'Histórico',    icon: 'pi pi-history',    route: '/portal/historico' },
+      ],
+    },
+  ];
+
+  readonly menuSections = computed<MenuSection[]>(() =>
+    this.currentUser()?.role === 'CLIENTE' ? this.portalSections : this.adminSections
+  );
 }

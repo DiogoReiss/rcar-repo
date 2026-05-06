@@ -111,8 +111,52 @@
   color: $color-primary;
   text-decoration: none;
 
+  &:hover { text-decoration: underline; }
+}
+
+// ─── Mock quick-access ────────────────────────────────────────────────────────
+.quick-access {
+  margin-top: $spacing-lg;
+  border-top: 1px dashed $color-neutral-300;
+  padding-top: $spacing-md;
+}
+
+.quick-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: $color-neutral-400;
+  text-align: center;
+  margin: 0 0 $spacing-sm;
+}
+
+.quick-btns {
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: center;
+}
+
+.quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px $spacing-sm;
+  border: 1px solid $color-neutral-300;
+  border-radius: 6px;
+  background: $color-neutral-50;
+  color: $color-neutral-700;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+
+  i { font-size: 0.75rem; color: $color-primary; }
+
   &:hover {
-    text-decoration: underline;
+    background: rgba($color-primary, 0.06);
+    border-color: $color-primary;
+    color: $color-primary-dark;
   }
 }
 

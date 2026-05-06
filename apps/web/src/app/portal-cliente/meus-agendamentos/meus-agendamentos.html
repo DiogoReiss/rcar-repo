@@ -1,0 +1,92 @@
+<section class="page">
+  <lync-page-header title="Meus Agendamentos">
+    <lync-btn label="+ Agendar Lavagem" (clicked)="openBook()" />
+  </lync-page-header>
+
+  @if (loading()) {
+    <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
+  } @else {
+
+    <!-- Upcoming -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <i class="pi pi-calendar" aria-hidden="true"></i> Próximos
+        <span class="section-count">{{ upcoming().length }}</span>
+      </h2>
+
+      @if (!upcoming().length) {
+        <div class="portal-empty">
+          <i class="pi pi-calendar-times"></i>
+          <p>Nenhum agendamento futuro.<br>
+            <button class="portal-empty-action" (click)="openBook()">Agendar agora →</button>
+          </p>
+        </div>
+      } @else {
+        <div class="portal-cards">
+          @for (s of upcoming(); track s.id) {
+            <div class="portal-card" [class]="'portal-card--' + s.status.toLowerCase()">
+              <div class="portal-card-date">
+                <i class="pi pi-clock" aria-hidden="true"></i>
+                {{ formatDateTime(s.dataHora) }}
+              </div>
+              <div class="portal-card-body">
+                <strong>{{ s.service?.nome }}</strong>
+                <span>{{ s.service?.preco | currencyBrl }}</span>
+              </div>
+              <span class="badge" [class]="statusClass[s.status]">{{ statusLabel[s.status] }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- History -->
+    @if (past().length) {
+      <div class="portal-section">
+        <h2 class="portal-section-title">
+          <i class="pi pi-history" aria-hidden="true"></i> Histórico
+          <span class="section-count">{{ past().length }}</span>
+        </h2>
+        <div class="portal-cards portal-cards--faded">
+          @for (s of past(); track s.id) {
+            <div class="portal-card" [class]="'portal-card--' + s.status.toLowerCase()">
+              <div class="portal-card-date">
+                <i class="pi pi-clock" aria-hidden="true"></i>
+                {{ formatDateTime(s.dataHora) }}
+              </div>
+              <div class="portal-card-body">
+                <strong>{{ s.service?.nome }}</strong>
+                <span>{{ s.service?.preco | currencyBrl }}</span>
+              </div>
+              <span class="badge" [class]="statusClass[s.status]">{{ statusLabel[s.status] }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Booking dialog -->
+  <lync-entity-dialog
+    title="Agendar Lavagem"
+    [visible]="dialogVisible()"
+    [loading]="saving()"
+    (submitted)="onSave()"
+    (cancelled)="dialogVisible.set(false)"
+    (visibleChange)="dialogVisible.set($event)"
+  >
+    <div class="book-form">
+      <lync-form-field label="Serviço" [required]="true">
+        <select [ngModel]="fServiceId()" (ngModelChange)="fServiceId.set($event)" name="svc">
+          @for (s of services(); track s.id) {
+            <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }} ({{ s.duracaoMin }} min)</option>
+          }
+        </select>
+      </lync-form-field>
+      <lync-form-field label="Data e Hora" [required]="true">
+        <input type="datetime-local" [ngModel]="fDataHora()" (ngModelChange)="fDataHora.set($event)" name="dt" />
+      </lync-form-field>
+    </div>
+  </lync-entity-dialog>
+</section>
+

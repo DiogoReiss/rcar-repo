@@ -1,5 +1,5 @@
 <nav aria-label="Menu de navegação">
-  @for (section of menuSections; track section.title) {
+  @for (section of menuSections(); track section.title) {
     <div class="sidebar-section">
       @if (!collapsed()) {
         <span class="sidebar-section-title">{{ section.title }}</span>

@@ -1,0 +1,50 @@
+<section class="page">
+  <lync-page-header title="Minhas Reservas" />
+
+  @if (loading()) {
+    <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
+  } @else if (!contracts().length) {
+    <div class="portal-empty">
+      <i class="pi pi-car"></i>
+      <p>Você não tem reservas ainda.</p>
+    </div>
+  } @else {
+    <div class="reservas-list">
+      @for (c of contracts(); track c.id) {
+        <div class="reserva-card">
+          <div class="reserva-header">
+            <div class="reserva-vehicle">
+              <i class="pi pi-car" aria-hidden="true"></i>
+              <strong>{{ c.vehicle?.modelo }}</strong>
+              <span class="reserva-plate">{{ c.vehicle?.placa }}</span>
+            </div>
+            <span class="badge" [class]="statusClass[c.status]">{{ statusLabel[c.status] }}</span>
+          </div>
+
+          <div class="reserva-dates">
+            <div class="reserva-date-item">
+              <span class="reserva-date-label">Retirada</span>
+              <span class="reserva-date-value">{{ formatDate(c.dataRetirada) }}</span>
+            </div>
+            <i class="pi pi-arrow-right reserva-arrow" aria-hidden="true"></i>
+            <div class="reserva-date-item">
+              <span class="reserva-date-label">Devolução</span>
+              <span class="reserva-date-value">{{ formatDate(c.dataDevolucao) }}</span>
+            </div>
+          </div>
+
+          <div class="reserva-footer">
+            <div class="reserva-meta">
+              <span>{{ c.modalidade }}</span>
+              @if (c.seguro) { <span class="badge badge--success">Seguro incluso</span> }
+            </div>
+            <div class="reserva-total">
+              Total: <strong>{{ c.valorTotal | currencyBrl }}</strong>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+

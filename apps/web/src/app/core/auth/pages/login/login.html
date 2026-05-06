@@ -56,6 +56,20 @@
         Esqueci minha senha
       </a>
     </form>
+
+    @if (isMock) {
+      <div class="quick-access">
+        <p class="quick-label">Acesso rápido (mock)</p>
+        <div class="quick-btns">
+          @for (u of quickUsers; track u.email) {
+            <button type="button" class="quick-btn" (click)="fillQuick(u)">
+              <i [class]="u.icon" aria-hidden="true"></i>
+              {{ u.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
   </div>
 </section>
 
