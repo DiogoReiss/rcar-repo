@@ -1,2 +1,9 @@
 @use 'admin' as *;
+@use 'variables' as *;
 
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  justify-content: end;
+}

@@ -238,26 +238,3 @@
 .loading { color: $color-neutral-600; padding: $spacing-xl; text-align: center; }
 .error   { color: $color-danger; background: #fef2f2; border: 1px solid $color-danger; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
 .success { color: $color-success; background: #f0fdf4; border: 1px solid $color-success; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
-
-// ─── Search bar ─────────────────────────────────────────────────────────────
-.search-bar {
-  display: flex;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-md;
-
-  input {
-    flex: 1;
-    padding: $spacing-sm $spacing-md;
-    border: 1px solid $color-neutral-300;
-    border-radius: 8px;
-    font-size: $font-size-base;
-    font-family: $font-family-base;
-
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
-    }
-  }
-}
-

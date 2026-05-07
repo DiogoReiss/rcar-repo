@@ -3,7 +3,13 @@
 
 :host { display: block; }
 
-.header-actions { display: flex; gap: $spacing-sm; align-items: center; flex-wrap: wrap; }
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+  justify-self: end;
+  flex-wrap: wrap;
+}
 
 // ─── SSE status indicator ────────────────────────────────────────────────────
 .sse-status {

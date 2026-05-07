@@ -1,15 +1,17 @@
 <section class="page">
   <lync-page-header title="Clientes">
-    <lync-btn label="+ Novo Cliente" (clicked)="openNew()" />
-  </lync-page-header>
-
-  <div class="search-bar">
-    <input type="search" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
-      [ngModel]="search()" (ngModelChange)="search.set($event)" name="search"
-      (keyup.enter)="onSearch()" />
-    <lync-btn label="Buscar" (clicked)="onSearch()" />
+  <div class="clients-header-actions">
+    <div class="search-bar">
+      <input type="search" placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
+             [ngModel]="search()" (ngModelChange)="search.set($event)" name="search"
+             (keyup.enter)="onSearch()" />
+      <lync-btn label="Buscar" (clicked)="onSearch()" />
+    </div>
+    <div>
+      <lync-btn label="Novo Cliente" (clicked)="openNew()" />
+    </div>
   </div>
-
+  </lync-page-header>
   @if (loading()) {
     <div class="loading">Carregando...</div>
   } @else {

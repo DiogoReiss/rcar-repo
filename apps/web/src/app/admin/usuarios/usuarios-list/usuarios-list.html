@@ -1,6 +1,9 @@
 <section class="page">
   <lync-page-header title="Usuários">
-    <lync-btn label="+ Novo Usuário" (clicked)="openNew()" />
+    <div class="header-actions">
+      <lync-btn label="+ Novo Usuário" (clicked)="openNew()" />
+
+    </div>
   </lync-page-header>
 
   @if (loading()) {

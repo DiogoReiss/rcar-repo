@@ -9,6 +9,8 @@
 .header-actions {
   display: flex;
   gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  justify-content: end;
 }
 
 .page-header {

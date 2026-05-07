@@ -1,6 +1,13 @@
 @use 'admin' as *;
 @use 'variables' as *;
 
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  justify-content: end;
+}
+
 // ─── Vehicle detail dialog ────────────────────────────────────────────────────
 .vd-loading {
   display: flex; align-items: center; justify-content: center;

@@ -1,6 +1,6 @@
 <section class="page">
   <lync-page-header title="Reservas">
-    <lync-btn label="+ Nova Reserva" (clicked)="openWizard()" />
+    <lync-btn label="Nova Reserva" (clicked)="openWizard()" />
   </lync-page-header>
 
   <!-- Active / recent contracts list -->
@@ -9,7 +9,7 @@
   } @else if (contracts().length === 0) {
     <div class="empty-state">
       <p>Nenhuma reserva cadastrada.</p>
-      <lync-btn label="+ Nova Reserva" variant="secondary" (clicked)="openWizard()" />
+      <lync-btn label="Nova Reserva" variant="secondary" (clicked)="openWizard()" />
     </div>
   } @else {
     <div class="table-wrapper">

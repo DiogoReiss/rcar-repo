@@ -1,17 +1,17 @@
 <section class="page">
-  <lync-page-header title="Estoque — Produtos">
-    <div class="header-actions">
-      <lync-btn label="Movimentações" variant="secondary" icon="pi pi-history" (clicked)="openMovimentacao()" />
-      <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Ver Histórico</a>
-      <lync-btn label="+ Novo Produto" (clicked)="openNew()" />
-    </div>
-  </lync-page-header>
 
   @if (lowStockCount() > 0) {
     <div class="alert-low-stock">
       ⚠️ {{ lowStockCount() }} produto(s) com estoque abaixo do mínimo
     </div>
   }
+
+  <lync-page-header title="Estoque — Produtos">
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Ver Histórico</a>
+      <lync-btn label="+ Novo Produto" (clicked)="openNew()" />
+    </div>
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>

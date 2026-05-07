@@ -1,25 +1,26 @@
 <section class="page">
   <lync-page-header title="Aluguéis">
-    <lync-btn label="+ Nova Reserva" icon="pi pi-plus" (clicked)="openWizard()" />
-  </lync-page-header>
-
-  <!-- ── Status tabs ──────────────────────────────────────────────────────── -->
-  <nav class="tab-bar" role="tablist" aria-label="Filtro por status">
-    @for (tab of tabs; track tab.key) {
-      <button
-        role="tab"
-        class="tab-btn"
-        [class.active]="activeTab() === tab.key"
-        [attr.aria-selected]="activeTab() === tab.key"
-        (click)="setTab(tab.key)"
-      >
-        {{ tab.label }}
-        @if (tabCounts()[tab.key] > 0) {
-          <span class="tab-count">{{ tabCounts()[tab.key] }}</span>
+    <div class="header-actions">
+      <nav class="tab-bar" role="tablist" aria-label="Filtro por status">
+        @for (tab of tabs; track tab.key) {
+          <button
+            role="tab"
+            class="tab-btn"
+            [class.active]="activeTab() === tab.key"
+            [attr.aria-selected]="activeTab() === tab.key"
+            (click)="setTab(tab.key)"
+          >
+            {{ tab.label }}
+            @if (tabCounts()[tab.key] > 0) {
+              <span class="tab-count">{{ tabCounts()[tab.key] }}</span>
+            }
+          </button>
         }
-      </button>
-    }
-  </nav>
+      </nav>
+
+      <lync-btn label="Nova Reserva" icon="pi pi-plus" (clicked)="openWizard()" />
+    </div>
+  </lync-page-header>
 
   <!-- ── Table ────────────────────────────────────────────────────────────── -->
   @if (loading()) {
@@ -31,7 +32,7 @@
       <i class="pi pi-inbox empty-icon"></i>
       <p>Nenhum registro encontrado nesta categoria.</p>
       @if (activeTab() === 'TODOS' || activeTab() === 'RESERVADO') {
-        <lync-btn label="+ Nova Reserva" variant="secondary" (clicked)="openWizard()" />
+        <lync-btn label="Nova Reserva" variant="secondary" (clicked)="openWizard()" />
       }
     </div>
   } @else {
