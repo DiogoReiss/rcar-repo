@@ -29,7 +29,9 @@ export default class EntityDialogComponent {
   readonly visible = input(false);
   readonly loading = input(false);
   /** Set to true for wide forms (vehicles, customers) */
-  readonly wide    = input(false);
+  readonly wide      = input(false);
+  /** Override the save button label (default: 'Salvar') */
+  readonly saveLabel = input('Salvar');
 
   readonly visibleChange = output<boolean>();
   readonly submitted     = output<void>();

@@ -1,7 +1,8 @@
 <section class="page">
   <lync-page-header title="Estoque — Produtos">
     <div class="header-actions">
-      <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Movimentações</a>
+      <lync-btn label="Movimentações" variant="secondary" icon="pi pi-history" (clicked)="openMovimentacao()" />
+      <a class="btn-secondary" routerLink="/admin/estoque/movimentacoes">Ver Histórico</a>
       <lync-btn label="+ Novo Produto" (clicked)="openNew()" />
     </div>
   </lync-page-header>
@@ -78,3 +79,50 @@
     </lync-form-field>
   </div>
 </lync-entity-dialog>
+
+<!-- ─── Movimentação dialog ──────────────────────────────────────────────── -->
+<lync-entity-dialog
+  [title]="movDialogTitle()"
+  [visible]="movDialogVisible()"
+  [loading]="movSaving()"
+  saveLabel="Registrar"
+  (submitted)="onMovSave()"
+  (cancelled)="closeMovDialog()"
+  (visibleChange)="movDialogVisible.set($event)"
+>
+  <div class="form-grid">
+    @if (!movProduct()) {
+      <lync-form-field label="Produto" [required]="true" [full]="true">
+        <select [ngModel]="movSelectedProductId()" (ngModelChange)="onMovProductSelect($event)" name="movProd">
+          <option value="" disabled>Selecione um produto...</option>
+          @for (p of products(); track p.id) {
+            <option [value]="p.id">{{ p.nome }} ({{ p.unidade }})</option>
+          }
+        </select>
+      </lync-form-field>
+    } @else {
+      <lync-form-field label="Produto" [full]="true">
+        <input [value]="movProduct()!.nome + ' (' + movProduct()!.unidade + ')'" disabled name="movProdDisplay" />
+      </lync-form-field>
+    }
+
+    <lync-form-field label="Tipo" [required]="true">
+      <select [ngModel]="movTipo()" (ngModelChange)="movTipo.set($event)" name="movTipo">
+        @for (t of movTipos; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+    </lync-form-field>
+
+    <lync-form-field label="Quantidade" [required]="true">
+      <input type="number" min="0.001" step="0.001"
+             [ngModel]="movQuantidade()" (ngModelChange)="movQuantidade.set(+$event)" name="movQty" />
+    </lync-form-field>
+
+    <lync-form-field label="Motivo" hint="Ex: Compra de fornecedor, consumo em serviço" [full]="true">
+      <input [ngModel]="movMotivo()" (ngModelChange)="movMotivo.set($event)" name="movMotivo"
+             placeholder="Opcional" />
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>
+
