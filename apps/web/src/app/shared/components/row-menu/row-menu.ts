@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, NgZone, computed, inject, input, viewChild } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 
@@ -27,7 +27,7 @@ import { Menu } from 'primeng/menu';
   selector: 'lync-row-menu',
   imports: [Menu],
   template: `
-    <p-menu #menu [model]="items()" [popup]="true" appendTo="body" />
+    <p-menu #menu [model]="menuItems()" [popup]="true" appendTo="body" />
     <button
       type="button"
       class="row-menu-btn"
@@ -68,15 +68,38 @@ import { Menu } from 'primeng/menu';
 })
 export default class RowMenuComponent {
   private readonly menu = viewChild.required<Menu>('menu');
+  private readonly zone = inject(NgZone);
 
   readonly items     = input<MenuItem[]>([]);
   readonly ariaLabel = input('Ações da linha');
   readonly disabled  = input(false);
 
+  /**
+   * Re-wraps every command in zone.run() so that OnPush components
+   * get properly notified when a menu item triggers a state change.
+   * PrimeNG registers its document-click listener outside Angular's zone
+   * for performance, which means raw command callbacks run outside zone
+   * and don't notify Angular's scheduler on the first invocation.
+   */
+  protected readonly menuItems = computed(() => this.wrapItems(this.items()));
+
   toggle(event: MouseEvent): void {
-    // Prevent table row click handlers from firing when the menu button is clicked
-    event.stopPropagation();
+    event.stopPropagation(); // prevent table row click handlers from firing
     this.menu().toggle(event);
+  }
+
+  private wrapItems(items: MenuItem[]): MenuItem[] {
+    return items.map(item => {
+      const wrapped: MenuItem = { ...item };
+      if (item.command) {
+        const orig = item.command;
+        wrapped.command = (ev) => this.zone.run(() => orig(ev));
+      }
+      if (item.items?.length) {
+        wrapped.items = this.wrapItems(item.items);
+      }
+      return wrapped;
+    });
   }
 }
 

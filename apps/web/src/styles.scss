@@ -77,3 +77,10 @@ textarea { min-height: 80px; resize: vertical; }
   &:hover { background: #fef2f2 !important; }
 }
 
+// ─── PrimeNG popup menu — strip link underline ────────────────────────────────
+// p-menu appends to <body>, so global a:hover rule would underline menu items.
+.p-menu .p-menuitem-link {
+  text-decoration: none !important;
+  &:hover { text-decoration: none !important; }
+}
+
