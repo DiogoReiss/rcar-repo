@@ -235,6 +235,22 @@ export interface Template {
   updatedAt?: string;
 }
 
+// ─── Availability ────────────────────────────────────────────────────────────
+
+export interface AvailabilitySlot {
+  time: string;       // 'HH:MM'
+  dateTime: string;   // ISO string
+  available: boolean;
+  conflictsWith?: string;
+}
+
+export interface AvailabilityResponse {
+  date: string;
+  serviceId?: string;
+  duration: number; // minutes
+  slots: AvailabilitySlot[];
+}
+
 // ─── Pagination ──────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {

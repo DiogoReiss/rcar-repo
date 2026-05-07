@@ -15,7 +15,7 @@ export class LavajatoService {
 
   // ─── Schedules ────────────────────────────────────────────────────────────
 
-  async getSchedules(date?: string) {
+  async getSchedules(date?: string, month?: string) {
     const where: Prisma.WashScheduleWhereInput = {};
     if (date) {
       const start = new Date(date);
@@ -23,12 +23,73 @@ export class LavajatoService {
       const end = new Date(date);
       end.setHours(23, 59, 59, 999);
       where.dataHora = { gte: start, lte: end };
+    } else if (month) {
+      // month format: YYYY-MM
+      const [y, m] = month.split('-').map(Number);
+      const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
+      const end   = new Date(y, m, 0, 23, 59, 59, 999);
+      where.dataHora = { gte: start, lte: end };
     }
     return this.prisma.washSchedule.findMany({
       where,
       include: { service: true, customer: { select: { id: true, nome: true, telefone: true } } },
       orderBy: { dataHora: 'asc' },
     });
+  }
+
+  // ─── Availability ─────────────────────────────────────────────────────────
+  // 11b.4: Calculate free slots for a given date, respecting service durations.
+  // Business hours: 08:00–18:00. Each slot length = selected service duration (or 30 min default).
+  async getAvailability(date: string, serviceId?: string) {
+    const OPEN_HOUR  = 8;
+    const CLOSE_HOUR = 18;
+    const DEFAULT_DURATION = 30;
+
+    let duration = DEFAULT_DURATION;
+    if (serviceId) {
+      const svc = await this.prisma.washService.findUnique({ where: { id: serviceId } });
+      if (svc) duration = svc.duracaoMin;
+    }
+
+    // All non-cancelled schedules for the requested day, with their service durations
+    const start = new Date(`${date}T00:00:00`);
+    const end   = new Date(`${date}T23:59:59`);
+    const existing = await this.prisma.washSchedule.findMany({
+      where: { dataHora: { gte: start, lte: end }, status: { not: 'CANCELADO' } },
+      include: { service: true },
+    });
+
+    const totalMinutes = (CLOSE_HOUR - OPEN_HOUR) * 60;
+    const slots: {
+      time: string;
+      dateTime: string;
+      available: boolean;
+      conflictsWith?: string;
+    }[] = [];
+
+    for (let m = 0; m < totalMinutes; m += duration) {
+      const absMinutes = OPEN_HOUR * 60 + m;
+      const hour = Math.floor(absMinutes / 60);
+      const min  = absMinutes % 60;
+      const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+      const slotStart = new Date(`${date}T${time}:00`);
+      const slotEnd   = new Date(slotStart.getTime() + duration * 60_000);
+
+      const conflict = existing.find(s => {
+        const sStart = new Date(s.dataHora);
+        const sEnd   = new Date(sStart.getTime() + s.service.duracaoMin * 60_000);
+        return slotStart < sEnd && slotEnd > sStart;
+      });
+
+      slots.push({
+        time,
+        dateTime: slotStart.toISOString(),
+        available: !conflict,
+        ...(conflict ? { conflictsWith: conflict.id } : {}),
+      });
+    }
+
+    return { date, serviceId, duration, slots };
   }
 
   async createSchedule(dto: CreateScheduleDto) {

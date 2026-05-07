@@ -182,7 +182,7 @@
 | 🟢 | 11b.1 | Criar `src/modules/lavajato/lavajato.service.ts` com `getSchedules`, `createSchedule`, `updateScheduleStatus`, `cancelSchedule` |
 | 🟢 | 11b.2 | Criar `src/modules/lavajato/lavajato.controller.ts` com rotas GET/POST/PATCH/DELETE de schedules |
 | 🟢 | 11b.3 | Criar DTOs: `CreateScheduleDto`, `UpdateScheduleDto` |
-| 🔴 | 11b.4 | Implementar lógica de disponibilidade: slots livres por duração do serviço, sem sobreposição (endpoint `GET /lavajato/schedules/availability?date=`) |
+| 🟢 | 11b.4 | Implementar lógica de disponibilidade: `GET /lavajato/schedules/availability?date=&serviceId=` — slots livres por duração do serviço, sem sobreposição. `GET /lavajato/schedules?month=YYYY-MM` para sumário mensal. Frontend: `MiniCalendarComponent` com dots por dia, layout de coluna dupla (sidebar + lista), slot picker visual no dialog de novo agendamento. |
 | 🔴 | 11b.5 | Testes unitários da lógica de disponibilidade |
 
 ### 11c. Fila Presencial (`/lavajato/queue`)

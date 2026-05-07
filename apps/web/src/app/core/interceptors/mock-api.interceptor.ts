@@ -353,9 +353,40 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // ── Lavajato schedules ───────────────────────────────────────────────────────────────────────
+  // availability must come before the general schedules GET so the more specific route matches first
+  if (method === 'GET' && path === '/lavajato/schedules/availability') {
+    const date      = params.get('date') ?? TODAY;
+    const serviceId = params.get('serviceId') ?? undefined;
+    const svc       = serviceId ? MOCK_WASH_SERVICES.find(s => s.id === serviceId) : undefined;
+    const duration  = svc?.duracaoMin ?? 30;
+    const OPEN = 8, CLOSE = 18;
+    const existing = mockSchedules.filter(s =>
+      (s['dataHora'] as string).startsWith(date) && s['status'] !== 'CANCELADO'
+    );
+    const slots: { time: string; dateTime: string; available: boolean }[] = [];
+    for (let m = 0; m < (CLOSE - OPEN) * 60; m += duration) {
+      const absMin = OPEN * 60 + m;
+      const hh = String(Math.floor(absMin / 60)).padStart(2, '0');
+      const mm = String(absMin % 60).padStart(2, '0');
+      const time = `${hh}:${mm}`;
+      const slotStart = new Date(`${date}T${time}:00`).getTime();
+      const slotEnd   = slotStart + duration * 60_000;
+      const conflict  = existing.find(s => {
+        const svcDur = (MOCK_WASH_SERVICES.find(ws => ws.id === s['serviceId'])?.duracaoMin ?? 30);
+        const sStart = new Date(s['dataHora'] as string).getTime();
+        const sEnd   = sStart + svcDur * 60_000;
+        return slotStart < sEnd && slotEnd > sStart;
+      });
+      slots.push({ time, dateTime: new Date(slotStart).toISOString(), available: !conflict });
+    }
+    return ok({ date, serviceId, duration, slots });
+  }
   if (method === 'GET' && path.startsWith('/lavajato/schedules') && !path.match(/\/schedules\/.+/)) {
-    const date = params.get('date');
-    return ok(date ? mockSchedules.filter(s => (s['dataHora'] as string).startsWith(date)) : mockSchedules);
+    const date  = params.get('date');
+    const month = params.get('month');
+    if (date)  return ok(mockSchedules.filter(s => (s['dataHora'] as string).startsWith(date)));
+    if (month) return ok(mockSchedules.filter(s => (s['dataHora'] as string).startsWith(month)));
+    return ok(mockSchedules);
   }
   if (method === 'POST'  && path.match(/\/lavajato\/schedules\/[^/]+\/payment/)) return ok({ message: 'Pagamento registrado (mock).' });
   if (method === 'PATCH' && path.match(/\/lavajato\/schedules\/[^/]+\/status/)) {

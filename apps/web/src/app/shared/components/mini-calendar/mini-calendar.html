@@ -1,0 +1,49 @@
+<div class="mc">
+  <!-- Month navigation -->
+  <div class="mc__nav">
+    <button class="mc__nav-btn" (click)="prevMonth()" aria-label="Mês anterior">‹</button>
+    <span class="mc__month-label">{{ monthLabel() }}</span>
+    <button class="mc__nav-btn" (click)="nextMonth()" aria-label="Próximo mês">›</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="mc__grid" role="grid" [attr.aria-label]="monthLabel()">
+    <!-- Day-of-week headers (Mon → Sun) -->
+    <div class="mc__dow" role="columnheader" aria-label="Segunda">Seg</div>
+    <div class="mc__dow" role="columnheader" aria-label="Terça">Ter</div>
+    <div class="mc__dow" role="columnheader" aria-label="Quarta">Qua</div>
+    <div class="mc__dow" role="columnheader" aria-label="Quinta">Qui</div>
+    <div class="mc__dow" role="columnheader" aria-label="Sexta">Sex</div>
+    <div class="mc__dow mc__dow--wknd" role="columnheader" aria-label="Sábado">Sáb</div>
+    <div class="mc__dow mc__dow--wknd" role="columnheader" aria-label="Domingo">Dom</div>
+
+    @for (week of weeks(); track $index) {
+      @for (day of week; track $index) {
+        <button
+          role="gridcell"
+          class="mc__day"
+          [class.mc__day--today]="isToday(day)"
+          [class.mc__day--selected]="isSelected(day)"
+          [class.mc__day--empty]="day === null"
+          [class.mc__day--has-events]="count(day) > 0"
+          [disabled]="day === null"
+          (click)="selectDay(day)"
+          [attr.aria-label]="day"
+          [attr.aria-pressed]="isSelected(day) || null"
+          [attr.aria-current]="isToday(day) ? 'date' : null">
+          @if (day !== null) {
+            <span class="mc__day-num">{{ dayNum(day) }}</span>
+            @if (count(day) > 0) {
+              <span
+                class="mc__dot"
+                [class.mc__dot--many]="count(day) >= 4"
+                [attr.aria-label]="count(day) + ' agendamentos'">
+              </span>
+            }
+          }
+        </button>
+      }
+    }
+  </div>
+</div>
+

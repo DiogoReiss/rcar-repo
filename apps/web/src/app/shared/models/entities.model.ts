@@ -35,5 +35,7 @@ export type {
   Inspection,
   Payment,
   Template,
+  AvailabilitySlot,
+  AvailabilityResponse,
   PaginatedResponse,
 } from '@rcar/shared-types';
