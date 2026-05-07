@@ -50,8 +50,8 @@
 .fila-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-md;
-  padding: 0 $spacing-lg $spacing-lg;
+  gap: $spacing-sm;
+  padding: $spacing-lg $spacing-lg $spacing-lg;
   align-items: start;
 
   @media (max-width: 768px) { grid-template-columns: 1fr; }
@@ -78,9 +78,9 @@
   padding: $spacing-md $spacing-md $spacing-sm;
   text-align: center;
 
-  &--waiting { background: #fef9c3; border-bottom: 3px solid $color-warning-light; }
-  &--active  { background: #dbeafe; border-bottom: 3px solid $color-accent-light; }
-  &--done    { background: #dcfce7; border-bottom: 3px solid $color-success-light; }
+  &--waiting { background: #fff; border-bottom: 3px solid $color-warning-light; }
+  &--active  { background: #fff; border-bottom: 3px solid $color-accent-light; }
+  &--done    { background: #fff; border-bottom: 3px solid $color-success-light; }
 }
 
 .board-col-count {
@@ -117,7 +117,7 @@
   &--drag-over {
     background: rgba($color-primary, 0.06);
     border: 2px dashed rgba($color-primary, 0.4);
-    border-radius: 8px;
+    border-radius: 0 0 10px 10px;
   }
 }
 
