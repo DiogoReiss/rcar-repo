@@ -84,37 +84,37 @@ const MOCK_USERS_LIST: Record<string, unknown>[] = [
 // ─── Mutable schedules ──────────────────────────────────────────────────────────────────
 let mockSchedules: Record<string, unknown>[] = [
   // Today
-  { id: 's1',  nomeAvulso: 'Maria Santos',    serviceId: 'ws1', dataHora: dt(TODAY, '08:00'), status: 'CONCLUIDO',      service: MOCK_WASH_SERVICES[0] },
+  { id: 's1',  nomeAvulso: 'Maria Santos',    telefone: '(11) 98001-1111', serviceId: 'ws1', dataHora: dt(TODAY, '08:00'), status: 'CONCLUIDO',      service: MOCK_WASH_SERVICES[0] },
   { id: 's2',  customerId: 'c2',  serviceId: 'ws2', dataHora: dt(TODAY, '09:00'), status: 'EM_ATENDIMENTO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c2', nome: 'Ana Beatriz Lima',   telefone: '(21) 99876-5432' } },
-  { id: 's3',  customerId: 'c1',  serviceId: 'ws1', dataHora: dt(TODAY, '10:00'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[0], customer: { id: 'c1', nome: 'Carlos Andrade',     telefone: '(11) 91234-5678' } },
-  { id: 's4',  nomeAvulso: 'Pedro Alves',      serviceId: 'ws3', dataHora: dt(TODAY, '11:00'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[2] },
+  { id: 's3',  customerId: 'c1',  serviceId: 'ws1', dataHora: dt(TODAY, '10:00'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[0], customer: { id: 'c1', nome: 'Carlos Andrade',     telefone: '(11) 91234-5678' }, observacoes: 'Cliente preferencial — atenção ao acabamento' },
+  { id: 's4',  nomeAvulso: 'Pedro Alves',     telefone: '(31) 97002-2222', serviceId: 'ws3', dataHora: dt(TODAY, '11:00'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[2], observacoes: 'Polimento completo incluindo rodas' },
   { id: 's5',  customerId: 'c4',  serviceId: 'ws4', dataHora: dt(TODAY, '13:30'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[3], customer: { id: 'c4', nome: 'Fernanda Costa',     telefone: '(41) 98765-4321' } },
   { id: 's6',  customerId: 'c6',  serviceId: 'ws6', dataHora: dt(TODAY, '14:30'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[5], customer: { id: 'c6', nome: 'Juliana Ferreira',   telefone: '(62) 98888-1111' } },
-  { id: 's7',  nomeAvulso: 'Sandro Reis',      serviceId: 'ws2', dataHora: dt(TODAY, '15:30'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[1] },
+  { id: 's7',  nomeAvulso: 'Sandro Reis',     telefone: '(41) 96003-3333', serviceId: 'ws2', dataHora: dt(TODAY, '15:30'), status: 'AGENDADO',       service: MOCK_WASH_SERVICES[1] },
   { id: 's8',  customerId: 'c11', serviceId: 'ws5', dataHora: dt(TODAY, '16:00'), status: 'CANCELADO',      service: MOCK_WASH_SERVICES[4], customer: { id: 'c11', nome: 'Lucas Martins',     telefone: '(11) 95555-4444' } },
   // Yesterday
-  { id: 's9',  nomeAvulso: 'João da Silva',  serviceId: 'ws2', dataHora: dt(daysAgo(1), '09:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[1] },
+  { id: 's9',  nomeAvulso: 'João da Silva',   telefone: '(51) 95004-4444', serviceId: 'ws2', dataHora: dt(daysAgo(1), '09:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[1] },
   { id: 's10', customerId: 'c1',  serviceId: 'ws1', dataHora: dt(daysAgo(1), '10:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[0], customer: { id: 'c1', nome: 'Carlos Andrade',     telefone: '(11) 91234-5678' } },
   { id: 's11', customerId: 'c8',  serviceId: 'ws4', dataHora: dt(daysAgo(1), '13:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[3], customer: { id: 'c8', nome: 'Thiago Barbosa',     telefone: '(71) 97777-2222' } },
   { id: 's12', customerId: 'c9',  serviceId: 'ws6', dataHora: dt(daysAgo(1), '15:00'), status: 'CANCELADO', service: MOCK_WASH_SERVICES[5], customer: { id: 'c9', nome: 'Patrícia Souza',     telefone: '(81) 96666-3333' } },
   // 2 days ago
-  { id: 's13', nomeAvulso: 'Cláudio Pires',  serviceId: 'ws1', dataHora: dt(daysAgo(2), '08:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[0] },
+  { id: 's13', nomeAvulso: 'Cláudio Pires',   telefone: '(62) 94005-5555', serviceId: 'ws1', dataHora: dt(daysAgo(2), '08:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[0] },
   { id: 's14', customerId: 'c5',  serviceId: 'ws3', dataHora: dt(daysAgo(2), '11:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[2], customer: { id: 'c5', nome: 'Rafael Mendes',      telefone: '(51) 97654-3210' } },
   { id: 's15', customerId: 'c2',  serviceId: 'ws2', dataHora: dt(daysAgo(2), '14:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c2', nome: 'Ana Beatriz Lima',   telefone: '(21) 99876-5432' } },
   // Older
-  { id: 's16', nomeAvulso: 'Renata Mota',       serviceId: 'ws6', dataHora: dt(daysAgo(3),  '09:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[5] },
+  { id: 's16', nomeAvulso: 'Renata Mota',      telefone: '(71) 93006-6666', serviceId: 'ws6', dataHora: dt(daysAgo(3),  '09:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[5] },
   { id: 's17', customerId: 'c12', serviceId: 'ws4', dataHora: dt(daysAgo(3),  '11:30'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[3], customer: { id: 'c12', nome: 'Beatriz Alves', telefone: '(11) 94444-5555' } },
   { id: 's18', customerId: 'c1',  serviceId: 'ws2', dataHora: dt(daysAgo(7),  '10:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c1',  nome: 'Carlos Andrade',   telefone: '(11) 91234-5678' } },
   { id: 's19', customerId: 'c4',  serviceId: 'ws5', dataHora: dt(daysAgo(7),  '14:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[4], customer: { id: 'c4',  nome: 'Fernanda Costa',   telefone: '(41) 98765-4321' } },
   { id: 's20', customerId: 'c1',  serviceId: 'ws4', dataHora: dt(daysAgo(14), '09:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[3], customer: { id: 'c1',  nome: 'Carlos Andrade',   telefone: '(11) 91234-5678' } },
-  { id: 's21', nomeAvulso: 'Marcos Lima',        serviceId: 'ws3', dataHora: dt(daysAgo(14), '15:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[2] },
+  { id: 's21', nomeAvulso: 'Marcos Lima',       telefone: '(85) 92007-7777', serviceId: 'ws3', dataHora: dt(daysAgo(14), '15:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[2] },
   { id: 's22', customerId: 'c1',  serviceId: 'ws1', dataHora: dt(daysAgo(21), '14:00'), status: 'CONCLUIDO', service: MOCK_WASH_SERVICES[0], customer: { id: 'c1',  nome: 'Carlos Andrade',   telefone: '(11) 91234-5678' } },
   { id: 's23', customerId: 'c1',  serviceId: 'ws3', dataHora: dt(daysAgo(30), '11:00'), status: 'CANCELADO', service: MOCK_WASH_SERVICES[2], customer: { id: 'c1',  nome: 'Carlos Andrade',   telefone: '(11) 91234-5678' } },
   // Future
   { id: 's24', customerId: 'c5',  serviceId: 'ws2', dataHora: dt(daysFrom(1), '09:30'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[1], customer: { id: 'c5',  nome: 'Rafael Mendes',    telefone: '(51) 97654-3210' } },
   { id: 's25', customerId: 'c1',  serviceId: 'ws3', dataHora: dt(daysFrom(1), '15:00'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[2], customer: { id: 'c1',  nome: 'Carlos Andrade',   telefone: '(11) 91234-5678' } },
   { id: 's26', customerId: 'c11', serviceId: 'ws5', dataHora: dt(daysFrom(2), '10:00'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[4], customer: { id: 'c11', nome: 'Lucas Martins',     telefone: '(11) 95555-4444' } },
-  { id: 's27', nomeAvulso: 'Tiago Rios',          serviceId: 'ws4', dataHora: dt(daysFrom(2), '14:00'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[3] },
+  { id: 's27', nomeAvulso: 'Tiago Rios',        telefone: '(48) 91008-8888', serviceId: 'ws4', dataHora: dt(daysFrom(2), '14:00'), status: 'AGENDADO', service: MOCK_WASH_SERVICES[3] },
 ];
 
 // ─── Mutable queue (4 waiting, 2 active, 3 done) ─────────────────────────────────────────────────────────────

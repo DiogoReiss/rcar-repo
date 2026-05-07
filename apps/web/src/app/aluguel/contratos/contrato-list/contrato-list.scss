@@ -1,12 +1,150 @@
+@use 'sass:color';
 @use 'admin' as *;
 @use 'variables' as *;
 
 :host { display: block; }
-.header-actions { display: flex; gap: $spacing-sm; align-items: center; }
-.filter-select { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; }
 
-.inline-form-row td { background: #f8fafc; padding: $spacing-sm $spacing-md; }
-.inline-form { display: flex; gap: $spacing-sm; align-items: flex-end; flex-wrap: wrap;
-  .form-field { display: flex; flex-direction: column; gap: 4px; label { font-size: 0.8rem; font-weight: 500; } input, select { padding: $spacing-xs $spacing-sm; border: 1px solid #d1d5db; border-radius: 6px; font-family: $font-family-base; } }
+// ─── Tab bar ──────────────────────────────────────────────────────────────────
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: $spacing-md;
+  border-bottom: 2px solid $color-neutral-100;
+  padding-bottom: 0;
 }
 
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-family: $font-family-base;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-neutral-500;
+  transition: color 0.15s, border-color 0.15s;
+  border-radius: 4px 4px 0 0;
+
+  &:hover { color: $color-primary; background: color.adjust($color-primary, $lightness: 48%); }
+  &.active { color: $color-primary; border-bottom-color: $color-primary; font-weight: 700; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: $color-neutral-100;
+  color: $color-neutral-600;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  .tab-btn.active & { background: $color-primary; color: #fff; }
+}
+
+// ─── State hints ─────────────────────────────────────────────────────────────
+.loading-hint { color: $color-neutral-400; padding: $spacing-md; font-size: 0.875rem; display: flex; align-items: center; gap: $spacing-xs; }
+.error-hint   { padding: $spacing-md; color: #dc2626; background: #fef2f2; border-radius: 8px; }
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-xl;
+  background: #fff;
+  border-radius: 12px;
+  border: 2px dashed $color-neutral-200;
+  color: $color-neutral-400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  .empty-icon { font-size: 2rem; opacity: .4; }
+}
+
+// ─── Table helpers ────────────────────────────────────────────────────────────
+.plate      { font-weight: 700; letter-spacing: 1px; display: block; }
+.text-muted { color: $color-neutral-400; font-size: 0.8125rem; }
+
+// ─── Wizard: step sections ────────────────────────────────────────────────────
+.step-section { padding: $spacing-xs 0; }
+
+.step-info {
+  margin: $spacing-md 0 0;
+  padding: $spacing-sm $spacing-md;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  &--ok   { background: #eff6ff; color: #1d4ed8; }
+  &--warn { background: #fff7ed; color: #c2410c; }
+}
+
+// ─── Vehicle grid ─────────────────────────────────────────────────────────────
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: $spacing-md;
+}
+
+.vehicle-card {
+  width: 100%;
+  text-align: left;
+  padding: $spacing-md;
+  background: #fff;
+  border-radius: 10px;
+  border: 2px solid $color-neutral-200;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover    { border-color: $color-primary; box-shadow: 0 2px 8px rgba($color-primary, 0.1); }
+  &.selected { border-color: $color-primary; background: #eff6ff; }
+  &:focus-visible { outline: 3px solid $color-primary; outline-offset: 2px; }
+}
+
+.vehicle-plate { font-size: 1.05rem; font-weight: 800; letter-spacing: 2px; }
+.vehicle-model { font-size: 0.875rem; font-weight: 600; margin-top: 2px; }
+.vehicle-meta  { font-size: 0.78rem; color: $color-neutral-400; margin-top: 2px; }
+
+// ─── Vehicle summary bar ──────────────────────────────────────────────────────
+.vehicle-summary-bar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: #eff6ff;
+  border-radius: 8px;
+  margin-bottom: $spacing-md;
+  font-size: 0.875rem;
+  color: $color-primary;
+  border: 1px solid #bfdbfe;
+  i { font-size: 1rem; }
+}
+
+// ─── Form helpers ─────────────────────────────────────────────────────────────
+.form-error {
+  padding: $spacing-sm $spacing-md;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: $spacing-md;
+}
+
+.checkbox-label {
+  display: flex; align-items: center; gap: $spacing-sm;
+  font-weight: 500; cursor: pointer;
+  input { width: 16px; height: 16px; }
+}
+
+.full { grid-column: 1 / -1; }

@@ -24,7 +24,7 @@ export type PaymentStatus = 'PENDENTE' | 'CONFIRMADO' | 'CANCELADO';
 export type PaymentRefType = 'WASH_SCHEDULE' | 'WASH_QUEUE' | 'RENTAL_CONTRACT';
 export type StockMovementType = 'ENTRADA' | 'SAIDA' | 'AJUSTE';
 export type InspectionType = 'SAIDA' | 'CHEGADA';
-export type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LAVAGEM' | 'RECIBO_LOCACAO';
+export type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LAVAGEM' | 'RECIBO_LOCACAO' | 'VISTORIA';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 

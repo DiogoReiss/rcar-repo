@@ -1,21 +1,36 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, inject, signal, computed, OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
-import { RentalContract, PaginatedResponse, PaymentMethod } from '@shared/models/entities.model';
+import {
+  RentalContract, PaginatedResponse, PaymentMethod, Vehicle, Customer,
+} from '@shared/models/entities.model';
 import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import FormFieldComponent from '@shared/components/form-field/form-field';
 import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import RowMenuComponent from '@shared/components/row-menu/row-menu';
+import WizardDialogComponent from '@shared/components/wizard-dialog/wizard-dialog';
+import AppButtonComponent from '@shared/components/app-button/app-button';
+import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
+import DateBrPipe from '@shared/pipes/date-br.pipe';
+
+type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
 
 @Component({
   selector: 'lync-contrato-list',
-  imports: [FormsModule, RouterLink, ConfirmDialogComponent, EntityDialogComponent, FormFieldComponent, PaymentDialogComponent, PageHeaderComponent, RowMenuComponent],
+  imports: [
+    FormsModule, RouterLink,
+    ConfirmDialogComponent, EntityDialogComponent, FormFieldComponent,
+    PaymentDialogComponent, PageHeaderComponent, RowMenuComponent,
+    WizardDialogComponent, AppButtonComponent, CurrencyBrlPipe, DateBrPipe,
+  ],
   templateUrl: './contrato-list.html',
   styleUrl: './contrato-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,56 +40,141 @@ export default class ContratoListComponent implements OnInit {
   private readonly toast  = inject(MessageService);
   private readonly router = inject(Router);
 
-  readonly contracts    = signal<RentalContract[]>([]);
-  readonly loading      = signal(false);
-  readonly error        = signal<string | null>(null);
-  readonly statusFilter = signal('');
+  // ── List state ────────────────────────────────────────────────────────────
+  readonly contracts = signal<RentalContract[]>([]);
+  readonly loading   = signal(false);
+  readonly error     = signal<string | null>(null);
 
-  // Abertura dialog
-  readonly aberturaTarget    = signal<string | null>(null);
-  readonly aberturaLoading   = signal(false);
-  readonly kmRetirada        = signal(0);
-  readonly combustivelSaida  = signal('CHEIO');
+  readonly activeTab  = signal<TabKey>('TODOS');
+  readonly tabs: { key: TabKey; label: string }[] = [
+    { key: 'TODOS',     label: 'Todos' },
+    { key: 'RESERVADO', label: 'Reservados' },
+    { key: 'ATIVO',     label: 'Ativos' },
+    { key: 'HISTORICO', label: 'Histórico' },
+  ];
 
-  // Payment dialog
+  readonly filtered = computed(() => {
+    const tab = this.activeTab();
+    const all  = this.contracts();
+    if (tab === 'TODOS')     return all;
+    if (tab === 'HISTORICO') return all.filter(c => c.status === 'ENCERRADO' || c.status === 'CANCELADO');
+    return all.filter(c => c.status === tab);
+  });
+
+  readonly tabCounts = computed(() => {
+    const all = this.contracts();
+    return {
+      TODOS:     all.length,
+      RESERVADO: all.filter(c => c.status === 'RESERVADO').length,
+      ATIVO:     all.filter(c => c.status === 'ATIVO').length,
+      HISTORICO: all.filter(c => c.status === 'ENCERRADO' || c.status === 'CANCELADO').length,
+    };
+  });
+
+  // ── Abertura dialog ───────────────────────────────────────────────────────
+  readonly aberturaTarget   = signal<string | null>(null);
+  readonly aberturaLoading  = signal(false);
+  readonly kmRetirada       = signal(0);
+  readonly combustivelSaida = signal('CHEIO');
+
+  // ── Payment dialog ────────────────────────────────────────────────────────
   readonly payingId   = signal<string | null>(null);
   readonly payLoading = signal(false);
 
-  // Cancel confirm
+  // ── Cancel confirm ────────────────────────────────────────────────────────
   readonly cancelTarget = signal<string | null>(null);
 
-  readonly statusLabel: Record<string, string> = { RESERVADO: 'Reservado', ATIVO: 'Ativo', ENCERRADO: 'Encerrado', CANCELADO: 'Cancelado' };
-  readonly statusClass:  Record<string, string> = { RESERVADO: 'badge--warning', ATIVO: 'badge--success', ENCERRADO: 'badge--inactive', CANCELADO: 'badge--danger' };
+  // ── Wizard state ──────────────────────────────────────────────────────────
+  readonly wizardVisible = signal(false);
+  readonly wizardStep    = signal(0);
+  readonly wizardSteps   = ['Período', 'Veículo', 'Detalhes'];
 
-  ngOnInit() { this.load(); }
+  readonly dateFrom  = signal(new Date().toISOString().slice(0, 10));
+  readonly dateTo    = signal(new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10));
+  readonly searching = signal(false);
+  readonly available = signal<Vehicle[]>([]);
+  readonly searched  = signal(false);
+
+  readonly selectedVehicle = signal<Vehicle | null>(null);
+
+  readonly customers   = signal<Customer[]>([]);
+  readonly customerId  = signal('');
+  readonly modalidade  = signal<string>('DIARIA');
+  readonly valorDiaria = signal(0);
+  readonly seguro      = signal(false);
+  readonly valorSeguro = signal(0);
+  readonly kmLimite    = signal<number | undefined>(undefined);
+  readonly obs         = signal('');
+  readonly saving      = signal(false);
+  readonly wizardError = signal<string | null>(null);
+
+  readonly modalidades = ['DIARIA', 'SEMANAL', 'MENSAL'];
+  readonly modalidadeLabels: Record<string, string> = {
+    DIARIA: 'Diária', SEMANAL: 'Semanal', MENSAL: 'Mensal',
+  };
+
+  readonly canProceed = computed(() => {
+    switch (this.wizardStep()) {
+      case 0: return this.searched() && !!this.available().length;
+      case 1: return !!this.selectedVehicle();
+      case 2: return !!this.customerId() && this.valorDiaria() > 0;
+      default: return false;
+    }
+  });
+
+  // ── Status display ────────────────────────────────────────────────────────
+  readonly statusLabel: Record<string, string> = {
+    RESERVADO: 'Reservado', ATIVO: 'Ativo', ENCERRADO: 'Encerrado', CANCELADO: 'Cancelado',
+  };
+  readonly statusClass: Record<string, string> = {
+    RESERVADO: 'badge--warning', ATIVO: 'badge--success',
+    ENCERRADO: 'badge--inactive', CANCELADO: 'badge--danger',
+  };
+
+  ngOnInit() {
+    this.load();
+    this.loadCustomers();
+  }
 
   async load() {
     this.loading.set(true); this.error.set(null);
     try {
-      const path = this.statusFilter() ? `/rental/contracts?status=${this.statusFilter()}` : '/rental/contracts';
-      const res = await firstValueFrom(this.api.get<PaginatedResponse<RentalContract>>(path));
-      this.contracts.set(res.data);
+      const res = await firstValueFrom(
+        this.api.get<PaginatedResponse<RentalContract>>('/rental/contracts?page=1&perPage=50'),
+      );
+      this.contracts.set((res as any).data ?? res);
     } catch { this.error.set('Erro ao carregar contratos.'); }
     finally { this.loading.set(false); }
   }
 
+  async loadCustomers() {
+    try {
+      const res = await firstValueFrom(this.api.get<{ data: Customer[] } | Customer[]>('/customers'));
+      this.customers.set(Array.isArray(res) ? res : (res as any).data ?? []);
+    } catch { /* silent */ }
+  }
+
+  setTab(key: TabKey) { this.activeTab.set(key); }
+
   getRowMenuItems(c: RentalContract): RowMenuItem[] {
     const items: RowMenuItem[] = [];
+    items.push({ label: 'Ver detalhes', icon: 'pi pi-eye', command: () => this.router.navigate(['/aluguel/contratos', c.id]) });
     if (c.status === 'RESERVADO') {
       items.push(
-        { label: 'Abertura',  icon: 'pi pi-play',       command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
-        { label: 'Cancelar',  icon: 'pi pi-times-circle', danger: true, command: () => this.cancelTarget.set(c.id) },
+        { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
+        { label: 'Cancelar',       icon: 'pi pi-times-circle', danger: true, command: () => this.cancelTarget.set(c.id) },
       );
     }
     if (c.status === 'ATIVO') {
       items.push(
-        { label: 'Devolução', icon: 'pi pi-undo', command: () => this.router.navigate(['/aluguel/devolucao', c.id]) },
-        { label: 'Pagar',     icon: 'pi pi-credit-card',  command: () => this.payingId.set(c.id) },
+        { label: 'Registrar devolução', icon: 'pi pi-undo',        command: () => this.router.navigate(['/aluguel/devolucao', c.id]) },
+        { label: 'Registrar pagamento', icon: 'pi pi-credit-card', command: () => this.payingId.set(c.id) },
       );
     }
     return items;
   }
 
+  // ── Abertura ──────────────────────────────────────────────────────────────
   async onAbertura() {
     const id = this.aberturaTarget();
     if (!id) return;
@@ -91,6 +191,7 @@ export default class ContratoListComponent implements OnInit {
     } finally { this.aberturaLoading.set(false); }
   }
 
+  // ── Cancel ────────────────────────────────────────────────────────────────
   async onConfirmCancel() {
     const id = this.cancelTarget();
     if (!id) return;
@@ -100,6 +201,7 @@ export default class ContratoListComponent implements OnInit {
     await this.load();
   }
 
+  // ── Payment ───────────────────────────────────────────────────────────────
   async onPay(metodo: PaymentMethod) {
     const id = this.payingId();
     if (!id) return;
@@ -110,6 +212,71 @@ export default class ContratoListComponent implements OnInit {
       this.payingId.set(null);
       await this.load();
     } finally { this.payLoading.set(false); }
+  }
+
+  // ── Wizard actions ────────────────────────────────────────────────────────
+  openWizard() {
+    this.wizardStep.set(0);
+    this.searched.set(false); this.available.set([]); this.selectedVehicle.set(null);
+    this.customerId.set(''); this.modalidade.set('DIARIA'); this.valorDiaria.set(0);
+    this.seguro.set(false); this.valorSeguro.set(0); this.kmLimite.set(undefined);
+    this.obs.set(''); this.wizardError.set(null);
+    this.wizardVisible.set(true);
+  }
+
+  async onNext() {
+    if (this.wizardStep() === 0 && !this.searched()) await this.onSearch();
+    if (this.canProceed()) this.wizardStep.update(s => s + 1);
+  }
+
+  onPrev() { this.wizardStep.update(s => s - 1); }
+  resetWizard() { this.wizardVisible.set(false); }
+
+  async onSearch() {
+    if (!this.dateFrom() || !this.dateTo()) return;
+    this.searching.set(true); this.available.set([]); this.searched.set(false);
+    try {
+      const res = await firstValueFrom(this.api.get<Vehicle[]>(
+        `/rental/available?dataRetirada=${this.dateFrom()}T00:00:00Z&dataDevolucao=${this.dateTo()}T23:59:59Z`,
+      ));
+      this.available.set(Array.isArray(res) ? res : (res as any).data ?? []);
+      this.searched.set(true);
+    } finally { this.searching.set(false); }
+  }
+
+  selectVehicle(v: Vehicle) { this.selectedVehicle.set(v); this.wizardStep.set(2); }
+
+  async onCreateReservation() {
+    if (!this.selectedVehicle() || !this.customerId()) return;
+    this.saving.set(true); this.wizardError.set(null);
+    try {
+      await firstValueFrom(this.api.post<RentalContract>('/rental/contracts', {
+        customerId:    this.customerId(),
+        vehicleId:     this.selectedVehicle()!.id,
+        modalidade:    this.modalidade(),
+        dataRetirada:  `${this.dateFrom()}T00:00:00.000Z`,
+        dataDevolucao: `${this.dateTo()}T23:59:59.000Z`,
+        valorDiaria:   this.valorDiaria(),
+        seguro:        this.seguro(),
+        valorSeguro:   this.seguro() ? this.valorSeguro() : undefined,
+        kmLimite:      this.kmLimite() || undefined,
+        observacoes:   this.obs() || undefined,
+      }));
+      this.toast.add({ severity: 'success', summary: 'Reserva criada com sucesso', life: 3000 });
+      this.wizardVisible.set(false);
+      this.activeTab.set('RESERVADO');
+      await this.load();
+    } catch (e: any) {
+      this.wizardError.set(e?.error?.message ?? 'Erro ao criar reserva.');
+    } finally { this.saving.set(false); }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  catLabel(c: string) {
+    return ({
+      ECONOMICO: 'Econômico', INTERMEDIARIO: 'Intermediário',
+      SUV: 'SUV', EXECUTIVO: 'Executivo', UTILITARIO: 'Utilitário',
+    } as Record<string, string>)[c] ?? c;
   }
 
   formatDate(d: string) { return new Date(d).toLocaleDateString('pt-BR'); }

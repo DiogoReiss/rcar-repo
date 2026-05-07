@@ -30,13 +30,12 @@ export default class SidebarComponent {
       items: [
         { label: 'Dashboard',    icon: 'pi pi-home',       route: '/admin' },
         { label: 'Clientes',     icon: 'pi pi-users',      route: '/admin/clientes' },
-        { label: 'Frota',        icon: 'pi pi-car',        route: '/admin/frota' },
-        { label: 'Estoque',      icon: 'pi pi-box',        route: '/admin/estoque' },
       ],
     },
     {
       title: 'Lavajato',
       items: [
+        { label: 'Estoque',      icon: 'pi pi-box',        route: '/admin/estoque' },
         { label: 'Serviços',     icon: 'pi pi-wrench',     route: '/admin/servicos' },
         { label: 'Agendamentos', icon: 'pi pi-calendar',   route: '/lavajato/agendamento' },
         { label: 'Fila',         icon: 'pi pi-list-check', route: '/lavajato/fila' },
@@ -45,8 +44,8 @@ export default class SidebarComponent {
     {
       title: 'Aluguel',
       items: [
-        { label: 'Reservas',     icon: 'pi pi-ticket',     route: '/aluguel/reserva' },
-        { label: 'Contratos',    icon: 'pi pi-file-edit',  route: '/aluguel/contratos' },
+        { label: 'Frota',     icon: 'pi pi-car',       route: '/admin/frota' },
+        { label: 'Aluguéis',  icon: 'pi pi-file-edit', route: '/aluguel/contratos' },
       ],
     },
     {
