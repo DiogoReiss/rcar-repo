@@ -61,3 +61,14 @@
 .vd-empty { color: $color-neutral-400; font-size: 0.875rem; text-align: center; margin: $spacing-md 0; }
 
 .vd-footer { display: flex; justify-content: flex-end; gap: $spacing-sm; }
+
+.maint-checkbox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  input { width: 16px; height: 16px; }
+}
+

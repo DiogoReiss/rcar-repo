@@ -1,0 +1,63 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visibleChange.emit($event)"
+  [header]="title()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: dialogWidth(), maxWidth: '96vw' }"
+  [breakpoints]="{ '768px': '96vw' }"
+  (onHide)="close()"
+>
+  <!-- Step indicator -->
+  <div class="wz-steps" role="list" [attr.aria-label]="'Passo ' + (currentStep() + 1) + ' de ' + steps().length">
+    @for (step of steps(); track $index) {
+      <div
+        class="wz-step"
+        role="listitem"
+        [class.wz-step--active]="$index === currentStep()"
+        [class.wz-step--done]="$index < currentStep()"
+        [attr.aria-current]="$index === currentStep() ? 'step' : null"
+      >
+        <div class="wz-step__bubble">
+          @if ($index < currentStep()) {
+            <i class="pi pi-check" aria-hidden="true"></i>
+          } @else {
+            {{ $index + 1 }}
+          }
+        </div>
+        <span class="wz-step__label">{{ step }}</span>
+      </div>
+      @if ($index < steps().length - 1) {
+        <div class="wz-step__connector" [class.wz-step__connector--done]="$index < currentStep()" aria-hidden="true"></div>
+      }
+    }
+  </div>
+
+  <!-- Step content -->
+  <div class="wz-body">
+    <ng-content />
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="wz-footer">
+      <lync-btn label="Cancelar" variant="ghost" (clicked)="close()" [disabled]="loading()" />
+      <div class="wz-footer__nav">
+        @if (!isFirst()) {
+          <lync-btn label="Voltar" variant="secondary" (clicked)="prev.emit()" [disabled]="loading()" />
+        }
+        @if (!isLast()) {
+          <lync-btn label="Próximo" [disabled]="!canNext()" (clicked)="next.emit()" />
+        } @else {
+          <lync-btn
+            [label]="loading() ? 'Salvando…' : 'Confirmar'"
+            [loading]="loading()"
+            [disabled]="!canNext()"
+            (clicked)="submitted.emit()"
+          />
+        }
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+

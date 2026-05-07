@@ -24,6 +24,7 @@ export type {
   LoginCredentials,
   User,
   Customer,
+  VehicleMaintenance,
   Vehicle,
   WashService,
   WashSchedule,

@@ -75,6 +75,15 @@ export interface Customer {
 
 // ─── Fleet ───────────────────────────────────────────────────────────────────
 
+export interface VehicleMaintenance {
+  id: string;
+  vehicleId: string;
+  descricao: string;
+  custo: number;
+  data: string;
+  createdAt: string;
+}
+
 export interface Vehicle {
   id: string;
   placa: string;

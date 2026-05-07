@@ -6,7 +6,7 @@ import { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { DialogModule } from 'primeng/dialog';
 import { FrotaService } from '../frota.service';
 import { ApiService } from '@core/services/api.service';
-import { Vehicle } from '@shared/models/entities.model';
+import { Vehicle, VehicleMaintenance } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
@@ -26,7 +26,7 @@ const CAT_LABELS: Record<string, string> = {
 };
 
 interface VehicleDetail extends Vehicle {
-  maintenances?: Array<{ id: string; descricao: string; custo: number; data: string }>;
+  maintenances?: VehicleMaintenance[];
   contracts?: Array<{
     id: string; status: string;
     dataRetirada: string; dataDevolucao: string;
@@ -50,15 +50,24 @@ export default class FrotaListComponent {
   readonly loading  = this.frotaService.loading;
   readonly saving   = signal(false);
 
-  // Edit/create dialog
+  // ── Edit/create dialog ─────────────────────────────────────────────────────
   readonly dialogVisible = signal(false);
   readonly editTarget    = signal<Vehicle | null>(null);
 
-  // Detail dialog
+  // ── Detail dialog ──────────────────────────────────────────────────────────
   readonly detailVehicle  = signal<VehicleDetail | null>(null);
   readonly detailLoading  = signal(false);
 
-  // Form fields
+  // ── Maintenance dialog ─────────────────────────────────────────────────────
+  readonly maintDialogVisible = signal(false);
+  readonly maintTarget        = signal<Vehicle | null>(null);
+  readonly maintSaving        = signal(false);
+  readonly fMaintDesc         = signal('');
+  readonly fMaintCusto        = signal(0);
+  readonly fMaintData         = signal(new Date().toISOString().slice(0, 10));
+  readonly fMaintSetStatus    = signal(false);
+
+  // ── Vehicle form fields ────────────────────────────────────────────────────
   readonly fPlaca     = signal('');
   readonly fModelo    = signal('');
   readonly fAno       = signal(new Date().getFullYear());
@@ -75,7 +84,7 @@ export default class FrotaListComponent {
 
   readonly statusLabel = (s: string) => STATUS_LABELS[s] ?? s;
   readonly catLabel    = (s: string) => CAT_LABELS[s] ?? s;
-  readonly statusClass = (s: string) => `badge--${s}`;
+  readonly statusClass = (s: string) => `badge--${s.toLowerCase()}`;
 
   readonly contractStatusClass: Record<string, string> = {
     RESERVADO: 'badge--warning', ATIVO: 'badge--success',
@@ -86,6 +95,7 @@ export default class FrotaListComponent {
     this.frotaService.load().pipe(takeUntilDestroyed()).subscribe();
   }
 
+  // ── CRUD dialog ────────────────────────────────────────────────────────────
   openNew() {
     this.editTarget.set(null);
     this.fPlaca.set(''); this.fModelo.set('');
@@ -104,9 +114,10 @@ export default class FrotaListComponent {
 
   closeDialog() { this.dialogVisible.set(false); }
 
+  // ── Detail dialog ──────────────────────────────────────────────────────────
   async openDetail(v: Vehicle) {
     this.detailLoading.set(true);
-    this.detailVehicle.set(v as VehicleDetail); // show shell immediately
+    this.detailVehicle.set(v as VehicleDetail);
     try {
       const detail = await firstValueFrom(this.api.get<VehicleDetail>(`/fleet/${v.id}`));
       this.detailVehicle.set(detail);
@@ -117,13 +128,64 @@ export default class FrotaListComponent {
 
   closeDetail() { this.detailVehicle.set(null); }
 
-  getRowMenuItems(v: Vehicle): RowMenuItem[] {
-    return [
-      { label: 'Editar',        icon: 'pi pi-pencil', command: () => this.openEdit(v) },
-      { label: 'Ver Detalhes',  icon: 'pi pi-eye',    command: () => this.openDetail(v) },
-    ];
+  // ── Maintenance dialog ─────────────────────────────────────────────────────
+  openMaintenance(v: Vehicle) {
+    this.maintTarget.set(v);
+    this.fMaintDesc.set('');
+    this.fMaintCusto.set(0);
+    this.fMaintData.set(new Date().toISOString().slice(0, 10));
+    this.fMaintSetStatus.set(v.status !== 'MANUTENCAO');
+    this.maintDialogVisible.set(true);
   }
 
+  closeMaintDialog() { this.maintDialogVisible.set(false); }
+
+  async onMaintenanceSave() {
+    const v = this.maintTarget();
+    if (!v) return;
+    this.maintSaving.set(true);
+    try {
+      await firstValueFrom(this.api.post(`/fleet/${v.id}/maintenances`, {
+        descricao:    this.fMaintDesc(),
+        custo:        this.fMaintCusto(),
+        data:         `${this.fMaintData()}T12:00:00Z`,
+        setMantencao: this.fMaintSetStatus(),
+      }));
+      this.toast.add({ severity: 'success', summary: 'Manutenção registrada', detail: `Manutenção para ${v.placa} salva.`, life: 3000 });
+      if (this.fMaintSetStatus()) {
+        await firstValueFrom(this.frotaService.load());
+      }
+      this.maintDialogVisible.set(false);
+    } catch {
+      this.toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível salvar.', life: 4000 });
+    } finally { this.maintSaving.set(false); }
+  }
+
+  async completeMaintenance(v: Vehicle) {
+    try {
+      await firstValueFrom(this.api.patch(`/fleet/${v.id}/complete-maintenance`, {}));
+      this.toast.add({ severity: 'success', summary: 'Manutenção concluída', detail: `${v.placa} está disponível.`, life: 3000 });
+      await firstValueFrom(this.frotaService.load());
+    } catch {
+      this.toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível concluir.', life: 4000 });
+    }
+  }
+
+  // ── Row menu ───────────────────────────────────────────────────────────────
+  getRowMenuItems(v: Vehicle): RowMenuItem[] {
+    const items: RowMenuItem[] = [
+      { label: 'Editar',               icon: 'pi pi-pencil', command: () => this.openEdit(v) },
+      { label: 'Ver Detalhes',          icon: 'pi pi-eye',    command: () => this.openDetail(v) },
+      { separator: true },
+      { label: 'Registrar Manutenção', icon: 'pi pi-wrench', command: () => this.openMaintenance(v) },
+    ];
+    if (v.status === 'MANUTENCAO') {
+      items.push({ label: 'Concluir Manutenção', icon: 'pi pi-check-circle', command: () => this.completeMaintenance(v) });
+    }
+    return items;
+  }
+
+  // ── Save vehicle ───────────────────────────────────────────────────────────
   async onDialogSave() {
     this.saving.set(true);
     const data = {

@@ -3,6 +3,7 @@ import { VehicleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateVehicleDto } from './dto/create-vehicle.dto.js';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto.js';
+import { CreateMaintenanceDto } from './dto/create-maintenance.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
@@ -55,6 +56,33 @@ export class FleetService {
     return this.prisma.vehicle.update({
       where: { id },
       data: { status: 'INATIVO', deletedAt: new Date() },
+    });
+  }
+
+  async addMaintenance(vehicleId: string, dto: CreateMaintenanceDto) {
+    await this.findOne(vehicleId);
+    const [maintenance] = await this.prisma.$transaction([
+      this.prisma.vehicleMaintenance.create({
+        data: { vehicleId, descricao: dto.descricao, custo: dto.custo, data: new Date(dto.data) },
+      }),
+      ...(dto.setMantencao
+        ? [this.prisma.vehicle.update({ where: { id: vehicleId }, data: { status: 'MANUTENCAO' } })]
+        : []),
+    ]);
+    return maintenance;
+  }
+
+  async completeMaintenance(vehicleId: string) {
+    const vehicle = await this.findOne(vehicleId);
+    if (vehicle.status !== 'MANUTENCAO') return vehicle;
+    return this.prisma.vehicle.update({ where: { id: vehicleId }, data: { status: 'DISPONIVEL' } });
+  }
+
+  async getMaintenances(vehicleId: string) {
+    await this.findOne(vehicleId);
+    return this.prisma.vehicleMaintenance.findMany({
+      where: { vehicleId },
+      orderBy: { data: 'desc' },
     });
   }
 }

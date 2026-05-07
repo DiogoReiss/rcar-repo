@@ -2,20 +2,110 @@
 @use 'variables' as *;
 
 :host { display: block; }
-.step-card { margin-bottom: $spacing-lg; }
-.step-title { font-size: 1rem; font-weight: 700; margin: 0 0 $spacing-md; color: $color-primary; }
 
-.vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: $spacing-md; }
-.vehicle-card {
-  padding: $spacing-md; background: #fff; border-radius: 10px; border: 2px solid #e2e8f0; cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  &:hover { border-color: $color-primary; box-shadow: 0 2px 8px rgba($color-primary, 0.1); }
-  &.selected { border-color: $color-primary; background: #eff6ff; }
+// ─── Page table view ──────────────────────────────────────────────────────────
+.loading-hint { color: $color-neutral-400; padding: $spacing-md; font-size: 0.875rem; }
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-xl;
+  background: #fff;
+  border-radius: 12px;
+  border: 2px dashed $color-neutral-200;
+  color: $color-neutral-400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
 }
-.vehicle-plate { font-size: 1.1rem; font-weight: 800; letter-spacing: 2px; }
-.vehicle-model { font-size: 0.9rem; font-weight: 600; margin-top: 2px; }
-.vehicle-meta { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
 
-.checkbox-label { display: flex; align-items: center; gap: $spacing-sm; font-weight: 500; cursor: pointer; input { width: 16px; height: 16px; } }
-.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; }
+.text-muted { color: $color-neutral-400; font-size: 0.8125rem; }
 
+// ─── Wizard step sections ─────────────────────────────────────────────────────
+.step-section { padding: $spacing-xs 0; }
+
+.step-hint {
+  margin: $spacing-md 0 0;
+  padding: $spacing-sm $spacing-md;
+  background: #eff6ff;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.empty-state-sm {
+  margin: $spacing-md 0 0;
+  padding: $spacing-md;
+  text-align: center;
+  background: #fff7ed;
+  border-radius: 8px;
+  color: #c2410c;
+  font-size: 0.875rem;
+}
+
+// ─── Vehicle selection grid ───────────────────────────────────────────────────
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: $spacing-md;
+}
+
+.vehicle-card {
+  width: 100%;
+  text-align: left;
+  padding: $spacing-md;
+  background: #fff;
+  border-radius: 10px;
+  border: 2px solid $color-neutral-200;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover  { border-color: $color-primary; box-shadow: 0 2px 8px rgba($color-primary, 0.1); }
+  &.selected { border-color: $color-primary; background: #eff6ff; }
+  &:focus-visible { outline: 3px solid $color-primary; outline-offset: 2px; }
+}
+
+.vehicle-plate { font-size: 1.05rem; font-weight: 800; letter-spacing: 2px; }
+.vehicle-model { font-size: 0.875rem; font-weight: 600; margin-top: 2px; }
+.vehicle-meta  { font-size: 0.78rem; color: $color-neutral-400; margin-top: 2px; }
+
+// ─── Vehicle summary bar (step 3) ─────────────────────────────────────────────
+.vehicle-summary-bar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: #eff6ff;
+  border-radius: 8px;
+  margin-bottom: $spacing-md;
+  font-size: 0.875rem;
+  color: $color-primary;
+  border: 1px solid #bfdbfe;
+
+  i { font-size: 1rem; }
+}
+
+// ─── Misc form helpers ────────────────────────────────────────────────────────
+.form-error {
+  padding: $spacing-sm $spacing-md;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: $spacing-md;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-weight: 500;
+  cursor: pointer;
+  input { width: 16px; height: 16px; }
+}
+
+.full { grid-column: 1 / -1; }

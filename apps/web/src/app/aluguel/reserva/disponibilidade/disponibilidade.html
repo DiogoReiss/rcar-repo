@@ -1,97 +1,157 @@
 <section class="page">
-  <lync-page-header title="Nova Reserva" />
+  <lync-page-header title="Reservas">
+    <lync-btn label="+ Nova Reserva" (clicked)="openWizard()" />
+  </lync-page-header>
 
-  <!-- Step 1: Search availability -->
-  <div class="form-card step-card">
-    <h2 class="step-title">1. Período da Locação</h2>
-    <div class="form-grid">
-      <div class="form-field">
-        <label for="dateFrom">Retirada</label>
-        <input id="dateFrom" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" name="df" />
-      </div>
-      <div class="form-field">
-        <label for="dateTo">Devolução</label>
-        <input id="dateTo" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" name="dt" />
-      </div>
-      <div class="form-actions full">
-        <button class="btn-primary" (click)="onSearch()" [disabled]="searching()">
-          {{ searching() ? 'Buscando...' : 'Verificar Disponibilidade' }}
-        </button>
-      </div>
+  <!-- Active / recent contracts list -->
+  @if (contractsLoading()) {
+    <div class="loading-hint">Carregando reservas...</div>
+  } @else if (contracts().length === 0) {
+    <div class="empty-state">
+      <p>Nenhuma reserva cadastrada.</p>
+      <lync-btn label="+ Nova Reserva" variant="secondary" (clicked)="openWizard()" />
     </div>
-  </div>
-
-  <!-- Step 2: Vehicle selection -->
-  @if (searched()) {
-    <div class="step-card">
-      <h2 class="step-title">2. Veículos Disponíveis ({{ available().length }})</h2>
-      @if (!available().length) {
-        <div class="empty-state">Nenhum veículo disponível para o período selecionado.</div>
-      } @else {
-        <div class="vehicle-grid">
-          @for (v of available(); track v.id) {
-            <div class="vehicle-card" [class.selected]="selectedVehicle()?.id === v.id" (click)="selectVehicle(v)">
-              <div class="vehicle-plate">{{ v.placa }}</div>
-              <div class="vehicle-model">{{ v.modelo }}</div>
-              <div class="vehicle-meta">{{ v.ano }} · {{ v.cor }} · {{ catLabel(v.categoria) }}</div>
-            </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th><th>Veículo</th><th>Modalidade</th>
+            <th>Retirada</th><th>Devolução</th><th>Total</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of contracts(); track c.id) {
+            <tr>
+              <td>{{ c.customer?.nome ?? '—' }}</td>
+              <td>{{ c.vehicle?.placa }} <span class="text-muted">{{ c.vehicle?.modelo }}</span></td>
+              <td>{{ modalidadeLabels[c.modalidade] }}</td>
+              <td>{{ c.dataRetirada | dateBr }}</td>
+              <td>{{ c.dataDevolucao | dateBr }}</td>
+              <td>{{ c.valorTotal | currencyBrl }}</td>
+              <td><span class="badge" [class]="statusClass[c.status]">{{ statusLabels[c.status] }}</span></td>
+              <td class="actions">
+                <lync-btn label="Ver" variant="ghost" size="sm" icon="pi pi-eye" (clicked)="goToDetail(c.id)" />
+              </td>
+            </tr>
           }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<!-- ── Rental Wizard ─────────────────────────────────────────────────────── -->
+<lync-wizard-dialog
+  title="Nova Reserva"
+  [visible]="wizardVisible()"
+  [steps]="wizardSteps"
+  [currentStep]="wizardStep()"
+  [loading]="saving()"
+  [canNext]="canProceed()"
+  [wide]="true"
+  (visibleChange)="wizardVisible.set($event)"
+  (next)="onNext()"
+  (prev)="onPrev()"
+  (submitted)="onCreateReservation()"
+  (cancelled)="resetWizard()"
+>
+  <!-- ── Step 1: Período ─────────────────────────────────────────────────── -->
+  @if (wizardStep() === 0) {
+    <div class="step-section">
+      <div class="form-grid">
+        <lync-form-field label="Data de Retirada" [required]="true">
+          <input type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); searched.set(false)" name="df" />
+        </lync-form-field>
+        <lync-form-field label="Data de Devolução" [required]="true">
+          <input type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); searched.set(false)" name="dt" />
+        </lync-form-field>
+        <div class="full">
+          <lync-btn
+            [label]="searching() ? 'Buscando...' : 'Verificar Disponibilidade'"
+            [loading]="searching()"
+            (clicked)="onSearch()"
+          />
         </div>
+      </div>
+      @if (searched()) {
+        @if (!available().length) {
+          <div class="empty-state-sm">Nenhum veículo disponível para o período selecionado.</div>
+        } @else {
+          <p class="step-hint"><i class="pi pi-info-circle"></i>&nbsp;{{ available().length }} veículo(s) disponíveis. Clique em "Próximo" para escolher.</p>
+        }
       }
     </div>
   }
 
-  <!-- Step 3: Reservation details -->
-  @if (selectedVehicle()) {
-    <div class="form-card step-card">
-      <h2 class="step-title">3. Dados da Reserva — {{ selectedVehicle()!.placa }} {{ selectedVehicle()!.modelo }}</h2>
-      @if (error()) { <div class="error">{{ error() }}</div> }
-      <form (ngSubmit)="onCreateReservation()" class="form-grid">
-        <div class="form-field">
-          <label for="cliente">Cliente</label>
-          <select id="cliente" [ngModel]="customerId()" (ngModelChange)="customerId.set($event)" name="cli" required>
-            <option value="">Selecione...</option>
-            @for (c of customers(); track c.id) { <option [value]="c.id">{{ c.nome }} ({{ c.cpfCnpj }})</option> }
-          </select>
-        </div>
-        <div class="form-field">
-          <label for="modalidade">Modalidade</label>
-          <select id="modalidade" [ngModel]="modalidade()" (ngModelChange)="modalidade.set($event)" name="mod">
-            @for (m of modalidades; track m) { <option [value]="m">{{ m }}</option> }
-          </select>
-        </div>
-        <div class="form-field">
-          <label for="diaria">Valor Diária (R$)</label>
-          <input id="diaria" type="number" min="0" step="0.01" [ngModel]="valorDiaria()" (ngModelChange)="valorDiaria.set(+$event)" name="vd" required />
-        </div>
-        <div class="form-field">
-          <label for="km">Limite de KM</label>
-          <input id="km" type="number" min="0" [ngModel]="kmLimite()" (ngModelChange)="kmLimite.set(+$event || undefined)" name="km" />
-        </div>
-        <div class="form-field full">
-          <label class="checkbox-label">
-            <input type="checkbox" [ngModel]="seguro()" (ngModelChange)="seguro.set($event)" name="seg" />
-            Incluir Seguro
-          </label>
-        </div>
-        @if (seguro()) {
-          <div class="form-field">
-            <label for="vseg">Valor do Seguro (R$)</label>
-            <input id="vseg" type="number" min="0" step="0.01" [ngModel]="valorSeguro()" (ngModelChange)="valorSeguro.set(+$event)" name="vseg" />
-          </div>
-        }
-        <div class="form-field full">
-          <label for="obs">Observações</label>
-          <textarea id="obs" [ngModel]="obs()" (ngModelChange)="obs.set($event)" name="obs"></textarea>
-        </div>
-        <div class="form-actions full">
-          <button type="submit" class="btn-primary" [disabled]="saving() || !customerId()">
-            {{ saving() ? 'Criando...' : 'Criar Reserva' }}
+  <!-- ── Step 2: Escolher Veículo ────────────────────────────────────────── -->
+  @if (wizardStep() === 1) {
+    <div class="step-section">
+      <div class="vehicle-grid">
+        @for (v of available(); track v.id) {
+          <button
+            type="button"
+            class="vehicle-card"
+            [class.selected]="selectedVehicle()?.id === v.id"
+            (click)="selectVehicle(v)"
+          >
+            <div class="vehicle-plate">{{ v.placa }}</div>
+            <div class="vehicle-model">{{ v.modelo }}</div>
+            <div class="vehicle-meta">{{ v.ano }} · {{ v.cor }} · {{ catLabel(v.categoria) }}</div>
           </button>
-          <button type="button" class="btn-secondary" (click)="selectedVehicle.set(null)">Cancelar</button>
-        </div>
-      </form>
+        }
+      </div>
     </div>
   }
-</section>
+
+  <!-- ── Step 3: Dados da Reserva ────────────────────────────────────────── -->
+  @if (wizardStep() === 2) {
+    <div class="step-section">
+      @if (selectedVehicle(); as sv) {
+        <div class="vehicle-summary-bar">
+          <i class="pi pi-car" aria-hidden="true"></i>
+          <strong>{{ sv.placa }}</strong>&nbsp;—&nbsp;{{ sv.modelo }} · {{ sv.ano }} · {{ sv.cor }}
+        </div>
+      }
+      @if (error()) { <div class="form-error">{{ error() }}</div> }
+      <div class="form-grid">
+        <lync-form-field label="Cliente" [required]="true">
+          <select [ngModel]="customerId()" (ngModelChange)="customerId.set($event)" name="cli" required>
+            <option value="">Selecione...</option>
+            @for (c of customers(); track c.id) {
+              <option [value]="c.id">{{ c.nome }} ({{ c.cpfCnpj }})</option>
+            }
+          </select>
+        </lync-form-field>
+        <lync-form-field label="Modalidade">
+          <select [ngModel]="modalidade()" (ngModelChange)="modalidade.set($event)" name="mod">
+            @for (m of modalidades; track m) { <option [value]="m">{{ modalidadeLabels[m] }}</option> }
+          </select>
+        </lync-form-field>
+        <lync-form-field label="Valor Diária (R$)" [required]="true">
+          <input type="number" min="0" step="0.01" [ngModel]="valorDiaria()" (ngModelChange)="valorDiaria.set(+$event)" name="vd" required />
+        </lync-form-field>
+        <lync-form-field label="Limite de KM">
+          <input type="number" min="0" [ngModel]="kmLimite()" (ngModelChange)="kmLimite.set(+$event || undefined)" name="km" />
+        </lync-form-field>
+        <lync-form-field label="Incluir Seguro" [full]="true">
+          <label class="checkbox-label">
+            <input type="checkbox" [ngModel]="seguro()" (ngModelChange)="seguro.set($event)" name="seg" />
+            Sim, incluir seguro
+          </label>
+        </lync-form-field>
+        @if (seguro()) {
+          <lync-form-field label="Valor do Seguro (R$)">
+            <input type="number" min="0" step="0.01" [ngModel]="valorSeguro()" (ngModelChange)="valorSeguro.set(+$event)" name="vseg" />
+          </lync-form-field>
+        }
+        <lync-form-field label="Observações" [full]="true">
+          <textarea [ngModel]="obs()" (ngModelChange)="obs.set($event)" name="obs" rows="2"></textarea>
+        </lync-form-field>
+      </div>
+    </div>
+  }
+</lync-wizard-dialog>
+
+
 

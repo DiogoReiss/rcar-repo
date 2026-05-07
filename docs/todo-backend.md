@@ -142,11 +142,12 @@
 | Status | Step | Descrição |
 |--------|------|-----------|
 | 🔴 | 9.1 | Criar `src/modules/fleet/fleet.module.ts` |
-| 🔴 | 9.2 | Criar `src/modules/fleet/fleet.service.ts` (findAll com filtro status/categoria, findOne com histórico, create, update, findAvailable por período) |
-| 🔴 | 9.3 | Criar `src/modules/fleet/fleet.controller.ts` (GET /, POST /, GET /:id, PATCH /:id, GET /available) |
-| 🔴 | 9.4 | Criar DTOs: `CreateVehicleDto`, `UpdateVehicleDto` (placa formato, ano range, categoria enum) |
+| 🟢 | 9.2 | Criar `src/modules/fleet/fleet.service.ts` (findAll com filtro status/categoria, findOne com histórico, create, update, findAvailable por período) |
+| 🟢 | 9.3 | Criar `src/modules/fleet/fleet.controller.ts` (GET /, POST /, GET /:id, PATCH /:id, GET /available) |
+| 🟢 | 9.4 | Criar DTOs: `CreateVehicleDto`, `UpdateVehicleDto` (placa formato, ano range, categoria enum) |
 | 🔴 | 9.5 | Implementar upload de fotos via Storage service |
-| 🔴 | 9.6 | Testes unitários: fleet.service (incluindo lógica de disponibilidade) |
+| 🟢 | 9.6 | **Endpoints de manutenção**: `POST /fleet/:id/maintenances` (registra manutenção, opcionalmente define status MANUTENCAO via `setMantencao`), `PATCH /fleet/:id/complete-maintenance` (retorna veículo para DISPONIVEL), `GET /fleet/:id/maintenances` (histórico). DTO `CreateMaintenanceDto` com validação. |
+| 🔴 | 9.7 | Testes unitários: fleet.service (incluindo lógica de disponibilidade e manutenção) |
 
 ---
 

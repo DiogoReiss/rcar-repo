@@ -146,3 +146,35 @@
     }
   </p-dialog>
 }
+
+<!-- Maintenance dialog -->
+<lync-entity-dialog
+  [title]="'Registrar Manutenção' + (maintTarget() ? ' — ' + maintTarget()!.placa : '')"
+  [visible]="maintDialogVisible()"
+  [loading]="maintSaving()"
+  saveLabel="Registrar"
+  (submitted)="onMaintenanceSave()"
+  (cancelled)="closeMaintDialog()"
+  (visibleChange)="maintDialogVisible.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Descrição do Serviço" [required]="true" [full]="true">
+      <input [ngModel]="fMaintDesc()" (ngModelChange)="fMaintDesc.set($event)" name="mdesc" placeholder="Ex: Troca de óleo e filtros" />
+    </lync-form-field>
+    <lync-form-field label="Custo (R$)" [required]="true">
+      <input type="number" min="0" step="0.01" [ngModel]="fMaintCusto()" (ngModelChange)="fMaintCusto.set(+$event)" name="mcusto" />
+    </lync-form-field>
+    <lync-form-field label="Data">
+      <input type="date" [ngModel]="fMaintData()" (ngModelChange)="fMaintData.set($event)" name="mdata" />
+    </lync-form-field>
+    @if (maintTarget()?.status !== 'MANUTENCAO') {
+      <lync-form-field label="Status do Veículo" [full]="true">
+        <label class="maint-checkbox">
+          <input type="checkbox" [ngModel]="fMaintSetStatus()" (ngModelChange)="fMaintSetStatus.set($event)" name="mstatus" />
+          Colocar veículo em manutenção (status MANUTENCAO)
+        </label>
+      </lync-form-field>
+    }
+  </div>
+</lync-entity-dialog>
+
