@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { DialogModule } from 'primeng/dialog';
 import { FrotaService } from '../frota.service';
 import { ApiService } from '@core/services/api.service';
@@ -116,7 +117,7 @@ export default class FrotaListComponent {
 
   closeDetail() { this.detailVehicle.set(null); }
 
-  getRowMenuItems(v: Vehicle): MenuItem[] {
+  getRowMenuItems(v: Vehicle): RowMenuItem[] {
     return [
       { label: 'Editar',        icon: 'pi pi-pencil', command: () => this.openEdit(v) },
       { label: 'Ver Detalhes',  icon: 'pi pi-eye',    command: () => this.openDetail(v) },

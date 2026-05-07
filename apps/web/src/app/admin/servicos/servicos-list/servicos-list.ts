@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ServicosService } from '../servicos.service';
 import { WashService } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -98,14 +99,14 @@ export default class ServicosListComponent {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   }
 
-  getRowMenuItems(s: WashService): MenuItem[] {
+  getRowMenuItems(s: WashService): RowMenuItem[] {
     return [
       { label: 'Editar', icon: 'pi pi-pencil', command: () => this.openEdit(s) },
       { separator: true },
       {
         label: s.ativo ? 'Desativar' : 'Ativar',
         icon: s.ativo ? 'pi pi-eye-slash' : 'pi pi-eye',
-        styleClass: s.ativo ? 'menu-item--danger' : '',
+        danger: !!s.ativo,
         command: () => this.confirmToggle(s),
       },
     ];

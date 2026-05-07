@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MenuItem } from 'primeng/api';
+import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { DialogModule } from 'primeng/dialog';
 import { ApiService } from '@core/services/api.service';
 import { ClientesService } from '../clientes.service';
@@ -125,7 +125,7 @@ export default class ClientesListComponent {
 
   closeDetail() { this.detailData.set(null); }
 
-  getRowMenuItems(c: Customer): MenuItem[] {
+  getRowMenuItems(c: Customer): RowMenuItem[] {
     return [
       { label: 'Editar',        icon: 'pi pi-pencil',  command: () => this.openEdit(c) },
       { label: 'Ver Histórico', icon: 'pi pi-history', command: () => this.openDetail(c) },

@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { UsersService } from '../users.service';
 import { User } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -103,11 +104,11 @@ export default class UsuariosListComponent {
 
   onCancelRemove() { this.confirmTarget.set(null); }
 
-  getRowMenuItems(u: User): MenuItem[] {
+  getRowMenuItems(u: User): RowMenuItem[] {
     return [
       { label: 'Editar',    icon: 'pi pi-pencil', command: () => this.openEdit(u) },
       { separator: true },
-      { label: 'Desativar', icon: 'pi pi-ban', styleClass: 'menu-item--danger', command: () => this.onRemoveClick(u) },
+      { label: 'Desativar', icon: 'pi pi-ban', danger: true, command: () => this.onRemoveClick(u) },
     ];
   }
 }

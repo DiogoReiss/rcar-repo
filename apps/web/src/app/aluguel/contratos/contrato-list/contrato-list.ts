@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { RentalContract, PaginatedResponse, PaymentMethod } from '@shared/models/entities.model';
@@ -56,12 +57,12 @@ export default class ContratoListComponent implements OnInit {
     finally { this.loading.set(false); }
   }
 
-  getRowMenuItems(c: RentalContract): MenuItem[] {
-    const items: MenuItem[] = [];
+  getRowMenuItems(c: RentalContract): RowMenuItem[] {
+    const items: RowMenuItem[] = [];
     if (c.status === 'RESERVADO') {
       items.push(
         { label: 'Abertura',  icon: 'pi pi-play',       command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
-        { label: 'Cancelar',  icon: 'pi pi-times-circle', styleClass: 'menu-item--danger', command: () => this.cancelTarget.set(c.id) },
+        { label: 'Cancelar',  icon: 'pi pi-times-circle', danger: true, command: () => this.cancelTarget.set(c.id) },
       );
     }
     if (c.status === 'ATIVO') {

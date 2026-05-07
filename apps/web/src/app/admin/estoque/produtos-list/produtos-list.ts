@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MessageService, MenuItem } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { Product, PaginatedResponse, StockMovementType } from '@shared/models/entities.model';
@@ -149,7 +150,7 @@ export default class ProdutosListComponent implements OnInit {
   // ─── Helpers ──────────────────────────────────────────────────────
   isLow(p: Product) { return p.quantidadeAtual <= p.estoqueMinimo; }
 
-  getRowMenuItems(p: Product): MenuItem[] {
+  getRowMenuItems(p: Product): RowMenuItem[] {
     return [
       { label: 'Editar',        icon: 'pi pi-pencil',  command: () => this.openEdit(p) },
       { label: 'Movimentação',  icon: 'pi pi-history', command: () => this.openMovimentacao(p) },
