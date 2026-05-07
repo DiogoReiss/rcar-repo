@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
@@ -21,8 +21,9 @@ import RowMenuComponent from '@shared/components/row-menu/row-menu';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ContratoListComponent implements OnInit {
-  private readonly api   = inject(ApiService);
-  private readonly toast = inject(MessageService);
+  private readonly api    = inject(ApiService);
+  private readonly toast  = inject(MessageService);
+  private readonly router = inject(Router);
 
   readonly contracts    = signal<RentalContract[]>([]);
   readonly loading      = signal(false);
@@ -67,7 +68,7 @@ export default class ContratoListComponent implements OnInit {
     }
     if (c.status === 'ATIVO') {
       items.push(
-        { label: 'Devolução', icon: 'pi pi-undo',         routerLink: ['/aluguel/devolucao', c.id] },
+        { label: 'Devolução', icon: 'pi pi-undo', command: () => this.router.navigate(['/aluguel/devolucao', c.id]) },
         { label: 'Pagar',     icon: 'pi pi-credit-card',  command: () => this.payingId.set(c.id) },
       );
     }
@@ -89,8 +90,6 @@ export default class ContratoListComponent implements OnInit {
       await this.load();
     } finally { this.aberturaLoading.set(false); }
   }
-
-  onCancelClick(id: string) { this.cancelTarget.set(id); }
 
   async onConfirmCancel() {
     const id = this.cancelTarget();

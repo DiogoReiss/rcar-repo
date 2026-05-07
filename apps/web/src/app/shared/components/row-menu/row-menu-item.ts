@@ -83,6 +83,7 @@ export default class RowMenuItemComponent {
 
   handleClick(): void {
     const item = this.item();
+    console.log(item);
     if (!item.disabled) this.clicked.emit(item);
   }
 }
