@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +26,9 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-idempotency-key'],
   });
+
+  // Global exception filter — maps Prisma + Http exceptions to clean JSON responses
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // A4: Global request/response logging
   app.useGlobalInterceptors(new LoggingInterceptor());
