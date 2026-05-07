@@ -71,32 +71,37 @@
 
 .board-col-header {
   display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  &--waiting { background: #fef9c3; color: #854d0e; border-bottom: 2px solid $color-warning-light; }
-  &--active  { background: #dbeafe; color: #1e40af; border-bottom: 2px solid $color-accent-light; }
-  &--done    { background: #dcfce7; color: #166534; border-bottom: 2px solid $color-success-light; }
-}
-
-.board-col-icon { font-size: 0.9rem; }
-.board-col-title { flex: 1; }
-.board-col-count {
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.1);
-  font-size: 0.72rem;
+  gap: 2px;
+  padding: $spacing-md $spacing-md $spacing-sm;
+  text-align: center;
+
+  &--waiting { background: #fef9c3; border-bottom: 3px solid $color-warning-light; }
+  &--active  { background: #dbeafe; border-bottom: 3px solid $color-accent-light; }
+  &--done    { background: #dcfce7; border-bottom: 3px solid $color-success-light; }
+}
+
+.board-col-count {
+  font-size: 2rem;
   font-weight: 800;
-  padding: 0 6px;
+  line-height: 1;
+
+  .board-col-header--waiting & { color: #92400e; }
+  .board-col-header--active  & { color: #1e40af; }
+  .board-col-header--done    & { color: #166534; }
+}
+
+.board-col-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  .board-col-header--waiting & { color: #92400e; }
+  .board-col-header--active  & { color: #1e40af; }
+  .board-col-header--done    & { color: #166534; }
 }
 
 .board-col-body {
