@@ -266,6 +266,8 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
         faturado: 1450,
         pago: 900,
         pendente: 550,
+        dueDate: `${daysAgo(1)}T10:00:00Z`,
+        overdue: true,
         payments: [{ id: 'p-r-1', valor: 900, metodo: 'PIX', createdAt: `${daysAgo(3)}T10:00:00Z` }],
       },
       {
@@ -276,6 +278,8 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
         faturado: 2200,
         pago: 1200,
         pendente: 1000,
+        dueDate: `${daysFrom(2)}T10:00:00Z`,
+        overdue: false,
         payments: [{ id: 'p-r-2', valor: 1200, metodo: 'CARTAO_CREDITO', createdAt: `${daysAgo(1)}T18:00:00Z` }],
       },
     ];
@@ -284,18 +288,24 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
       totalFaturado: data.reduce((a, r) => a + r.faturado, 0),
       totalPago: data.reduce((a, r) => a + r.pago, 0),
       totalPendente: data.reduce((a, r) => a + r.pendente, 0),
+      aging: {
+        vencidos: data.filter(r => r.overdue).reduce((a, r) => a + r.pendente, 0),
+        aVencer: data.filter(r => !r.overdue).reduce((a, r) => a + r.pendente, 0),
+      },
       data,
     });
   }
   if (method === 'GET' && path === '/reports/fleet/maintenance-costs') {
     return ok({
       periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },
-      total: 4200,
+      totalCusto: 4200,
+      totalReceita: 9800,
+      totalLucroBruto: 5600,
       manutencoes: 9,
       veiculos: [
-        { vehicleId: 'v3', placa: 'JKL9A81', modelo: 'Compass', categoria: 'SUV', total: 1600, qtd: 3, ultimaData: `${daysAgo(5)}T12:00:00Z` },
-        { vehicleId: 'v1', placa: 'ABC1D23', modelo: 'Onix LT', categoria: 'ECONOMICO', total: 980, qtd: 2, ultimaData: `${daysAgo(12)}T12:00:00Z` },
-        { vehicleId: 'v8', placa: 'QWE4T67', modelo: 'Hilux SW4', categoria: 'UTILITARIO', total: 830, qtd: 2, ultimaData: `${daysAgo(9)}T12:00:00Z` },
+        { vehicleId: 'v3', placa: 'JKL9A81', modelo: 'Compass', categoria: 'SUV', receita: 4200, custo: 1600, lucroBruto: 2600, qtd: 3, ultimaData: `${daysAgo(5)}T12:00:00Z` },
+        { vehicleId: 'v1', placa: 'ABC1D23', modelo: 'Onix LT', categoria: 'ECONOMICO', receita: 2400, custo: 980, lucroBruto: 1420, qtd: 2, ultimaData: `${daysAgo(12)}T12:00:00Z` },
+        { vehicleId: 'v8', placa: 'QWE4T67', modelo: 'Hilux SW4', categoria: 'UTILITARIO', receita: 3200, custo: 830, lucroBruto: 2370, qtd: 2, ultimaData: `${daysAgo(9)}T12:00:00Z` },
       ],
     });
   }
@@ -304,12 +314,35 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
       periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },
       custoTotal: 1980,
       itens: 48,
+      valorEstoqueAtual: 17650,
       produtos: [
         { productId: 'p1', nome: 'Shampoo Automotivo', unidade: 'L', quantidade: 22.5, custoTotal: 900 },
         { productId: 'p2', nome: 'Cera Líquida', unidade: 'L', quantidade: 8.4, custoTotal: 630 },
         { productId: 'p3', nome: 'Desengraxante', unidade: 'L', quantidade: 12.0, custoTotal: 450 },
       ],
     });
+  }
+
+  // ── Payments (standalone financeiro) ─────────────────────────────────────────────────────
+  if (method === 'GET' && path === '/payments/method-summary') {
+    return ok({
+      totalValor: 18450,
+      totalQuantidade: 42,
+      data: [
+        { metodo: 'PIX', quantidade: 18, valor: 8120, percentual: 44.01 },
+        { metodo: 'CARTAO_CREDITO', quantidade: 12, valor: 6030, percentual: 32.68 },
+        { metodo: 'CARTAO_DEBITO', quantidade: 7, valor: 2810, percentual: 15.23 },
+        { metodo: 'DINHEIRO', quantidade: 5, valor: 1490, percentual: 8.08 },
+      ],
+    });
+  }
+  if (method === 'GET' && path === '/payments') {
+    return ok(paginated([
+      { id: 'pay-1', refType: 'RENTAL_CONTRACT', valor: 1200, metodo: 'PIX', status: 'CONFIRMADO', createdAt: `${daysAgo(2)}T11:00:00Z` },
+      { id: 'pay-2', refType: 'WASH_SCHEDULE', valor: 65, metodo: 'DINHEIRO', status: 'CONFIRMADO', createdAt: `${daysAgo(1)}T09:30:00Z` },
+      { id: 'pay-3', refType: 'WASH_QUEUE', valor: 35, metodo: 'CARTAO_DEBITO', status: 'CONFIRMADO', createdAt: `${daysAgo(0)}T10:30:00Z` },
+      { id: 'pay-4', refType: 'RENTAL_CONTRACT', valor: 900, metodo: 'CARTAO_CREDITO', status: 'PENDENTE', createdAt: `${daysAgo(0)}T14:10:00Z` },
+    ], Number(params.get('page') ?? 1), Number(params.get('perPage') ?? 20)));
   }
 
   // ── Users ─────────────────────────────────────────────────────────────────────────────────

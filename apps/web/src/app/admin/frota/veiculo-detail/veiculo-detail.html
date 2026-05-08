@@ -47,6 +47,7 @@
 
     <section class="detail-card">
       <h2>Histórico de Manutenções</h2>
+      <p class="history-sub">Total gasto em manutenção: <strong>{{ totalMaintenanceCost(v) | currencyBrl }}</strong></p>
       @if (!v.maintenances?.length) {
         <p class="empty-state">Nenhuma manutenção registrada.</p>
       } @else {

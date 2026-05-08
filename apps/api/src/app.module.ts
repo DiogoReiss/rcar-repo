@@ -12,6 +12,7 @@ import { LavajatoModule } from './modules/lavajato/lavajato.module.js';
 import { RentalModule } from './modules/rental/rental.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { TemplatesModule } from './modules/templates/templates.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
 import { MailModule } from './modules/mail/mail.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -36,6 +37,7 @@ import { HealthModule } from './modules/health/health.module.js';
     LavajatoModule,
     RentalModule,
     ReportsModule,
+    PaymentsModule,
     TemplatesModule,
     HealthModule,
   ],

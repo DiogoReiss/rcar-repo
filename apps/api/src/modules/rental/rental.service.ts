@@ -174,6 +174,25 @@ export class RentalService {
     const valorReal = new Prisma.Decimal(contract.valorDiaria).mul(diffDays)
       .add(contract.seguro && contract.valorSeguro ? contract.valorSeguro : 0);
 
+    const incidents = dto.incidents ?? [];
+    const incidentesCobrados = incidents.filter((i) => i.cobradoCliente !== false);
+    const totalIncidentesCobrados = incidentesCobrados.reduce((a, i) => a + Number(i.valor ?? 0), 0);
+    const valorRealFinal = valorReal.add(new Prisma.Decimal(totalIncidentesCobrados));
+
+    const incidentCreates = incidents.map((incident) =>
+      this.prisma.contractIncident.create({
+        data: {
+          contractId: id,
+          tipo: incident.tipo as Prisma.ContractIncidentUncheckedCreateInput['tipo'],
+          descricao: incident.descricao,
+          valor: new Prisma.Decimal(incident.valor ?? 0),
+          cobradoCliente: incident.cobradoCliente ?? true,
+          fotos: [],
+          data: now,
+        },
+      }),
+    );
+
     await this.prisma.$transaction([
       this.prisma.rentalContract.update({
         where: { id },
@@ -182,7 +201,7 @@ export class RentalService {
           dataDevReal: now,
           kmDevolucao: dto.kmDevolucao,
           combustivelChegada: dto.combustivelChegada,
-          valorTotalReal: valorReal,
+          valorTotalReal: valorRealFinal,
           observacoes: dto.observacoes,
         },
       }),
@@ -193,6 +212,7 @@ export class RentalService {
       ...(dto.checklist ? [this.prisma.inspection.create({
         data: { contractId: id, tipo: 'CHEGADA', checklist: (dto.checklist ?? {}) as Prisma.JsonObject, fotos: [] },
       })] : []),
+      ...incidentCreates,
     ]);
 
     return this.findOne(id);

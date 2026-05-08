@@ -4,6 +4,8 @@
       <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" aria-label="Data inicial" />
       <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" aria-label="Data final" />
       <lync-btn label="Atualizar" icon="pi pi-refresh" [loading]="loading()" (clicked)="reload()" />
+      <lync-btn label="Exportar CSV" icon="pi pi-file" variant="secondary" (clicked)="exportCsv()" />
+      <lync-btn label="Exportar PDF" icon="pi pi-print" variant="secondary" (clicked)="exportPdf()" />
     </div>
   </lync-page-header>
 
@@ -29,6 +31,13 @@
           <strong>{{ s.margem.bruta | currencyBrl }}</strong>
           <small>{{ s.margem.percentual.toFixed(2) }}%</small>
         </article>
+        @if (stockCosts(); as st) {
+          <article class="kpi-card">
+            <h3>Valoração do Estoque</h3>
+            <strong>{{ st.valorEstoqueAtual | currencyBrl }}</strong>
+            <small>COGS no período: {{ st.custoTotal | currencyBrl }}</small>
+          </article>
+        }
       </div>
     }
 
@@ -37,10 +46,11 @@
         <h3>Contas a Receber (Aluguel)</h3>
         @if (receivables(); as r) {
           <p class="totals">Pendente total: <strong>{{ r.totalPendente | currencyBrl }}</strong> · Registros: {{ r.totalRegistros }}</p>
+          <p class="totals">Vencidos: <strong>{{ r.aging.vencidos | currencyBrl }}</strong> · A vencer: <strong>{{ r.aging.aVencer | currencyBrl }}</strong></p>
           <div class="table-wrapper">
             <table class="data-table">
               <thead>
-                <tr><th>Contrato</th><th>Cliente</th><th>Veículo</th><th>Faturado</th><th>Pago</th><th>Pendente</th></tr>
+                <tr><th>Contrato</th><th>Cliente</th><th>Veículo</th><th>Faturado</th><th>Pago</th><th>Pendente</th><th>Status</th></tr>
               </thead>
               <tbody>
                 @for (row of r.data; track row.contractId) {
@@ -51,9 +61,16 @@
                     <td>{{ row.faturado | currencyBrl }}</td>
                     <td>{{ row.pago | currencyBrl }}</td>
                     <td class="text-danger"><strong>{{ row.pendente | currencyBrl }}</strong></td>
+                    <td>
+                      @if (row.overdue) {
+                        <span class="badge badge--danger">Vencido</span>
+                      } @else {
+                        <span class="badge badge--ok">A vencer</span>
+                      }
+                    </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="6" class="empty">Sem pendências no período.</td></tr>
+                  <tr><td colspan="7" class="empty">Sem pendências no período.</td></tr>
                 }
               </tbody>
             </table>
@@ -62,24 +79,57 @@
       </article>
 
       <article class="card">
-        <h3>Rentabilidade por Veículo (proxy)</h3>
+        <h3>Rentabilidade por Veículo</h3>
         @if (maintenance(); as m) {
-          <p class="totals">Custo manutenção no período: <strong>{{ m.total | currencyBrl }}</strong></p>
+          <p class="totals">Receita: <strong>{{ m.totalReceita | currencyBrl }}</strong> · Custo: <strong>{{ m.totalCusto | currencyBrl }}</strong> · Lucro bruto: <strong>{{ m.totalLucroBruto | currencyBrl }}</strong></p>
           <div class="table-wrapper">
             <table class="data-table">
               <thead>
-                <tr><th>Placa</th><th>Modelo</th><th>Manutenções</th><th>Custo</th></tr>
+                <tr><th>Placa</th><th>Modelo</th><th>Receita</th><th>Custo</th><th>Lucro Bruto</th></tr>
               </thead>
               <tbody>
                 @for (row of m.veiculos; track row.vehicleId) {
                   <tr>
                     <td><strong>{{ row.placa }}</strong></td>
                     <td>{{ row.modelo }}</td>
-                    <td>{{ row.qtd }}</td>
-                    <td>{{ row.total | currencyBrl }}</td>
+                    <td>{{ row.receita | currencyBrl }}</td>
+                    <td>{{ row.custo | currencyBrl }}</td>
+                    <td [class.text-danger]="row.lucroBruto < 0"><strong>{{ row.lucroBruto | currencyBrl }}</strong></td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="4" class="empty">Sem custos de manutenção no período.</td></tr>
+                  <tr><td colspan="5" class="empty">Sem dados de rentabilidade no período.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </article>
+    </div>
+
+    <div class="two-col">
+      <article class="card">
+        <h3>Distribuição por Método de Pagamento</h3>
+        <div class="chart-wrap">
+          <canvas #paymentMethodsCanvas></canvas>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Resumo por Método</h3>
+        @if (paymentMethods(); as pm) {
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr><th>Método</th><th>Quantidade</th><th>Valor</th><th>%</th></tr>
+              </thead>
+              <tbody>
+                @for (m of pm.data; track m.metodo) {
+                  <tr>
+                    <td>{{ m.metodo }}</td>
+                    <td>{{ m.quantidade }}</td>
+                    <td>{{ m.valor | currencyBrl }}</td>
+                    <td>{{ m.percentual.toFixed(2) }}%</td>
+                  </tr>
                 }
               </tbody>
             </table>
@@ -91,7 +141,7 @@
     <article class="card">
       <h3>Valoração e Custo de Estoque (COGS)</h3>
       @if (stockCosts(); as c) {
-        <p class="totals">Custo total consumido: <strong>{{ c.custoTotal | currencyBrl }}</strong> · Itens de saída: {{ c.itens }}</p>
+        <p class="totals">Custo total consumido: <strong>{{ c.custoTotal | currencyBrl }}</strong> · Itens de saída: {{ c.itens }} · Valor estoque atual: <strong>{{ c.valorEstoqueAtual | currencyBrl }}</strong></p>
         <div class="table-wrapper">
           <table class="data-table">
             <thead>

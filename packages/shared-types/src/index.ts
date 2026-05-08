@@ -25,6 +25,8 @@ export type PaymentRefType = 'WASH_SCHEDULE' | 'WASH_QUEUE' | 'RENTAL_CONTRACT';
 export type StockMovementType = 'ENTRADA' | 'SAIDA' | 'AJUSTE';
 export type InspectionType = 'SAIDA' | 'CHEGADA';
 export type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LAVAGEM' | 'RECIBO_LOCACAO' | 'VISTORIA';
+export type MaintenanceType = 'PREVENTIVA' | 'CORRETIVA' | 'SINISTRO';
+export type MaintenanceStatus = 'PENDENTE' | 'CONCLUIDA';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +82,9 @@ export interface VehicleMaintenance {
   vehicleId: string;
   descricao: string;
   custo: number;
+  tipo?: MaintenanceType;
+  status?: MaintenanceStatus;
+  fornecedor?: string;
   data: string;
   createdAt: string;
 }
@@ -157,6 +162,7 @@ export interface StockMovement {
   productId: string;
   tipo: StockMovementType;
   quantidade: number;
+  custoUnitario?: number;
   motivo?: string;
   userId?: string;
   createdAt: string;
@@ -277,6 +283,8 @@ export interface RentalReceivableRow {
   customer?: Pick<Customer, 'id' | 'nome' | 'cpfCnpj'>;
   vehicle?: Pick<Vehicle, 'id' | 'placa' | 'modelo'>;
   dataDevReal?: string | Date | null;
+  dueDate?: string | Date | null;
+  overdue?: boolean;
   faturado: number;
   pago: number;
   pendente: number;
@@ -288,19 +296,27 @@ export interface RentalReceivablesReport {
   totalFaturado: number;
   totalPago: number;
   totalPendente: number;
+  aging: {
+    vencidos: number;
+    aVencer: number;
+  };
   data: RentalReceivableRow[];
 }
 
 export interface MaintenanceCostsReport {
   periodo: { from: string; to: string };
-  total: number;
+  totalCusto: number;
+  totalReceita: number;
+  totalLucroBruto: number;
   manutencoes: number;
   veiculos: Array<{
     vehicleId: string;
     placa: string;
     modelo: string;
     categoria: string;
-    total: number;
+    custo: number;
+    receita: number;
+    lucroBruto: number;
     qtd: number;
     ultimaData: string;
   }>;
@@ -310,12 +326,24 @@ export interface StockCostAnalysisReport {
   periodo: { from: string; to: string };
   custoTotal: number;
   itens: number;
+  valorEstoqueAtual: number;
   produtos: Array<{
     productId: string;
     nome: string;
     unidade: string;
     quantidade: number;
     custoTotal: number;
+  }>;
+}
+
+export interface PaymentMethodSummaryReport {
+  totalValor: number;
+  totalQuantidade: number;
+  data: Array<{
+    metodo: PaymentMethod;
+    quantidade: number;
+    valor: number;
+    percentual: number;
   }>;
 }
 

@@ -82,12 +82,23 @@ export class InventoryService {
     if (!product) throw new NotFoundException('Produto não encontrado');
 
     let novaQuantidade: Prisma.Decimal;
+    let novoCustoUnitario = product.custoUnitario;
     const currentQty = product.quantidadeAtual;
     const movQty = new Prisma.Decimal(dto.quantidade);
 
     switch (dto.tipo) {
       case 'ENTRADA':
         novaQuantidade = currentQty.add(movQty);
+        if (dto.custoUnitario !== undefined && dto.custoUnitario !== null) {
+          const custoEntrada = new Prisma.Decimal(dto.custoUnitario);
+          const custoAtual = product.custoUnitario ?? new Prisma.Decimal(0);
+          // Weighted-average cost: ((qtyAtual * custoAtual) + (qtyEntrada * custoEntrada)) / qtyFinal
+          const valorAtual = currentQty.mul(custoAtual);
+          const valorEntrada = movQty.mul(custoEntrada);
+          novoCustoUnitario = novaQuantidade.greaterThan(0)
+            ? valorAtual.add(valorEntrada).div(novaQuantidade)
+            : custoEntrada;
+        }
         break;
       case 'SAIDA':
         novaQuantidade = currentQty.sub(movQty);
@@ -108,6 +119,7 @@ export class InventoryService {
           productId: dto.productId,
           tipo: dto.tipo,
           quantidade: dto.quantidade,
+          custoUnitario: dto.custoUnitario,
           motivo: dto.motivo,
           userId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,7 +128,10 @@ export class InventoryService {
       }),
       this.prisma.product.update({
         where: { id: dto.productId },
-        data: { quantidadeAtual: novaQuantidade },
+        data: {
+          quantidadeAtual: novaQuantidade,
+          ...(dto.tipo === 'ENTRADA' ? { custoUnitario: novoCustoUnitario } : {}),
+        },
       }),
     ]);
 

@@ -192,10 +192,10 @@
 | 🟢     | Backend: `GET /reports/financial-summary` (DRE simplificado: receita - custos = margem) |
 | 🟢     | Backend: custo de insumos e manutenção no `getDailySummary` / `getMonthlyStats` |
 | 🟢     | Backend: baixa automática de estoque ao concluir serviço (`ServiceProduct`) |
-| 🔴     | Backend: `GET /payments` standalone com filtros (data, tipo, status, método) |
+| 🟢     | Backend: `GET /payments` standalone com filtros (data, tipo, status, método) |
 | 🟢     | Frontend: página `/admin/financeiro` com DRE visual + gráficos |
 | 🟢     | Frontend: card "Contas a receber" (contratos sem pagamento total) |
-| 🔴     | Frontend: rentabilidade por veículo (receita - manutenção) |
+| 🟢     | Frontend: rentabilidade por veículo (receita - manutenção) |
 
 ### 2b. Pagamentos online (Pagar.me)
 
@@ -252,9 +252,8 @@
 
 ## Próximos Passos Imediatos
 
-1. **Financeiro backend (fechamento)**: entregar `GET /payments` standalone + agregação por método de pagamento.
-2. **Financeiro schema (fechamento)**: custo médio ponderado (`StockMovement.custoUnitario`) + campos de manutenção/incidentes financeiros.
-3. **Financeiro frontend (fechamento)**: gráfico por método, rentabilidade por veículo completa, card de valoração de estoque e export CSV/PDF.
-4. **Qualidade**: ampliar cobertura de testes da feature financeiro (API + WEB).
-5. **Governança de docs**: manter `todo-backend.md`, `todo-frontend.md` e `06-financeiro.md` sincronizados como fonte operacional.
+1. **Qualidade**: ampliar cobertura de testes da feature financeiro no backend (payments/reports).
+2. **Integração online**: avançar para Pagar.me + webhook de confirmação automática.
+3. **Refino analítico**: aging avançado, custo-benefício preventiva/corretiva, rentabilidade histórica por veículo.
+4. **Governança de docs**: manter `todo-backend.md`, `todo-frontend.md` e `06-financeiro.md` sincronizados como fonte operacional.
 

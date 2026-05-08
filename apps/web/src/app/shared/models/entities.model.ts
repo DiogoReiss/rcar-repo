@@ -20,6 +20,8 @@ export type {
   StockMovementType,
   InspectionType,
   TemplateType,
+  MaintenanceType,
+  MaintenanceStatus,
   AuthTokens,
   LoginCredentials,
   User,
@@ -42,5 +44,6 @@ export type {
   RentalReceivableRow,
   MaintenanceCostsReport,
   StockCostAnalysisReport,
+  PaymentMethodSummaryReport,
   PaginatedResponse,
 } from '@rcar/shared-types';

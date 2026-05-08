@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 @Injectable()
@@ -93,7 +94,18 @@ export class ReportsService {
     const start = new Date(y, m, 1);
     const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
 
-    const [washPayments, rentalPayments, newCustomers, newContracts, stockMovements, maintenances, closedContracts] = await Promise.all([
+    const [
+      washPayments,
+      rentalPayments,
+      newCustomers,
+      newContracts,
+      stockMovements,
+      maintenances,
+      closedContracts,
+      movementsBeforeStart,
+      movementsUntilEnd,
+      products,
+    ] = await Promise.all([
       this.prisma.payment.findMany({
         where: { createdAt: { gte: start, lte: end }, status: 'CONFIRMADO', refType: { in: ['WASH_SCHEDULE', 'WASH_QUEUE'] } },
         select: { valor: true },
@@ -121,6 +133,18 @@ export class ReportsService {
           },
         },
       }),
+      this.prisma.stockMovement.findMany({
+        where: { createdAt: { lt: start } },
+        select: { createdAt: true, quantidade: true, tipo: true, productId: true },
+      }),
+      this.prisma.stockMovement.findMany({
+        where: { createdAt: { lte: end } },
+        select: { createdAt: true, quantidade: true, tipo: true, productId: true },
+      }),
+      this.prisma.product.findMany({
+        where: { ativo: true, deletedAt: null },
+        select: { id: true, custoUnitario: true, quantidadeAtual: true },
+      }),
     ]);
 
     const washTotal = washPayments.reduce((a, p) => a + Number(p.valor), 0);
@@ -136,6 +160,22 @@ export class ReportsService {
       0,
     );
 
+    const qtyByProductAt = (movements: Array<{ tipo: string; quantidade: Prisma.Decimal; productId: string }>) => {
+      const map = new Map<string, number>();
+      for (const mv of movements) {
+        const q = Number(mv.quantidade);
+        const current = map.get(mv.productId) ?? 0;
+        if (mv.tipo === 'ENTRADA') map.set(mv.productId, current + q);
+        if (mv.tipo === 'SAIDA') map.set(mv.productId, current - q);
+        if (mv.tipo === 'AJUSTE') map.set(mv.productId, q);
+      }
+      return map;
+    };
+    const startQty = qtyByProductAt(movementsBeforeStart as Array<{ tipo: string; quantidade: Prisma.Decimal; productId: string }>);
+    const endQty = qtyByProductAt(movementsUntilEnd as Array<{ tipo: string; quantidade: Prisma.Decimal; productId: string }>);
+    const valorEstoqueInicio = products.reduce((a, p) => a + (startQty.get(p.id) ?? Number(p.quantidadeAtual)) * Number(p.custoUnitario ?? 0), 0);
+    const valorEstoqueFim = products.reduce((a, p) => a + (endQty.get(p.id) ?? Number(p.quantidadeAtual)) * Number(p.custoUnitario ?? 0), 0);
+
     return {
       period: `${y}-${String(m + 1).padStart(2, '0')}`,
       receita: { lavajato: washTotal, aluguel: rentalTotal, total: washTotal + rentalTotal },
@@ -149,6 +189,11 @@ export class ReportsService {
         recebido,
         aReceber: Math.max(0, faturado - recebido),
       },
+      estoque: {
+        valorInicio: valorEstoqueInicio,
+        valorFim: valorEstoqueFim,
+        variacao: valorEstoqueFim - valorEstoqueInicio,
+      },
       novosClientes: newCustomers,
       novosContratos: newContracts,
     };
@@ -156,11 +201,17 @@ export class ReportsService {
 
   async getStockCostAnalysis(from?: string, to?: string) {
     const { start, end } = this.parsePeriod(from, to);
-    const movements = await this.prisma.stockMovement.findMany({
-      where: { createdAt: { gte: start, lte: end }, tipo: 'SAIDA' },
-      include: { product: { select: { id: true, nome: true, unidade: true, custoUnitario: true } } },
-      orderBy: { createdAt: 'asc' },
-    });
+    const [movements, products] = await Promise.all([
+      this.prisma.stockMovement.findMany({
+        where: { createdAt: { gte: start, lte: end }, tipo: 'SAIDA' },
+        include: { product: { select: { id: true, nome: true, unidade: true, custoUnitario: true } } },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.product.findMany({
+        where: { ativo: true, deletedAt: null },
+        select: { quantidadeAtual: true, custoUnitario: true },
+      }),
+    ]);
 
     const byProduct = new Map<string, { productId: string; nome: string; unidade: string; quantidade: number; custoTotal: number }>();
     for (const m of movements) {
@@ -181,29 +232,54 @@ export class ReportsService {
 
     const produtos = Array.from(byProduct.values()).sort((a, b) => b.custoTotal - a.custoTotal);
     const custoTotal = produtos.reduce((a, p) => a + p.custoTotal, 0);
+    const servicesCount = await Promise.all([
+      this.prisma.washSchedule.count({ where: { dataHora: { gte: start, lte: end }, status: 'CONCLUIDO' } }),
+      this.prisma.washQueue.count({ where: { concluidoAt: { gte: start, lte: end }, status: 'CONCLUIDO' } }),
+    ]).then(([a, b]) => a + b);
+    const valorEstoqueAtual = products.reduce(
+      (a, p) => a + Number(p.quantidadeAtual) * Number(p.custoUnitario ?? 0),
+      0,
+    );
 
     return {
       periodo: { from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) },
       custoTotal,
       itens: movements.length,
+      valorEstoqueAtual,
+      eficiencia: {
+        servicosConcluidos: servicesCount,
+        custoPorServico: servicesCount > 0 ? custoTotal / servicesCount : 0,
+      },
       produtos,
     };
   }
 
   async getMaintenanceCosts(from?: string, to?: string) {
     const { start, end } = this.parsePeriod(from, to);
-    const maintenances = await this.prisma.vehicleMaintenance.findMany({
-      where: { data: { gte: start, lte: end } },
-      include: { vehicle: { select: { id: true, placa: true, modelo: true, categoria: true } } },
-      orderBy: { data: 'desc' },
-    });
+    const [maintenances, rentalPayments] = await Promise.all([
+      this.prisma.vehicleMaintenance.findMany({
+        where: { data: { gte: start, lte: end } },
+        include: { vehicle: { select: { id: true, placa: true, modelo: true, categoria: true } } },
+        orderBy: { data: 'desc' },
+      }),
+      this.prisma.payment.findMany({
+        where: {
+          createdAt: { gte: start, lte: end },
+          status: 'CONFIRMADO',
+          refType: 'RENTAL_CONTRACT',
+        },
+        select: { valor: true, contract: { select: { vehicleId: true, vehicle: { select: { placa: true, modelo: true, categoria: true } } } } },
+      }),
+    ]);
 
     const byVehicle = new Map<string, {
       vehicleId: string;
       placa: string;
       modelo: string;
       categoria: string;
-      total: number;
+      custo: number;
+      receita: number;
+      lucroBruto: number;
       qtd: number;
       ultimaData: string;
     }>();
@@ -215,11 +291,13 @@ export class ReportsService {
         placa: m.vehicle.placa,
         modelo: m.vehicle.modelo,
         categoria: m.vehicle.categoria,
-        total: 0,
+        custo: 0,
+        receita: 0,
+        lucroBruto: 0,
         qtd: 0,
         ultimaData: m.data.toISOString(),
       };
-      current.total += Number(m.custo);
+      current.custo += Number(m.custo);
       current.qtd += 1;
       if (new Date(m.data).getTime() > new Date(current.ultimaData).getTime()) {
         current.ultimaData = m.data.toISOString();
@@ -227,12 +305,44 @@ export class ReportsService {
       byVehicle.set(key, current);
     }
 
-    const veiculos = Array.from(byVehicle.values()).sort((a, b) => b.total - a.total);
-    const total = veiculos.reduce((a, v) => a + v.total, 0);
+    for (const pay of rentalPayments) {
+      const vehicleId = pay.contract?.vehicleId;
+      const vehicle = pay.contract?.vehicle;
+      if (!vehicleId || !vehicle) continue;
+      const current = byVehicle.get(vehicleId) ?? {
+        vehicleId,
+        placa: vehicle.placa,
+        modelo: vehicle.modelo,
+        categoria: vehicle.categoria,
+        custo: 0,
+        receita: 0,
+        lucroBruto: 0,
+        qtd: 0,
+        ultimaData: start.toISOString(),
+      };
+      current.receita += Number(pay.valor);
+      byVehicle.set(vehicleId, current);
+    }
+
+    for (const item of byVehicle.values()) {
+      item.lucroBruto = item.receita - item.custo;
+    }
+
+    const veiculos = Array.from(byVehicle.values()).sort((a, b) => b.lucroBruto - a.lucroBruto);
+    const totalCusto = veiculos.reduce((a, v) => a + v.custo, 0);
+    const totalReceita = veiculos.reduce((a, v) => a + v.receita, 0);
 
     return {
       periodo: { from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) },
-      total,
+      totalCusto,
+      totalReceita,
+      totalLucroBruto: totalReceita - totalCusto,
+      porTipo: await this.prisma.vehicleMaintenance.groupBy({
+        by: ['tipo'],
+        where: { data: { gte: start, lte: end } },
+        _sum: { custo: true },
+        _count: { _all: true },
+      }),
       manutencoes: maintenances.length,
       veiculos,
     };
@@ -253,16 +363,23 @@ export class ReportsService {
       orderBy: { dataDevReal: 'desc' },
     });
 
+    const now = new Date();
     const data = contracts
       .map((c) => {
         const faturado = Number(c.valorTotalReal ?? c.valorTotal);
         const pago = c.payments.reduce((a, p) => a + Number(p.valor), 0);
         const pendente = Math.max(0, faturado - pago);
+        const dueDate = c.dataDevReal
+          ? new Date(new Date(c.dataDevReal).getTime() + 3 * 24 * 60 * 60 * 1000)
+          : null;
+        const overdue = dueDate ? dueDate.getTime() < now.getTime() : false;
         return {
           contractId: c.id,
           customer: c.customer,
           vehicle: c.vehicle,
           dataDevReal: c.dataDevReal,
+          dueDate,
+          overdue,
           faturado,
           pago,
           pendente,
@@ -276,6 +393,10 @@ export class ReportsService {
       totalFaturado: data.reduce((a, r) => a + r.faturado, 0),
       totalPago: data.reduce((a, r) => a + r.pago, 0),
       totalPendente: data.reduce((a, r) => a + r.pendente, 0),
+      aging: {
+        vencidos: data.filter((r) => r.overdue).reduce((a, r) => a + r.pendente, 0),
+        aVencer: data.filter((r) => !r.overdue).reduce((a, r) => a + r.pendente, 0),
+      },
       data,
     };
   }
@@ -300,12 +421,20 @@ export class ReportsService {
         include: { product: { select: { custoUnitario: true } } },
       }),
       this.prisma.vehicleMaintenance.findMany({ where: { data: { gte: start, lte: end } }, select: { custo: true } }),
-      this.prisma.contractIncident.findMany({ where: { data: { gte: start, lte: end } }, select: { valor: true } }),
+      this.prisma.contractIncident.findMany({
+        where: { data: { gte: start, lte: end }, cobradoCliente: true },
+        select: { valor: true, tipo: true },
+      }),
     ]);
 
     const receitaLavajato = washPayments.reduce((a, p) => a + Number(p.valor), 0);
     const receitaAluguel = rentalPayments.reduce((a, p) => a + Number(p.valor), 0);
     const extrasAluguel = incidents.reduce((a, i) => a + Number(i.valor), 0);
+    const extrasPorTipo = incidents.reduce<Record<string, number>>((acc, i) => {
+      const key = i.tipo;
+      acc[key] = (acc[key] ?? 0) + Number(i.valor);
+      return acc;
+    }, {});
     const custoInsumos = stockMovements.reduce(
       (a, m) => a + Number(m.quantidade) * Number(m.product.custoUnitario ?? 0),
       0,
@@ -322,6 +451,7 @@ export class ReportsService {
         lavajato: receitaLavajato,
         aluguel: receitaAluguel,
         extrasAluguel,
+        extrasPorTipo,
         total: receitaTotal,
       },
       custos: {

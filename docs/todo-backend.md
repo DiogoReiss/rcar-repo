@@ -226,9 +226,10 @@
 | Status | Step | Descrição |
 |--------|------|-----------|
 | 🟡 | 13.1 | Pagamentos **embedded** nos módulos lavajato (`POST /schedules/:id/payment`, `POST /queue/:id/payment`) e rental (`POST /contracts/:id/payment`) — sem módulo standalone |
-| 🔴 | 13.2 | Criar `src/modules/payments/payments.module.ts` com `PaymentsService` e `PaymentsController` standalone (GET /payments com filtros) |
+| 🟢 | 13.2 | Criar `src/modules/payments/payments.module.ts` com `PaymentsService` e `PaymentsController` standalone (GET /payments com filtros) |
 | 🔴 | 13.3 | Testes unitários |
-| 🔴 | 13.4 | Agregação por método de pagamento (`PIX`, `DINHEIRO`, `CARTAO_*`) para consumo do dashboard financeiro |
+| 🟢 | 13.4 | Agregação por método de pagamento (`PIX`, `DINHEIRO`, `CARTAO_*`) para consumo do dashboard financeiro |
+| 🟢 | 13.5 | Reconciliação: endpoint `GET /payments/reconciliation?days=` para pagamentos `PENDENTE` vencidos |
 
 ---
 
@@ -296,10 +297,10 @@
 | Status | Step | Descrição |
 |--------|------|-----------|
 | 🟢 | 17b.1 | Baixa automática de estoque ao concluir `WashSchedule`/`WashQueue`: criar `StockMovement` (SAIDA) para cada `ServiceProduct` vinculado ao serviço |
-| 🔴 | 17b.2 | Custo médio ponderado: recalcular `Product.custoUnitario` a cada `StockMovement` de ENTRADA com `custoUnitario` informado |
-| 🔴 | 17b.3 | Schema migration: adicionar `tipo`, `status`, `fornecedor` em `VehicleMaintenance` |
-| 🔴 | 17b.4 | Schema migration: adicionar `custoUnitario` em `StockMovement` |
-| 🔴 | 17b.5 | Schema migration: adicionar `cobradoCliente` em `ContractIncident`, novos `IncidentType` (KM_EXCEDENTE, COMBUSTIVEL) |
+| 🟢 | 17b.2 | Custo médio ponderado: recalcular `Product.custoUnitario` a cada `StockMovement` de ENTRADA com `custoUnitario` informado |
+| 🟢 | 17b.3 | Schema migration: adicionar `tipo`, `status`, `fornecedor` em `VehicleMaintenance` |
+| 🟢 | 17b.4 | Schema migration: adicionar `custoUnitario` em `StockMovement` |
+| 🟢 | 17b.5 | Schema migration: adicionar `cobradoCliente` em `ContractIncident`, novos `IncidentType` (KM_EXCEDENTE, COMBUSTIVEL) |
 
 ---
 

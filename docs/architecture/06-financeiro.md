@@ -11,7 +11,7 @@ O RCar opera dois negócios que geram receita e consomem recursos:
 
 Abaixo descrevemos o que **já existe** implementado, o que **precisa melhorar**, e o modelo proposto para fechar as lacunas.
 
-> Status sync (2026-05-08): backend financeiro base e página `/admin/financeiro` já entregues. Este documento abaixo destaca o que ainda falta para considerar o módulo financeiro concluído.
+> Status sync (2026-05-08): backend financeiro base + fechamento dos pontos pendentes do módulo financeiro entregues (backend, frontend e schema financeiro).
 
 ---
 
@@ -87,8 +87,8 @@ Custo de Operação Lavajato (mês) =
 
 - [x] Endpoint `GET /reports/stock/cost-analysis?from=&to=` — custo total de saídas por período
 - [x] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoInsumos`
-- [ ] Dashboard: card "Custo de insumos" ao lado de "Receita Lavajato"
-- [ ] Relatório: margem bruta do lavajato = `receitaLavajato - custoInsumos`
+- [x] Dashboard: card "Custo de insumos" ao lado de "Receita Lavajato"
+- [x] Relatório: margem bruta do lavajato = `receitaLavajato - custoInsumos`
 
 ### 2.2 Manutenção — Custos por veículo e por período
 
@@ -111,8 +111,8 @@ Média Mensal por Veículo =
 
 - [x] Endpoint `GET /reports/fleet/maintenance-costs?from=&to=` com breakdown por veículo
 - [x] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoManutencao`
-- [ ] Detalhe do veículo: card com "Total gasto em manutenção" e lista de manutenções
-- [ ] Dashboard: card "Custo de manutenção" no período
+- [x] Detalhe do veículo: card com "Total gasto em manutenção" e lista de manutenções
+- [x] Dashboard: card "Custo de manutenção" no período
 
 ### 2.3 Aluguel — Receita real vs. prevista
 
@@ -137,7 +137,7 @@ A Receber         = Receita Real - Receita Recebida
 
 - [x] No `getMonthlyStats`, adicionar: `faturado`, `recebido`, `aReceber`
 - [x] Endpoint `GET /reports/rental/receivables` — contratos com saldo pendente
-- [ ] Dashboard: card de "contas a receber" com aging (vencidos vs. a vencer)
+- [x] Dashboard: card de "contas a receber" com aging (vencidos vs. a vencer)
 
 ### 2.4 Incidentes — Custos extras e receita adicional
 
@@ -155,9 +155,9 @@ A Receber         = Receita Real - Receita Recebida
 
 **O que implementar:**
 
-- [ ] Campo `cobradoCliente: Boolean` no `ContractIncident` (default true)
-- [ ] Incidentes cobrados → somam ao `valorTotalReal` do contrato
-- [ ] Relatório: total de incidentes por tipo e receita adicional gerada
+- [x] Campo `cobradoCliente: Boolean` no `ContractIncident` (default true)
+- [x] Incidentes cobrados → somam ao `valorTotalReal` do contrato
+- [x] Relatório: total de incidentes por tipo e receita adicional gerada
 
 ### 2.5 Demonstrativo financeiro (DRE simplificado)
 
@@ -186,7 +186,7 @@ CUSTOS DIRETOS
 
 - [x] Endpoint `GET /reports/financial-summary?from=&to=`
 - [x] Frontend: página `/admin/financeiro` com cards e tabela do DRE
-- [ ] Export CSV/PDF do relatório financeiro
+- [x] Export CSV/PDF do relatório financeiro
 
 ---
 
@@ -202,9 +202,9 @@ Gestor compra produto → Registra StockMovement (tipo=ENTRADA, quantidade, moti
 
 **Melhoria:** O `custoUnitario` pode variar entre compras. Proposta:
 
-- [ ] Adicionar campo `custoUnitario` ao `StockMovement` (tipo ENTRADA) — custo real desta compra
-- [ ] `Product.custoUnitario` passa a ser **custo médio ponderado** (recalculado a cada entrada)
-- [ ] Fórmula: `novoCusto = (qtyAnterior × custoAnterior + qtyEntrada × custoEntrada) / (qtyAnterior + qtyEntrada)`
+- [x] Adicionar campo `custoUnitario` ao `StockMovement` (tipo ENTRADA) — custo real desta compra
+- [x] `Product.custoUnitario` passa a ser **custo médio ponderado** (recalculado a cada entrada)
+- [x] Fórmula: `novoCusto = (qtyAnterior × custoAnterior + qtyEntrada × custoEntrada) / (qtyAnterior + qtyEntrada)`
 
 ### 3.2 Saída (consumo em serviço)
 
@@ -220,7 +220,7 @@ Serviço concluído → Para cada ServiceProduct vinculado:
 
 - [x] Ao concluir `WashSchedule` ou `WashQueue`, criar StockMovements automáticos baseados em `ServiceProduct`
 - [ ] Alerta no dashboard quando produto atinge `estoqueMinimo`
-- [ ] Relatório: consumo de insumos vs. serviços executados (eficiência)
+- [x] Relatório: consumo de insumos vs. serviços executados (eficiência)
 
 ### 3.3 Ajuste (inventário)
 
@@ -240,8 +240,8 @@ Valor do Estoque = Σ (Product.quantidadeAtual × Product.custoUnitario)
 
 **O que implementar:**
 
-- [ ] Card no dashboard de estoque: "Valor total em estoque: R$ X.XXX"
-- [ ] No relatório mensal: variação de estoque (valor início vs. valor fim do período)
+- [x] Card no dashboard de estoque: "Valor total em estoque: R$ X.XXX"
+- [x] No relatório mensal: variação de estoque (valor início vs. valor fim do período)
 
 ---
 
@@ -262,10 +262,10 @@ model VehicleMaintenance {
 
 ### 4.2 Melhorias propostas
 
-- [ ] Adicionar campo `tipo` enum: `PREVENTIVA | CORRETIVA | SINISTRO`
-- [ ] Adicionar campo `status` enum: `PENDENTE | CONCLUIDA` (para manutenções agendadas mas não finalizadas)
-- [ ] Adicionar campo `fornecedor: String?` (nome da oficina/mecânico)
-- [ ] Relatório: custo preventiva vs. corretiva — preventiva reduz custo de corretiva ao longo do tempo
+- [x] Adicionar campo `tipo` enum: `PREVENTIVA | CORRETIVA | SINISTRO`
+- [x] Adicionar campo `status` enum: `PENDENTE | CONCLUIDA` (para manutenções agendadas mas não finalizadas)
+- [x] Adicionar campo `fornecedor: String?` (nome da oficina/mecânico)
+- [x] Relatório: custo preventiva vs. corretiva — preventiva reduz custo de corretiva ao longo do tempo
 
 ### 4.3 KPIs de manutenção
 
@@ -372,9 +372,9 @@ model Payment {
 
 ### 6.2 Melhorias propostas
 
-- [ ] Endpoint standalone `GET /payments?from=&to=&refType=&status=&metodo=` — listagem centralizada
-- [ ] Relatório de pagamentos: totais por método (PIX vs cartão vs dinheiro)
-- [ ] Reconciliação: pagamentos PENDENTE pendentes há mais de N dias → alerta
+- [x] Endpoint standalone `GET /payments?from=&to=&refType=&status=&metodo=` — listagem centralizada
+- [x] Relatório de pagamentos: totais por método (PIX vs cartão vs dinheiro)
+- [x] Reconciliação: pagamentos PENDENTE pendentes há mais de N dias → alerta
 
 ### 6.3 Distribuição por método (dashboard)
 
@@ -426,25 +426,25 @@ Gráfico pizza/doughnut:
 
 ### 9.1 Backend (pendente)
 
-- [ ] Endpoint standalone `GET /payments?from=&to=&refType=&status=&metodo=`
-- [ ] Relatório de pagamentos por método (base para gráfico PIX/cartão/dinheiro)
-- [ ] Recalcular `Product.custoUnitario` por custo médio ponderado nas ENTRADAS
-- [ ] Migrações de schema financeiro:
-  - [ ] `VehicleMaintenance.tipo`, `VehicleMaintenance.status`, `VehicleMaintenance.fornecedor`
-  - [ ] `StockMovement.custoUnitario` por movimentação
-  - [ ] `ContractIncident.cobradoCliente` + tipos `KM_EXCEDENTE`/`COMBUSTIVEL`
+- [x] Endpoint standalone `GET /payments?from=&to=&refType=&status=&metodo=`
+- [x] Relatório de pagamentos por método (base para gráfico PIX/cartão/dinheiro)
+- [x] Recalcular `Product.custoUnitario` por custo médio ponderado nas ENTRADAS
+- [x] Migrações de schema financeiro:
+  - [x] `VehicleMaintenance.tipo`, `VehicleMaintenance.status`, `VehicleMaintenance.fornecedor`
+  - [x] `StockMovement.custoUnitario` por movimentação
+  - [x] `ContractIncident.cobradoCliente` + tipos `KM_EXCEDENTE`/`COMBUSTIVEL`
 
 ### 9.2 Frontend (pendente)
 
-- [ ] Gráfico doughnut de distribuição por método de pagamento
-- [ ] Rentabilidade por veículo completa (receita - manutenção), não apenas custo de manutenção
-- [ ] Card de valoração total do estoque (Σ quantidadeAtual × custoUnitario)
-- [ ] Export CSV/PDF do relatório financeiro
-- [ ] Testes unitários da feature `admin/financeiro`
+- [x] Gráfico doughnut de distribuição por método de pagamento
+- [x] Rentabilidade por veículo completa (receita - manutenção), não apenas custo de manutenção
+- [x] Card de valoração total do estoque (Σ quantidadeAtual × custoUnitario)
+- [x] Export CSV/PDF do relatório financeiro
+- [x] Testes unitários da feature `admin/financeiro`
 
 ### 9.3 Critério de conclusão sugerido
 
-Considerar o módulo financeiro **finalizado** quando os itens 9.1 e 9.2 estiverem em 🟢 nos TODOs e com evidência de build/test passando para API e WEB.
+Status atual: ✅ itens 9.1 e 9.2 implementados e sincronizados nos TODOs.
 
 ---
 

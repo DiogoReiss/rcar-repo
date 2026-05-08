@@ -1,6 +1,25 @@
 import { IsString, IsNumber, IsOptional, IsInt, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+class ContractIncidentDto {
+  @ApiProperty({ example: 'AVARIA' })
+  @IsString()
+  tipo: string;
+
+  @ApiProperty({ example: 'Risco no para-choque traseiro' })
+  @IsString()
+  descricao: string;
+
+  @ApiPropertyOptional({ example: 180 })
+  @IsNumber()
+  @IsOptional()
+  valor?: number;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  cobradoCliente?: boolean;
+}
+
 export class OpenContractDto {
   @ApiProperty({ description: 'KM no momento da retirada' })
   @IsInt()
@@ -36,6 +55,13 @@ export class CloseContractDto {
   @IsString()
   @IsOptional()
   observacoes?: string;
+
+  @ApiPropertyOptional({
+    type: [Object],
+    description: 'Incidentes registrados na devolução (avaria, multa, km excedente, etc.)',
+  })
+  @IsOptional()
+  incidents?: ContractIncidentDto[];
 }
 
 export class CheckAvailabilityDto {

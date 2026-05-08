@@ -25,5 +25,14 @@ export class CreateStockMovementDto {
   @IsString()
   @IsOptional()
   motivo?: string;
+
+  @ApiPropertyOptional({
+    example: 39.9,
+    description: 'Custo unitário da movimentação (obrigatório para ENTRADA quando quiser recalcular custo médio).',
+  })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  custoUnitario?: number;
 }
 

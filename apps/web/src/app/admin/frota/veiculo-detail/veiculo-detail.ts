@@ -59,5 +59,9 @@ export default class VeiculoDetailComponent implements OnInit {
       this.loading.set(false);
     }
   }
+
+  totalMaintenanceCost(v: VehicleDetail): number {
+    return (v.maintenances ?? []).reduce((a, m) => a + Number(m.custo ?? 0), 0);
+  }
 }
 

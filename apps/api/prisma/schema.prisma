@@ -71,11 +71,23 @@ enum InspectionType {
 }
 
 enum IncidentType {
+  SINISTRO
   AVARIA
   MULTA
   KM_EXCEDENTE
   COMBUSTIVEL
   OUTRO
+}
+
+enum MaintenanceType {
+  PREVENTIVA
+  CORRETIVA
+  SINISTRO
+}
+
+enum MaintenanceStatus {
+  PENDENTE
+  CONCLUIDA
 }
 
 enum PaymentRefType {
@@ -184,6 +196,9 @@ model VehicleMaintenance {
   vehicleId String   @map("vehicle_id")
   descricao String
   custo     Decimal  @db.Decimal(10, 2)
+  tipo      MaintenanceType   @default(CORRETIVA)
+  status    MaintenanceStatus @default(CONCLUIDA)
+  fornecedor String?
   data      DateTime
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -305,6 +320,7 @@ model ContractIncident {
   tipo        IncidentType
   descricao   String
   valor       Decimal      @db.Decimal(10, 2)
+  cobradoCliente Boolean   @default(true) @map("cobrado_cliente")
   fotos       String[]
   data        DateTime
   createdAt   DateTime     @default(now()) @map("created_at")
@@ -377,6 +393,7 @@ model StockMovement {
   productId        String            @map("product_id")
   tipo             StockMovementType
   quantidade       Decimal           @db.Decimal(10, 3)
+  custoUnitario    Decimal?          @db.Decimal(10, 2) @map("custo_unitario")
   motivo           String?
   userId           String?           @map("user_id")
   idempotencyKey   String?           @unique @map("idempotency_key")
