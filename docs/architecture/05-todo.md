@@ -25,6 +25,18 @@
 4. **Ponto 4**: pagamentos online
 5. **Ponto 1**: hardening final de testes/segurança/go-live
 
+### Status real da ordem ativa (auditado no código)
+
+| Ponto | Situação | O que já está pronto | O que falta para fechar |
+|---|---|---|---|
+| 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend e cobertura inicial | Cobertura de testes mais ampla, UX de carregamento/empty states e estabilização final da trilha |
+| 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` + validações + testes iniciais | Motor real HTML->PDF e fluxo completo de assinatura D4Sign |
+| 3 | 🟡 Em andamento | Módulo `storage` scaffold com URLs assinadas e testes iniciais | Integração S3/MinIO real + fluxo frontend de upload/download fim a fim |
+| 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
+| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes iniciais) | Cobertura ampla unit/E2E, Swagger completo, fechamento de lint/CI e checklist de go-live |
+
+**Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2`, `3` e `1` estão parcialmente implementados, e `4` depende de integração externa.
+
 ---
 
 ## Snapshot Consolidado (done/partial/not started)

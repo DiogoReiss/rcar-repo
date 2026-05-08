@@ -4,6 +4,16 @@
 **Fonte de verdade detalhada:** `docs/architecture/05-todo.md`
 **Última sincronização:** 2026-05-08
 
+### Status da ordem ativa (5 -> 2 -> 3 -> 4 -> 1)
+
+| Ponto | Status atual | Pendência-chave |
+|---|---|---|
+| 5 (operacional/UX) | 🟡 | Expandir testes e fechar UX de estados de carregamento/vazio |
+| 2 (documentos/PDF/assinatura) | 🟡 | Implementar renderização HTML->PDF real e fluxo D4Sign |
+| 3 (storage) | 🟡 | Integrar S3/MinIO real e upload frontend fim a fim |
+| 4 (pagamentos online) | 🔴/📌 | Integração Pagar.me depende de credenciais e webhook homologado |
+| 1 (hardening final) | 🟡 | Cobertura de testes, Swagger completo e gates finais de CI/go-live |
+
 ---
 
 ## 1) Macro status alinhado com `05-todo.md`
