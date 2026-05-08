@@ -150,6 +150,10 @@ export const routes: Routes = [
   - `GET /reports/rental/receivables`
   - `GET /reports/fleet/maintenance-costs`
   - `GET /reports/stock/cost-analysis`
+- Pendências para fechamento da feature:
+  - gráfico doughnut de distribuição por método de pagamento
+  - rentabilidade por veículo completa (receita - manutenção)
+  - card de valoração total do estoque e export CSV/PDF
 
 ---
 

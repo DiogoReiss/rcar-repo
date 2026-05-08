@@ -252,9 +252,9 @@
 
 ## Próximos Passos Imediatos
 
-1. **Financeiro backend (P1)**: implementar `GET /reports/financial-summary`, `/rental/receivables`, `/stock/cost-analysis` e custos em `daily/monthly`.
-2. **Financeiro frontend (P1)**: criar `/admin/financeiro` com DRE, contas a receber e rentabilidade por veículo.
-3. **Qualidade**: ampliar cobertura de testes (API unit/e2e e frontend unit) além dos arquivos atuais.
-4. **Documentos e arquivos**: concluir módulo Storage + geração real de PDF + integração D4Sign.
-5. **Governança de docs**: manter `todo-backend.md` e `todo-frontend.md` como fonte primária de status operacional.
+1. **Financeiro backend (fechamento)**: entregar `GET /payments` standalone + agregação por método de pagamento.
+2. **Financeiro schema (fechamento)**: custo médio ponderado (`StockMovement.custoUnitario`) + campos de manutenção/incidentes financeiros.
+3. **Financeiro frontend (fechamento)**: gráfico por método, rentabilidade por veículo completa, card de valoração de estoque e export CSV/PDF.
+4. **Qualidade**: ampliar cobertura de testes da feature financeiro (API + WEB).
+5. **Governança de docs**: manter `todo-backend.md`, `todo-frontend.md` e `06-financeiro.md` sincronizados como fonte operacional.
 

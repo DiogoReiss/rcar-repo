@@ -294,9 +294,14 @@ GET    /api/documents/sign/:id/status        # Status da assinatura
 
 ### Payments
 
+> Status (2026-05-08): pagamentos estão implementados de forma **embedded** nos módulos `lavajato` e `rental`. Módulo standalone `/api/payments` com filtros globais permanece pendente.
+
 ```
-POST   /api/payments                # Registra pagamento
-GET    /api/payments?ref_type=wash|rental&ref_id=uuid  # Pagamentos de uma referência
+POST   /api/lavajato/schedules/:id/payment   # Registra pagamento de agendamento
+POST   /api/lavajato/queue/:id/payment       # Registra pagamento de fila
+POST   /api/rental/contracts/:id/payment     # Registra pagamento de contrato
+# pendente:
+# GET /api/payments?from=&to=&refType=&status=&metodo
 ```
 
 ### Reports

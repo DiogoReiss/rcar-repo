@@ -11,6 +11,8 @@ O RCar opera dois negócios que geram receita e consomem recursos:
 
 Abaixo descrevemos o que **já existe** implementado, o que **precisa melhorar**, e o modelo proposto para fechar as lacunas.
 
+> Status sync (2026-05-08): backend financeiro base e página `/admin/financeiro` já entregues. Este documento abaixo destaca o que ainda falta para considerar o módulo financeiro concluído.
+
 ---
 
 ## 1. O que já existe
@@ -52,10 +54,14 @@ CUSTO INSUMOS (ESTOQUE)
 | Endpoint                   | O que retorna                                      |
 |----------------------------|----------------------------------------------------|
 | `GET /reports/dashboard`   | Contagens: users, vehicles, customers, services, low-stock |
-| `GET /reports/daily`       | Agendados/concluídos do dia, receita estimada (lavajato + aluguel), alertas de estoque |
-| `GET /reports/monthly`     | Receita confirmada (payments) por módulo, novos clientes, novos contratos |
+| `GET /reports/daily`       | Operação do dia + `custoInsumos`, `custoManutencao`, margem bruta diária |
+| `GET /reports/monthly`     | Receita, custos diretos (`insumos` + `manutenção`) e métricas de faturamento/recebimento |
 | `GET /reports/charts`      | Serviços/dia, hora de pico, receita vs. saídas de estoque, uso de produtos (7 dias) |
 | `GET /reports/stock`       | Produtos com quantidade atual, mínimo, flag de baixo estoque |
+| `GET /reports/financial-summary` | DRE simplificado por período (receita, custos diretos, margem) |
+| `GET /reports/rental/receivables` | Contratos encerrados com saldo pendente |
+| `GET /reports/fleet/maintenance-costs` | Custo de manutenção agregado por veículo |
+| `GET /reports/stock/cost-analysis` | COGS por período (consumo de insumos) |
 
 ---
 
@@ -179,7 +185,7 @@ CUSTOS DIRETOS
 **O que implementar:**
 
 - [x] Endpoint `GET /reports/financial-summary?from=&to=`
-- [ ] Frontend: página `/admin/financeiro` com cards e tabela do DRE
+- [x] Frontend: página `/admin/financeiro` com cards e tabela do DRE
 - [ ] Export CSV/PDF do relatório financeiro
 
 ---
@@ -413,6 +419,32 @@ Gráfico pizza/doughnut:
 | P2         | Análise de custo-benefício: preventiva vs. corretiva         | Backend   |
 | P2         | Export CSV/PDF do relatório financeiro                        | Full stack|
 | P3         | Depreciation schedule (se `custoAquisicao` for adicionado)   | Schema    |
+
+---
+
+## 9. O que falta para finalizar o módulo financeiro
+
+### 9.1 Backend (pendente)
+
+- [ ] Endpoint standalone `GET /payments?from=&to=&refType=&status=&metodo=`
+- [ ] Relatório de pagamentos por método (base para gráfico PIX/cartão/dinheiro)
+- [ ] Recalcular `Product.custoUnitario` por custo médio ponderado nas ENTRADAS
+- [ ] Migrações de schema financeiro:
+  - [ ] `VehicleMaintenance.tipo`, `VehicleMaintenance.status`, `VehicleMaintenance.fornecedor`
+  - [ ] `StockMovement.custoUnitario` por movimentação
+  - [ ] `ContractIncident.cobradoCliente` + tipos `KM_EXCEDENTE`/`COMBUSTIVEL`
+
+### 9.2 Frontend (pendente)
+
+- [ ] Gráfico doughnut de distribuição por método de pagamento
+- [ ] Rentabilidade por veículo completa (receita - manutenção), não apenas custo de manutenção
+- [ ] Card de valoração total do estoque (Σ quantidadeAtual × custoUnitario)
+- [ ] Export CSV/PDF do relatório financeiro
+- [ ] Testes unitários da feature `admin/financeiro`
+
+### 9.3 Critério de conclusão sugerido
+
+Considerar o módulo financeiro **finalizado** quando os itens 9.1 e 9.2 estiverem em 🟢 nos TODOs e com evidência de build/test passando para API e WEB.
 
 ---
 

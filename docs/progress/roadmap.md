@@ -20,6 +20,10 @@
   - Backend: `GET /reports/financial-summary`, `/reports/rental/receivables`, `/reports/fleet/maintenance-costs`, `/reports/stock/cost-analysis`
   - Backend: `getDailySummary` e `getMonthlyStats` enriquecidos com custos/métrica de recebíveis
   - Frontend: `/admin/financeiro` com DRE, custos diretos e tabela de contas a receber
+- Para fechar o módulo financeiro ainda faltam:
+  - Backend: `GET /payments` standalone + agregação por método
+  - Schema: custo médio ponderado/novos campos de manutenção e incidentes financeiros
+  - Frontend: gráfico de método de pagamento, rentabilidade por veículo completa, card de valoração de estoque e export CSV/PDF
 
 ---
 

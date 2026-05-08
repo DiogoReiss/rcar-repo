@@ -228,6 +228,7 @@
 | 🟡 | 13.1 | Pagamentos **embedded** nos módulos lavajato (`POST /schedules/:id/payment`, `POST /queue/:id/payment`) e rental (`POST /contracts/:id/payment`) — sem módulo standalone |
 | 🔴 | 13.2 | Criar `src/modules/payments/payments.module.ts` com `PaymentsService` e `PaymentsController` standalone (GET /payments com filtros) |
 | 🔴 | 13.3 | Testes unitários |
+| 🔴 | 13.4 | Agregação por método de pagamento (`PIX`, `DINHEIRO`, `CARTAO_*`) para consumo do dashboard financeiro |
 
 ---
 
