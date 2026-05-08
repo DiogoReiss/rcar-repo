@@ -29,5 +29,19 @@ test.describe('Admin happy paths', () => {
       await expect(page.locator('body')).toBeVisible();
     }
   });
+
+  test('creates customer through admin dialog happy path', async ({ page }) => {
+    await adminLogin(page);
+    await page.goto('/admin/clientes');
+
+    await page.getByText('Novo Cliente').click();
+    await expect(page.getByText('Novo Cliente', { exact: true })).toBeVisible();
+
+    await page.locator('input[name="nome"]').fill('Cliente Playwright');
+    await page.locator('input[name="cpfCnpj"]').fill('12345678900');
+    await page.getByText('Salvar').click();
+
+    await expect(page.getByText('Cliente Playwright')).toBeVisible();
+  });
 });
 
