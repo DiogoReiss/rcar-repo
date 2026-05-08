@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { finalize } from 'rxjs';
 import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { DialogModule } from 'primeng/dialog';
 import { ApiService } from '@core/services/api.service';
@@ -32,6 +32,7 @@ interface CustomerHistory {
 export default class ClientesListComponent {
   private readonly clientesService = inject(ClientesService);
   private readonly api             = inject(ApiService);
+  private readonly destroyRef      = inject(DestroyRef);
 
   readonly clientes   = this.clientesService.clientes;
   readonly loading    = this.clientesService.loading;
@@ -77,17 +78,17 @@ export default class ClientesListComponent {
 
   private loadPage() {
     this.clientesService.load(this.search(), this.page(), this.perPage)
-      .pipe(takeUntilDestroyed()).subscribe();
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch() {
     this.page.set(1);
-    this.clientesService.load(this.search(), 1, this.perPage).pipe(takeUntilDestroyed()).subscribe();
+    this.clientesService.load(this.search(), 1, this.perPage).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   goToPage(p: number) {
     this.page.set(p);
-    this.clientesService.load(this.search(), p, this.perPage).pipe(takeUntilDestroyed()).subscribe();
+    this.clientesService.load(this.search(), p, this.perPage).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   openNew() {
@@ -110,17 +111,18 @@ export default class ClientesListComponent {
 
   closeDialog() { this.dialogVisible.set(false); }
 
-  async openDetail(c: Customer) {
+  openDetail(c: Customer) {
     this.detailData.set({ customer: c, schedules: [], contracts: [] });
     this.detailLoading.set(true);
-    try {
-      const res = await firstValueFrom(this.api.get<CustomerHistory>(`/customers/${c.id}/history`));
-      this.detailData.set(res);
-    } catch {
-      // keep shell with empty history on error
-    } finally {
-      this.detailLoading.set(false);
-    }
+    this.api.get<CustomerHistory>(`/customers/${c.id}/history`).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.detailLoading.set(false)),
+    ).subscribe({
+      next: res => this.detailData.set(res),
+      error: () => {
+        // keep shell with empty history on error
+      },
+    });
   }
 
   closeDetail() { this.detailData.set(null); }
@@ -132,7 +134,7 @@ export default class ClientesListComponent {
     ];
   }
 
-  async onDialogSave() {
+  onDialogSave() {
     this.saving.set(true);
     const base = {
       tipo: this.fTipo(), nome: this.fNome(), cpfCnpj: this.fCpfCnpj(),
@@ -144,13 +146,15 @@ export default class ClientesListComponent {
     const pj = this.fTipo() === 'PJ'
       ? { razaoSocial: this.fRazaoSocial() || undefined, responsavel: this.fResponsavel() || undefined }
       : {};
-    try {
-      if (this.isEdit()) {
-        await firstValueFrom(this.clientesService.update(this.editTarget()!.id, { ...base, ...pf, ...pj }));
-      } else {
-        await firstValueFrom(this.clientesService.create({ ...base, ...pf, ...pj } as any));
-      }
-      this.closeDialog();
-    } finally { this.saving.set(false); }
+    const request$ = this.isEdit()
+      ? this.clientesService.update(this.editTarget()!.id, { ...base, ...pf, ...pj })
+      : this.clientesService.create({ ...base, ...pf, ...pj } as any);
+
+    request$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.saving.set(false)),
+    ).subscribe({
+      next: () => this.closeDialog(),
+    });
   }
 }

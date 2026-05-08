@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  UseGuards, Sse, HttpCode, HttpStatus,
+  UseGuards, Sse, HttpCode, HttpStatus, ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Observable, switchMap, startWith } from 'rxjs';
@@ -52,14 +52,14 @@ export class LavajatoController {
 
   @Patch('schedules/:id/status')
   @ApiOperation({ summary: 'Atualiza status do agendamento' })
-  updateScheduleStatus(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
+  updateScheduleStatus(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: UpdateScheduleDto) {
     return this.lavajatoService.updateScheduleStatus(id, dto);
   }
 
   @Delete('schedules/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Cancela agendamento' })
-  async cancelSchedule(@Param('id') id: string) {
+  async cancelSchedule(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     await this.lavajatoService.cancelSchedule(id);
   }
 
@@ -79,14 +79,14 @@ export class LavajatoController {
 
   @Patch('queue/:id/advance')
   @ApiOperation({ summary: 'Avança status na fila (aguardando → em atendimento → concluído)' })
-  advanceQueue(@Param('id') id: string) {
+  advanceQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.lavajatoService.advanceQueue(id);
   }
 
   @Delete('queue/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove/conclui entrada da fila' })
-  async removeFromQueue(@Param('id') id: string) {
+  async removeFromQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     await this.lavajatoService.removeFromQueue(id);
   }
 
@@ -115,13 +115,13 @@ export class LavajatoController {
 
   @Post('schedules/:id/payment')
   @ApiOperation({ summary: 'Registra pagamento de agendamento' })
-  paySchedule(@Param('id') id: string, @Body() dto: CreatePaymentDto) {
+  paySchedule(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: CreatePaymentDto) {
     return this.lavajatoService.registerPayment('WASH_SCHEDULE', id, dto);
   }
 
   @Post('queue/:id/payment')
   @ApiOperation({ summary: 'Registra pagamento de atendimento na fila' })
-  payQueue(@Param('id') id: string, @Body() dto: CreatePaymentDto) {
+  payQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: CreatePaymentDto) {
     return this.lavajatoService.registerPayment('WASH_QUEUE', id, dto);
   }
 }

@@ -71,7 +71,7 @@
 - [x] **Q15**: Fixed broken unit test — removed `require()`, uses injected `Router`
 
 ### Sprint B — Frontend reactivity (1–2 days)
-- [ ] **A12**: Convert all 14 remaining `firstValueFrom` / async-await service calls to `Observable` + `takeUntilDestroyed`
+- [ ] **A12**: Convert all 14 remaining `firstValueFrom` / async-await service calls to `Observable` + `takeUntilDestroyed` *(started: `clientes-list.ts` migrated to `subscribe` + `takeUntilDestroyed` + `finalize`)*
 - [ ] **A13**: Add pagination controls to `clientes-list` HTML and wire `page` to `clientes.service.ts`
 - [ ] **A16**: Add `takeUntilDestroyed` to all open `.subscribe()` calls in components
 
@@ -86,7 +86,7 @@
 
 ### Sprint E — Security hardening (1 day)
 - [ ] **S11**: Add per-account login attempt counter (store failed attempts in a Redis key per email, lock after 10 failures for 15 min)
-- [ ] **Q16**: Add a global `ParseUUIDPipe` to all `:id` route params
+- [x] **Q16**: Add `ParseUUIDPipe` (`version: '4'`) to all current `:id` route params in module controllers (`lavajato` + `templates`)
 - [ ] **D8**: Verify `openContract` transaction cannot create a partially-applied state (already uses `$transaction` — add re-read and status guard)
 - [ ] **D9**: Add idempotency key header support to `inventory.createMovement`
 
