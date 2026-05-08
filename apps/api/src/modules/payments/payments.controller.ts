@@ -5,12 +5,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '@common/guards/roles.guard';
-import { Roles } from '@common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
 import { PaymentsService } from './payments.service.js';
 import { QueryPaymentsDto } from './dto/query-payments.dto.js';
-import { PaginationDto } from '@common/dto/pagination.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @ApiTags('Payments')
 @ApiBearerAuth()

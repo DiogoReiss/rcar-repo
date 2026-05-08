@@ -5,9 +5,9 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '@common/decorators/roles.decorator';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { CreateUploadRequestDto } from './dto/create-upload-request.dto.js';
 import { GetSignedUrlQueryDto } from './dto/get-signed-url-query.dto.js';
 import { StorageService } from './storage.service.js';

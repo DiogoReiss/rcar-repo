@@ -18,6 +18,7 @@ import { ReportsService } from '../src/modules/reports/reports.service';
 import { PaymentsService } from '../src/modules/payments/payments.service';
 import { InventoryService } from '../src/modules/inventory/inventory.service';
 import { StorageService } from '../src/modules/storage/storage.service';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('API happy paths (e2e)', () => {
   let app: INestApplication<App> | null = null;
@@ -103,6 +104,10 @@ describe('API happy paths (e2e)', () => {
       .fn()
       .mockResolvedValue({ signedUrl: 'https://storage.local/file' }),
   };
+  const prismaService = {
+    $connect: jest.fn().mockResolvedValue(undefined),
+    $disconnect: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -138,6 +143,8 @@ describe('API happy paths (e2e)', () => {
       .useValue(inventoryService)
       .overrideProvider(StorageService)
       .useValue(storageService)
+      .overrideProvider(PrismaService)
+      .useValue(prismaService)
       .compile();
 
     const testApp = moduleFixture.createNestApplication();
