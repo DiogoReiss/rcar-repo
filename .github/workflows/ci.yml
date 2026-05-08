@@ -6,33 +6,41 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build-api:
     name: Build API
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/api
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.33.0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: .
 
       # Q10: Generate Prisma client before building so types are available
       - name: Generate Prisma client
         run: pnpm --filter api prisma generate
+
+      - name: Lint (API)
+        run: pnpm --filter api lint
 
       - name: Build
         run: pnpm --filter api build
@@ -40,21 +48,26 @@ jobs:
       - name: Unit tests (API)
         run: pnpm --filter api test
 
+      - name: Happy-path E2E tests (API)
+        run: pnpm --filter api test:e2e
+
   build-web:
     name: Build Web
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.33.0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -64,4 +77,10 @@ jobs:
 
       - name: Unit tests
         run: pnpm --filter web test:unit
+
+      - name: Install Playwright browser (Chromium)
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Happy-path E2E tests (Web)
+        run: pnpm --filter web test:e2e
 

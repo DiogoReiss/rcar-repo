@@ -35,7 +35,7 @@ test.describe('Admin happy paths', () => {
     await page.goto('/admin/clientes');
 
     await page.getByText('Novo Cliente').click();
-    await expect(page.getByText('Novo Cliente', { exact: true })).toBeVisible();
+    await expect(page.locator('input[name="nome"]')).toBeVisible();
 
     await page.locator('input[name="nome"]').fill('Cliente Playwright');
     await page.locator('input[name="cpfCnpj"]').fill('12345678900');
