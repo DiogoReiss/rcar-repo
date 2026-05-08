@@ -9,7 +9,7 @@
 >
   <p class="confirm-message">{{ message() }}</p>
 
-  <ng-template pTemplate="footer">
+  <ng-template #footer>
     <div class="confirm-footer">
       <lync-btn [label]="cancelLabel()" variant="secondary" [disabled]="loading()" (clicked)="cancelled.emit()" />
       <lync-btn

@@ -181,7 +181,7 @@
     </div>
   }
 
-  <ng-template pTemplate="footer">
+  <ng-template #footer>
     <div class="detail-footer">
       <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
       @if (detailData()?.status === 'ATIVO') {
@@ -248,7 +248,7 @@
     </div>
   }
 
-  <ng-template pTemplate="footer">
+  <ng-template #footer>
     <div class="detail-footer">
       <lync-btn label="Cancelar" variant="secondary" (clicked)="closeDevolucao()" [disabled]="devolucaoSaving()" />
       <lync-btn label="Confirmar Devolução" (clicked)="onSubmitDevolucao()" [loading]="devolucaoSaving()" [disabled]="devolucaoLoading()" />

@@ -95,7 +95,7 @@
       </div>
     </div>
 
-    <ng-template pTemplate="footer">
+    <ng-template #footer>
       <div class="detail-footer detail-footer--add">
         <span class="add-dialog-state" [class.add-dialog-state--ready]="canSubmitAdd">
           @if (canSubmitAdd) {
@@ -298,7 +298,7 @@
         </div>
       </div>
 
-      <ng-template pTemplate="footer">
+      <ng-template #footer>
         <div class="detail-footer">
           <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
           @if (detailCanPay) {

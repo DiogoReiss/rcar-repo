@@ -39,7 +39,7 @@
     <ng-content />
   </div>
 
-  <ng-template pTemplate="footer">
+  <ng-template #footer>
     <div class="wz-footer">
       <lync-btn label="Cancelar" variant="ghost" (clicked)="close()" [disabled]="loading()" />
       <div class="wz-footer__nav">

@@ -19,7 +19,7 @@
     </div>
   </div>
 
-  <ng-template pTemplate="footer">
+  <ng-template #footer>
     <div class="pay-footer">
       <lync-btn label="Cancelar" variant="secondary" [disabled]="loading()" (clicked)="onCancel()" />
       <lync-btn
