@@ -33,7 +33,7 @@ export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post('templates/:id/pdf')
-  @ApiOperation({ summary: 'Gera PDF a partir de template + variáveis (scaffold inicial)' })
+  @ApiOperation({ summary: 'Gera PDF real a partir de template HTML + variáveis' })
   @ApiConsumes('application/json')
   @ApiProduces('application/pdf')
   @ApiBody({ type: GenerateTemplatePdfDto })
@@ -44,6 +44,7 @@ export class DocumentsController {
   })
   @ApiResponse({ status: 400, description: 'Template inválido ou sem conteúdo renderizável' })
   @ApiResponse({ status: 404, description: 'Template não encontrado' })
+  @ApiResponse({ status: 500, description: 'Falha de renderização do PDF no servidor' })
   async generateTemplatePdf(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() dto: GenerateTemplatePdfDto,

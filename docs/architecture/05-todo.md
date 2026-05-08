@@ -30,7 +30,7 @@
 | Ponto | Situação | O que já está pronto | O que falta para fechar |
 |---|---|---|---|
 | 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend e cobertura inicial | Cobertura de testes mais ampla, UX de carregamento/empty states e estabilização final da trilha |
-| 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` + validações + testes iniciais | Motor real HTML->PDF e fluxo completo de assinatura D4Sign |
+| 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validações e testes iniciais | Fluxo completo de assinatura D4Sign + expansão de geração/consumo no frontend |
 | 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
 | 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes iniciais) | Cobertura ampla unit/E2E, Swagger completo, fechamento de lint/CI e checklist de go-live |
@@ -49,7 +49,7 @@
 | Admin CRUD (usuários, serviços, frota, clientes) | 🟢 (uploads pendentes) | 🟢 | 🟡 |
 | Lavajato (agenda/fila/pagamentos) | 🟢 (testes pendentes) | 🟢 | 🟡 |
 | Aluguel (disponibilidade, contrato, devolução) | 🟢 (testes pendentes) | 🟡 | 🟡 |
-| Templates + PDF | 🟡 (scaffold pronto, motor real pendente) | 🟡 | 🟡 |
+| Templates + PDF | 🟢 (motor HTML->PDF real no backend) | 🟡 | 🟡 |
 | D4Sign | 🔴 | 🔴 | 🔴 |
 | Storage real S3/MinIO | 🟡 (presigned real) | 🟡 (upload CNH integrado, cobertura parcial) | 🟡 |
 | Financeiro e relatórios | 🟢 | 🟢 | 🟢 |
@@ -170,10 +170,9 @@
 ### 5.1 Templates e PDF
 
 - 🟢 Backend templates CRUD + preview concluídos.
-- 🟡 `POST /documents/templates/:id/pdf` disponível com scaffold seguro (validação + filename normalizado + headers) e testes iniciais.
-- 🔴 Renderização HTML->PDF real (Puppeteer/engine) pendente.
+- 🟢 `POST /documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validação de conteúdo e filename normalizado.
 - 🟢 Frontend templates list + editor inline + preview live concluídos.
-- 🔴 Preview dedicado com dados mock estruturados e botão "Gerar PDF" em contratos/recibos pendentes.
+- 🔴 Botão "Gerar PDF" em contratos/recibos e consumo completo do fluxo no frontend pendentes.
 
 ### 5.2 D4Sign
 

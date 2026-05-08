@@ -9,7 +9,7 @@
 | Ponto | Status atual | Pendência-chave |
 |---|---|---|
 | 5 (operacional/UX) | 🟡 | Expandir testes e fechar UX de estados de carregamento/vazio |
-| 2 (documentos/PDF/assinatura) | 🟡 | Implementar renderização HTML->PDF real e fluxo D4Sign |
+| 2 (documentos/PDF/assinatura) | 🟡 | Renderização HTML->PDF backend já implementada; falta fluxo D4Sign e fechamento frontend |
 | 3 (storage) | 🟡 | Presigned real já implementado; falta expandir upload/download frontend fim a fim para todas as trilhas |
 | 4 (pagamentos online) | 🔴/📌 | Integração Pagar.me depende de credenciais e webhook homologado |
 | 1 (hardening final) | 🟡 | Cobertura de testes, Swagger completo e gates finais de CI/go-live |
@@ -44,7 +44,7 @@
 ## 3) O que está parcialmente concluído
 
 - **Storage**: backend com presigned URL real (AWS SDK) e upload CNH no frontend já integrados; pendente cobertura total (frota/vistorias/download assinado).
-- **PDF**: endpoint protegido e scaffold de geração prontos; falta motor real HTML->PDF.
+- **PDF**: endpoint protegido com renderização real HTML->PDF já implementado; pendente integração completa de consumo no frontend e assinatura digital.
 - **Aluguel frontend**: fluxo wizard existe, mas itens do checklist original (form/confirm/services de reserva, abertura detalhada, fechamento final) ainda pendentes.
 - **Testes**: há base real, mas cobertura funcional completa (unit+e2e) ainda não atingida.
 - **Swagger/CI/lint**: estrutura pronta; falta fechamento de cobertura e validações finais de pipeline como gate de release.
