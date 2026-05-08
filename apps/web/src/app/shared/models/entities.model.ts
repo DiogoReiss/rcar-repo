@@ -37,5 +37,10 @@ export type {
   Template,
   AvailabilitySlot,
   AvailabilityResponse,
+  FinancialSummary,
+  RentalReceivablesReport,
+  RentalReceivableRow,
+  MaintenanceCostsReport,
+  StockCostAnalysisReport,
   PaginatedResponse,
 } from '@rcar/shared-types';

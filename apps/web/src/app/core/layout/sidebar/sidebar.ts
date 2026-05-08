@@ -51,6 +51,7 @@ export default class SidebarComponent {
     {
       title: 'Administração',
       items: [
+        { label: 'Financeiro',   icon: 'pi pi-chart-line', route: '/admin/financeiro' },
         { label: 'Templates',    icon: 'pi pi-copy',       route: '/admin/templates' },
         { label: 'Usuários',     icon: 'pi pi-user-edit',  route: '/admin/usuarios' },
       ],

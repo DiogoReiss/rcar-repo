@@ -251,6 +251,74 @@ export interface AvailabilityResponse {
   slots: AvailabilitySlot[];
 }
 
+// ─── Financial Reports ──────────────────────────────────────────────────────
+
+export interface FinancialSummary {
+  periodo: { from: string; to: string };
+  receita: {
+    lavajato: number;
+    aluguel: number;
+    extrasAluguel: number;
+    total: number;
+  };
+  custos: {
+    insumos: number;
+    manutencao: number;
+    total: number;
+  };
+  margem: {
+    bruta: number;
+    percentual: number;
+  };
+}
+
+export interface RentalReceivableRow {
+  contractId: string;
+  customer?: Pick<Customer, 'id' | 'nome' | 'cpfCnpj'>;
+  vehicle?: Pick<Vehicle, 'id' | 'placa' | 'modelo'>;
+  dataDevReal?: string | Date | null;
+  faturado: number;
+  pago: number;
+  pendente: number;
+  payments: Array<Pick<Payment, 'id' | 'valor' | 'metodo' | 'createdAt'>>;
+}
+
+export interface RentalReceivablesReport {
+  totalRegistros: number;
+  totalFaturado: number;
+  totalPago: number;
+  totalPendente: number;
+  data: RentalReceivableRow[];
+}
+
+export interface MaintenanceCostsReport {
+  periodo: { from: string; to: string };
+  total: number;
+  manutencoes: number;
+  veiculos: Array<{
+    vehicleId: string;
+    placa: string;
+    modelo: string;
+    categoria: string;
+    total: number;
+    qtd: number;
+    ultimaData: string;
+  }>;
+}
+
+export interface StockCostAnalysisReport {
+  periodo: { from: string; to: string };
+  custoTotal: number;
+  itens: number;
+  produtos: Array<{
+    productId: string;
+    nome: string;
+    unidade: string;
+    quantidade: number;
+    custoTotal: number;
+  }>;
+}
+
 // ─── Pagination ──────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {

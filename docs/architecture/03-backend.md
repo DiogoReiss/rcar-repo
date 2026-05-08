@@ -301,6 +301,8 @@ GET    /api/payments?ref_type=wash|rental&ref_id=uuid  # Pagamentos de uma refer
 
 ### Reports
 
+> Status (2026-05-08): endpoints de DRE simplificado, contas a receber, custo de manutenção e COGS já implementados no `ReportsService`.
+
 ```
 GET    /api/reports/dashboard                       # KPIs: contagens, low-stock
 GET    /api/reports/daily?date=YYYY-MM-DD           # Resumo do dia (lavajato + aluguel + estoque + custos)

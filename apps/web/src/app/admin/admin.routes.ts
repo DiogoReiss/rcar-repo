@@ -12,4 +12,5 @@ export const adminRoutes: Routes = [
   { path: 'clientes',  loadComponent: () => import('./clientes/clientes-list/clientes-list') },
   { path: 'clientes/:id', loadComponent: () => import('./clientes/cliente-detail/cliente-detail') },
   { path: 'templates', loadComponent: () => import('./templates/templates-list/templates-list') },
+  { path: 'financeiro', loadComponent: () => import('./financeiro/financeiro-dashboard/financeiro-dashboard') },
 ];

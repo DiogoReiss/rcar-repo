@@ -1,0 +1,117 @@
+<section class="page">
+  <lync-page-header title="Financeiro">
+    <div class="header-actions">
+      <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" aria-label="Data inicial" />
+      <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" aria-label="Data final" />
+      <lync-btn label="Atualizar" icon="pi pi-refresh" [loading]="loading()" (clicked)="reload()" />
+    </div>
+  </lync-page-header>
+
+  @if (loading()) {
+    <div class="loading">Carregando indicadores financeiros...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else {
+    @if (summary(); as s) {
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <h3>Receita Total</h3>
+          <strong>{{ s.receita.total | currencyBrl }}</strong>
+          <small>Lavajato: {{ s.receita.lavajato | currencyBrl }} · Aluguel: {{ s.receita.aluguel | currencyBrl }}</small>
+        </article>
+        <article class="kpi-card kpi-card--cost">
+          <h3>Custos Diretos</h3>
+          <strong>{{ s.custos.total | currencyBrl }}</strong>
+          <small>Insumos: {{ s.custos.insumos | currencyBrl }} · Manutenção: {{ s.custos.manutencao | currencyBrl }}</small>
+        </article>
+        <article class="kpi-card kpi-card--margin">
+          <h3>Margem Bruta</h3>
+          <strong>{{ s.margem.bruta | currencyBrl }}</strong>
+          <small>{{ s.margem.percentual.toFixed(2) }}%</small>
+        </article>
+      </div>
+    }
+
+    <div class="two-col">
+      <article class="card">
+        <h3>Contas a Receber (Aluguel)</h3>
+        @if (receivables(); as r) {
+          <p class="totals">Pendente total: <strong>{{ r.totalPendente | currencyBrl }}</strong> · Registros: {{ r.totalRegistros }}</p>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr><th>Contrato</th><th>Cliente</th><th>Veículo</th><th>Faturado</th><th>Pago</th><th>Pendente</th></tr>
+              </thead>
+              <tbody>
+                @for (row of r.data; track row.contractId) {
+                  <tr>
+                    <td>#{{ row.contractId.slice(0, 8) }}</td>
+                    <td>{{ row.customer?.nome ?? '—' }}</td>
+                    <td>{{ row.vehicle?.placa ?? '—' }}</td>
+                    <td>{{ row.faturado | currencyBrl }}</td>
+                    <td>{{ row.pago | currencyBrl }}</td>
+                    <td class="text-danger"><strong>{{ row.pendente | currencyBrl }}</strong></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="6" class="empty">Sem pendências no período.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </article>
+
+      <article class="card">
+        <h3>Rentabilidade por Veículo (proxy)</h3>
+        @if (maintenance(); as m) {
+          <p class="totals">Custo manutenção no período: <strong>{{ m.total | currencyBrl }}</strong></p>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr><th>Placa</th><th>Modelo</th><th>Manutenções</th><th>Custo</th></tr>
+              </thead>
+              <tbody>
+                @for (row of m.veiculos; track row.vehicleId) {
+                  <tr>
+                    <td><strong>{{ row.placa }}</strong></td>
+                    <td>{{ row.modelo }}</td>
+                    <td>{{ row.qtd }}</td>
+                    <td>{{ row.total | currencyBrl }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="4" class="empty">Sem custos de manutenção no período.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </article>
+    </div>
+
+    <article class="card">
+      <h3>Valoração e Custo de Estoque (COGS)</h3>
+      @if (stockCosts(); as c) {
+        <p class="totals">Custo total consumido: <strong>{{ c.custoTotal | currencyBrl }}</strong> · Itens de saída: {{ c.itens }}</p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Produto</th><th>Quantidade</th><th>Custo Total</th></tr>
+            </thead>
+            <tbody>
+              @for (p of c.produtos; track p.productId) {
+                <tr>
+                  <td>{{ p.nome }}</td>
+                  <td>{{ p.quantidade.toFixed(3) }} {{ p.unidade }}</td>
+                  <td>{{ p.custoTotal | currencyBrl }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="empty">Sem consumo de estoque no período.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  }
+</section>
+

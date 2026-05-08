@@ -1,7 +1,25 @@
-# Phase 2–6: Remaining Work Roadmap
+# Phase 2–6: Deep Review Backlog Roadmap
 
-**Status:** ✅ All Phases Complete (2–6)
+**Status:** 🟡 Mixed — core phases delivered, backlog still open
 **Prerequisites:** Phase 1 ✅ Complete
+
+---
+
+## Status Sync Notes (2026-05-08)
+
+- Este arquivo consolida **backlog técnico pós-entrega** (deep review), não substitui os TODOs detalhados.
+- Referência de status operacional (fonte primária):
+  - `docs/todo-backend.md`
+  - `docs/todo-frontend.md`
+- Verificações rápidas no codebase usadas na sincronização:
+  - Backend módulos presentes: `apps/api/src/modules/{auth,customers,fleet,inventory,lavajato,rental,reports,templates,...}`
+  - Frontend áreas presentes: `apps/web/src/app/{admin,lavajato,aluguel,core,shared}`
+  - CI ativo com build/test web+api: `.github/workflows/ci.yml`
+  - Lacunas ainda reais: `apps/api/src/modules/storage/` e `apps/api/src/modules/documents/` ausentes; sem serviço `d4sign`/PDF no backend.
+- Quick wins financeiros já entregues (2026-05-08):
+  - Backend: `GET /reports/financial-summary`, `/reports/rental/receivables`, `/reports/fleet/maintenance-costs`, `/reports/stock/cost-analysis`
+  - Backend: `getDailySummary` e `getMonthlyStats` enriquecidos com custos/métrica de recebíveis
+  - Frontend: `/admin/financeiro` com DRE, custos diretos e tabela de contas a receber
 
 ---
 
@@ -196,7 +214,7 @@
 
 ---
 
-## Post-launch Backlog
+## Post-launch Backlog (open)
 
 The following items were intentionally deferred and can be tackled independently:
 
@@ -204,5 +222,5 @@ The following items were intentionally deferred and can be tackled independently
 - [ ] D4Sign full API integration (send doc, webhook, signed PDF download)
 - [ ] PDF generation (puppeteer or weasyprint) from rendered templates
 - [ ] Portal do Cliente pages (histórico, agendamentos, reservas, documentos)
-- [ ] E2E tests (Playwright)
+- [ ] Expandir cobertura E2E (Playwright + cenários backend além do stub)
 - [ ] Multi-unit / multi-branch support

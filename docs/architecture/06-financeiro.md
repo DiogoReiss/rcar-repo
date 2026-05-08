@@ -79,8 +79,8 @@ Custo de Operação Lavajato (mês) =
 
 **O que implementar:**
 
-- [ ] Endpoint `GET /reports/stock/cost-analysis?from=&to=` — custo total de saídas por período
-- [ ] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoInsumos`
+- [x] Endpoint `GET /reports/stock/cost-analysis?from=&to=` — custo total de saídas por período
+- [x] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoInsumos`
 - [ ] Dashboard: card "Custo de insumos" ao lado de "Receita Lavajato"
 - [ ] Relatório: margem bruta do lavajato = `receitaLavajato - custoInsumos`
 
@@ -103,8 +103,8 @@ Média Mensal por Veículo =
 
 **O que implementar:**
 
-- [ ] Endpoint `GET /reports/fleet/maintenance-costs?from=&to=` com breakdown por veículo
-- [ ] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoManutencao`
+- [x] Endpoint `GET /reports/fleet/maintenance-costs?from=&to=` com breakdown por veículo
+- [x] No `getDailySummary` e `getMonthlyStats`, adicionar campo `custoManutencao`
 - [ ] Detalhe do veículo: card com "Total gasto em manutenção" e lista de manutenções
 - [ ] Dashboard: card "Custo de manutenção" no período
 
@@ -129,8 +129,8 @@ A Receber         = Receita Real - Receita Recebida
 
 **O que implementar:**
 
-- [ ] No `getMonthlyStats`, adicionar: `faturado`, `recebido`, `aReceber`
-- [ ] Endpoint `GET /reports/rental/receivables` — contratos com saldo pendente
+- [x] No `getMonthlyStats`, adicionar: `faturado`, `recebido`, `aReceber`
+- [x] Endpoint `GET /reports/rental/receivables` — contratos com saldo pendente
 - [ ] Dashboard: card de "contas a receber" com aging (vencidos vs. a vencer)
 
 ### 2.4 Incidentes — Custos extras e receita adicional
@@ -178,7 +178,7 @@ CUSTOS DIRETOS
 
 **O que implementar:**
 
-- [ ] Endpoint `GET /reports/financial-summary?from=&to=`
+- [x] Endpoint `GET /reports/financial-summary?from=&to=`
 - [ ] Frontend: página `/admin/financeiro` com cards e tabela do DRE
 - [ ] Export CSV/PDF do relatório financeiro
 
@@ -208,11 +208,11 @@ Serviço concluído → Para cada ServiceProduct vinculado:
   → Product.quantidadeAtual -= quantidadePorUso
 ```
 
-**Status:** A baixa automática por serviço concluído **não está implementada**. Hoje as saídas são manuais.
+**Status:** A baixa automática por serviço concluído **já está implementada** no backend (`lavajato.service.ts`) com criação de `StockMovement` do tipo `SAIDA` ao concluir atendimento.
 
 **O que implementar:**
 
-- [ ] Ao concluir `WashSchedule` ou `WashQueue`, criar StockMovements automáticos baseados em `ServiceProduct`
+- [x] Ao concluir `WashSchedule` ou `WashQueue`, criar StockMovements automáticos baseados em `ServiceProduct`
 - [ ] Alerta no dashboard quando produto atinge `estoqueMinimo`
 - [ ] Relatório: consumo de insumos vs. serviços executados (eficiência)
 

@@ -232,8 +232,85 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
       productUsage:   { labels: MOCK_PRODUCTS.slice(0,6).map(p => p.nome), data: [24,9,38,11,15,7] },
     });
   }
-  if (method === 'GET' && path === '/reports/daily')   return ok({ lavajato: { agendados: 8, concluidos: 6, cancelados: 1, walkins: 4, receita: 720 }, aluguel: { novasReservas: 3, receita: 1080 } });
-  if (method === 'GET' && path === '/reports/monthly') return ok({ receita: { lavajato: 11400, aluguel: 22800, total: 34200 }, novosClientes: 12, novosContratos: 18 });
+  if (method === 'GET' && path === '/reports/daily') {
+    return ok({
+      lavajato: { agendados: 8, concluidos: 6, cancelados: 1, walkins: 4, receita: 720, custoInsumos: 115 },
+      aluguel: { novasReservas: 3, receita: 1080, custoManutencao: 240 },
+      financeiro: { receitaTotal: 1800, custosDiretos: 355, margemBruta: 1445 },
+    });
+  }
+  if (method === 'GET' && path === '/reports/monthly') {
+    return ok({
+      receita: { lavajato: 11400, aluguel: 22800, total: 34200 },
+      custos: { insumos: 1980, manutencao: 4200, total: 6180 },
+      faturamentoAluguel: { faturado: 25100, recebido: 22800, aReceber: 2300 },
+      novosClientes: 12,
+      novosContratos: 18,
+    });
+  }
+  if (method === 'GET' && path === '/reports/financial-summary') {
+    return ok({
+      periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },
+      receita: { lavajato: 11400, aluguel: 22800, extrasAluguel: 1700, total: 35900 },
+      custos: { insumos: 1980, manutencao: 4200, total: 6180 },
+      margem: { bruta: 29720, percentual: 82.78 },
+    });
+  }
+  if (method === 'GET' && path === '/reports/rental/receivables') {
+    const data = [
+      {
+        contractId: 'rcv-1',
+        customer: { id: 'c1', nome: 'Ana Souza', cpfCnpj: '123.456.789-00' },
+        vehicle: { id: 'v1', placa: 'ABC1D23', modelo: 'Onix LT' },
+        dataDevReal: `${daysAgo(2)}T10:00:00Z`,
+        faturado: 1450,
+        pago: 900,
+        pendente: 550,
+        payments: [{ id: 'p-r-1', valor: 900, metodo: 'PIX', createdAt: `${daysAgo(3)}T10:00:00Z` }],
+      },
+      {
+        contractId: 'rcv-2',
+        customer: { id: 'c3', nome: 'Carlos Lima', cpfCnpj: '456.123.987-11' },
+        vehicle: { id: 'v3', placa: 'JKL9A81', modelo: 'Compass' },
+        dataDevReal: `${daysAgo(1)}T16:00:00Z`,
+        faturado: 2200,
+        pago: 1200,
+        pendente: 1000,
+        payments: [{ id: 'p-r-2', valor: 1200, metodo: 'CARTAO_CREDITO', createdAt: `${daysAgo(1)}T18:00:00Z` }],
+      },
+    ];
+    return ok({
+      totalRegistros: data.length,
+      totalFaturado: data.reduce((a, r) => a + r.faturado, 0),
+      totalPago: data.reduce((a, r) => a + r.pago, 0),
+      totalPendente: data.reduce((a, r) => a + r.pendente, 0),
+      data,
+    });
+  }
+  if (method === 'GET' && path === '/reports/fleet/maintenance-costs') {
+    return ok({
+      periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },
+      total: 4200,
+      manutencoes: 9,
+      veiculos: [
+        { vehicleId: 'v3', placa: 'JKL9A81', modelo: 'Compass', categoria: 'SUV', total: 1600, qtd: 3, ultimaData: `${daysAgo(5)}T12:00:00Z` },
+        { vehicleId: 'v1', placa: 'ABC1D23', modelo: 'Onix LT', categoria: 'ECONOMICO', total: 980, qtd: 2, ultimaData: `${daysAgo(12)}T12:00:00Z` },
+        { vehicleId: 'v8', placa: 'QWE4T67', modelo: 'Hilux SW4', categoria: 'UTILITARIO', total: 830, qtd: 2, ultimaData: `${daysAgo(9)}T12:00:00Z` },
+      ],
+    });
+  }
+  if (method === 'GET' && path === '/reports/stock/cost-analysis') {
+    return ok({
+      periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },
+      custoTotal: 1980,
+      itens: 48,
+      produtos: [
+        { productId: 'p1', nome: 'Shampoo Automotivo', unidade: 'L', quantidade: 22.5, custoTotal: 900 },
+        { productId: 'p2', nome: 'Cera Líquida', unidade: 'L', quantidade: 8.4, custoTotal: 630 },
+        { productId: 'p3', nome: 'Desengraxante', unidade: 'L', quantidade: 12.0, custoTotal: 450 },
+      ],
+    });
+  }
 
   // ── Users ─────────────────────────────────────────────────────────────────────────────────
   if (method === 'GET'  && path === '/users') return ok(MOCK_USERS_LIST);

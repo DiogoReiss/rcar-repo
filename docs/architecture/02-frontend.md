@@ -140,6 +140,17 @@ export const routes: Routes = [
 
 > **Nota:** O dashboard vive em `/admin` (empty-path em `admin.routes.ts`), **não** em `/admin/dashboard`. Links internos devem usar `routerLink="/admin"`.
 
+### Admin — Financeiro (implementado)
+
+- Rota: `/admin/financeiro`
+- Página: `src/app/admin/financeiro/financeiro-dashboard/`
+- Service: `src/app/admin/financeiro/financeiro.service.ts`
+- Fontes de dados consumidas:
+  - `GET /reports/financial-summary`
+  - `GET /reports/rental/receivables`
+  - `GET /reports/fleet/maintenance-costs`
+  - `GET /reports/stock/cost-analysis`
+
 ---
 
 ## Layout Shell

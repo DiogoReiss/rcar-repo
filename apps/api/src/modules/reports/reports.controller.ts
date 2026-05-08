@@ -46,4 +46,34 @@ export class ReportsController {
   charts() {
     return this.reportsService.getChartsData();
   }
+
+  @Get('financial-summary')
+  @ApiOperation({ summary: 'Resumo financeiro (DRE simplificado): receita, custos diretos e margem' })
+  @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
+  @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
+  financialSummary(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.reportsService.getFinancialSummary(from, to);
+  }
+
+  @Get('rental/receivables')
+  @ApiOperation({ summary: 'Contas a receber de aluguel (contratos encerrados com saldo pendente)' })
+  rentalReceivables() {
+    return this.reportsService.getRentalReceivables();
+  }
+
+  @Get('fleet/maintenance-costs')
+  @ApiOperation({ summary: 'Custos de manutenção por veículo e por período' })
+  @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
+  @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
+  maintenanceCosts(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.reportsService.getMaintenanceCosts(from, to);
+  }
+
+  @Get('stock/cost-analysis')
+  @ApiOperation({ summary: 'Custo de consumo de estoque (COGS) por período' })
+  @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
+  @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
+  stockCostAnalysis(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.reportsService.getStockCostAnalysis(from, to);
+  }
 }

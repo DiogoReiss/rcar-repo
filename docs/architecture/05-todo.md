@@ -1,4 +1,4 @@
-# RCar — TODO (Roadmap de Implementação)
+# RCar — TODO (Roadmap Macro de Implementação)
 
 ## Legenda
 
@@ -9,7 +9,22 @@
 
 ---
 
-## Fase 1 — MVP (Core funcional)
+## Status Sync Notes (2026-05-08)
+
+- Este arquivo é um **roadmap macro de arquitetura** (planejamento por fases), não a fonte detalhada de execução diária.
+- O status granular (passo a passo) foi verificado no código e é mantido em:
+  - `docs/todo-backend.md`
+  - `docs/todo-frontend.md`
+  - `docs/progress/improvement-fixes.md`
+- Evidências de codebase usadas na sincronização:
+  - módulos backend existentes em `apps/api/src/modules/`
+  - rotas/páginas frontend existentes em `apps/web/src/app/`
+  - pipeline CI em `.github/workflows/ci.yml`
+  - lacunas relevantes: ausência de `apps/api/src/modules/storage/`, `apps/api/src/modules/documents/`, `d4sign` e geração de PDF no backend
+
+---
+
+## Fase 1 — MVP (baseline histórico)
 
 ### Infraestrutura
 
@@ -174,12 +189,12 @@
 
 | Status | Tarefa                                              |
 |--------|-----------------------------------------------------|
-| 🔴     | Backend: `GET /reports/financial-summary` (DRE simplificado: receita - custos = margem) |
-| 🔴     | Backend: custo de insumos e manutenção no `getDailySummary` / `getMonthlyStats` |
-| 🔴     | Backend: baixa automática de estoque ao concluir serviço (`ServiceProduct`) |
+| 🟢     | Backend: `GET /reports/financial-summary` (DRE simplificado: receita - custos = margem) |
+| 🟢     | Backend: custo de insumos e manutenção no `getDailySummary` / `getMonthlyStats` |
+| 🟢     | Backend: baixa automática de estoque ao concluir serviço (`ServiceProduct`) |
 | 🔴     | Backend: `GET /payments` standalone com filtros (data, tipo, status, método) |
-| 🔴     | Frontend: página `/admin/financeiro` com DRE visual + gráficos |
-| 🔴     | Frontend: card "Contas a receber" (contratos sem pagamento total) |
+| 🟢     | Frontend: página `/admin/financeiro` com DRE visual + gráficos |
+| 🟢     | Frontend: card "Contas a receber" (contratos sem pagamento total) |
 | 🔴     | Frontend: rentabilidade por veículo (receita - manutenção) |
 
 ### 2b. Pagamentos online (Pagar.me)
@@ -237,9 +252,9 @@
 
 ## Próximos Passos Imediatos
 
-1. **Definir monorepo**: setup do workspace com `apps/web` (Angular) e `apps/api` (NestJS)
-2. **Docker Compose**: PostgreSQL + Redis + MinIO para dev local
-3. **Schema Prisma**: aplicar migration inicial com seed
-4. **Auth completa**: backend + frontend login funcional
-5. **CRUD de Serviços**: primeiro fluxo end-to-end para validar arquitetura
+1. **Financeiro backend (P1)**: implementar `GET /reports/financial-summary`, `/rental/receivables`, `/stock/cost-analysis` e custos em `daily/monthly`.
+2. **Financeiro frontend (P1)**: criar `/admin/financeiro` com DRE, contas a receber e rentabilidade por veículo.
+3. **Qualidade**: ampliar cobertura de testes (API unit/e2e e frontend unit) além dos arquivos atuais.
+4. **Documentos e arquivos**: concluir módulo Storage + geração real de PDF + integração D4Sign.
+5. **Governança de docs**: manter `todo-backend.md` e `todo-frontend.md` como fonte primária de status operacional.
 
