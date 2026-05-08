@@ -12,7 +12,7 @@
 | 2 (documentos/PDF/assinatura) | 🟡 | Renderização HTML->PDF backend já implementada; falta fluxo D4Sign e fechamento frontend |
 | 3 (storage) | 🟡 | Presigned real já implementado; falta expandir upload/download frontend fim a fim para todas as trilhas |
 | 4 (pagamentos online) | 🔴/📌 | Integração Pagar.me depende de credenciais e webhook homologado |
-| 1 (hardening final) | 🟡 | Cobertura unit evoluiu amplamente (backend + frontend centrais) e E2E happy-path de rotas web com criação em admin; faltam E2E transacionais completos, Swagger e gates finais de CI/go-live |
+| 1 (hardening final) | 🟡 | Cobertura unit evoluiu amplamente (backend + frontend centrais) e E2E happy-path em web + API (Supertest); faltam E2E transacionais/negativos completos, Swagger e gates finais de CI/go-live |
 
 ---
 
@@ -46,7 +46,7 @@
 - **Storage**: backend com presigned URL real (AWS SDK) e upload CNH no frontend já integrados; pendente cobertura total (frota/vistorias/download assinado).
 - **PDF**: endpoint protegido com renderização real HTML->PDF já implementado; pendente integração completa de consumo no frontend e assinatura digital.
 - **Aluguel frontend**: fluxo wizard existe, mas itens do checklist original (form/confirm/services de reserva, abertura detalhada, fechamento final) ainda pendentes.
-- **Testes**: há base real com unit abrangente em serviços e E2E happy-path por área (inclui cenário transacional básico), mas cobertura funcional completa (cenários transacionais amplos e negativos) ainda não atingida.
+- **Testes**: há base real com unit abrangente em serviços e E2E happy-path por área em web + API, mas cobertura funcional completa (cenários transacionais amplos e negativos) ainda não atingida.
 - **Swagger/CI/lint**: estrutura pronta; falta fechamento de cobertura e validações finais de pipeline como gate de release.
 
 ---
