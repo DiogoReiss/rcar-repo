@@ -3,16 +3,18 @@ import { StorageService } from './storage.service';
 
 describe('StorageService', () => {
   const config = new ConfigService({
-    STORAGE_PUBLIC_BASE_URL: 'http://localhost:9000',
+    STORAGE_ENDPOINT: 'http://localhost:9000',
+    STORAGE_REGION: 'us-east-1',
+    STORAGE_ACCESS_KEY: 'minioadmin',
+    STORAGE_SECRET_KEY: 'minioadmin',
     STORAGE_BUCKET: 'rcar-documents',
-    STORAGE_SIGNING_SECRET: 'test-secret',
     STORAGE_SIGNED_URL_TTL_SECONDS: '900',
   });
 
-  it('creates upload metadata with signed PUT url', () => {
+  it('creates upload metadata with signed PUT url', async () => {
     const service = new StorageService(config);
 
-    const result = service.createUploadRequest({
+    const result = await service.createUploadRequest({
       fileName: 'CNH Frente.jpg',
       contentType: 'image/jpeg',
       folder: 'customers',
@@ -20,23 +22,23 @@ describe('StorageService', () => {
     });
 
     expect(result.objectKey).toMatch(/^customers\/[0-9a-f-]+-cnh-frente.jpg$/);
-    expect(result.uploadUrl).toContain('method=PUT');
-    expect(result.uploadUrl).toContain('sig=');
+    expect(result.uploadUrl).toContain('X-Amz-Signature=');
+    expect(result.uploadUrl).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256');
     expect(result.bucket).toBe('rcar-documents');
     expect(result.headers['Content-Type']).toBe('image/jpeg');
   });
 
-  it('creates signed GET url with attachment filename', () => {
+  it('creates signed GET url with attachment filename', async () => {
     const service = new StorageService(config);
 
-    const result = service.getSignedDownloadUrl({
+    const result = await service.getSignedDownloadUrl({
       objectKey: 'documents/abc123-contrato.pdf',
       downloadName: 'Contrato Maio.pdf',
       expiresInSeconds: 600,
     });
 
-    expect(result.signedUrl).toContain('method=GET');
-    expect(result.signedUrl).toContain('response-content-disposition=attachment%3B+filename%3D%22contrato-maio.pdf%22');
+    expect(result.signedUrl).toContain('X-Amz-Signature=');
+    expect(result.signedUrl).toContain('response-content-disposition=attachment%3B%20filename%3D%22contrato-maio.pdf%22');
   });
 });
 

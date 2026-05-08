@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.upload-box {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.upload-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #5f6b7a;
+}
+
+.upload-status--success {
+  color: #1a7f37;
+}
+
+.upload-status--info {
+  color: #0047ab;
+}
+
+.upload-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #b00020;
+}
+
+.upload-clear {
+  width: fit-content;
+  border: none;
+  background: transparent;
+  color: #9f1239;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+

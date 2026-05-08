@@ -87,6 +87,14 @@
       <lync-form-field label="Validade CNH">
         <input type="date" [ngModel]="fCnhValidade()" (ngModelChange)="fCnhValidade.set($event)" name="cnhValidade" />
       </lync-form-field>
+      <lync-form-field label="Arquivo da CNH" [full]="true">
+        <lync-file-upload
+          folder="customers"
+          accept="image/*,.pdf"
+          [value]="fCnhUrl()"
+          (valueChange)="fCnhUrl.set($event)"
+        />
+      </lync-form-field>
     }
     @if (fTipo() === 'PJ') {
       <lync-form-field label="Razão Social">
@@ -127,6 +135,7 @@
             @if (d.customer.tipo === 'PF') {
               <dt>CNH</dt>          <dd>{{ d.customer.cnh ?? '—' }}</dd>
               <dt>Validade CNH</dt> <dd>{{ d.customer.cnhValidade | dateBr }}</dd>
+              <dt>Arquivo CNH</dt>  <dd>{{ d.customer.cnhUrl ?? '—' }}</dd>
             } @else {
               <dt>Razão Social</dt> <dd>{{ d.customer.razaoSocial ?? '—' }}</dd>
               <dt>Responsável</dt>  <dd>{{ d.customer.responsavel ?? '—' }}</dd>

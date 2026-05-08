@@ -12,6 +12,7 @@ import PaginationComponent from '@shared/components/pagination/pagination';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import FileUploadComponent from '@shared/components/file-upload/file-upload';
 import RowMenuComponent from '@shared/components/row-menu/row-menu';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 import DateBrPipe from '@shared/pipes/date-br.pipe';
@@ -24,7 +25,7 @@ interface CustomerHistory {
 
 @Component({
   selector: 'lync-clientes-list',
-  imports: [FormsModule, DialogModule, PageHeaderComponent, PaginationComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent, CurrencyBrlPipe, DateBrPipe],
+  imports: [FormsModule, DialogModule, PageHeaderComponent, PaginationComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, FileUploadComponent, RowMenuComponent, CurrencyBrlPipe, DateBrPipe],
   templateUrl: './clientes-list.html',
   styleUrl: './clientes-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +60,7 @@ export default class ClientesListComponent {
   readonly fTelefone    = signal('');
   readonly fCnh         = signal('');
   readonly fCnhValidade = signal('');
+  readonly fCnhUrl      = signal<string | null>(null);
   readonly fRazaoSocial = signal('');
   readonly fResponsavel = signal('');
 
@@ -96,6 +98,7 @@ export default class ClientesListComponent {
     this.fTipo.set('PF'); this.fNome.set(''); this.fCpfCnpj.set('');
     this.fEmail.set(''); this.fTelefone.set('');
     this.fCnh.set(''); this.fCnhValidade.set('');
+    this.fCnhUrl.set(null);
     this.fRazaoSocial.set(''); this.fResponsavel.set('');
     this.dialogVisible.set(true);
   }
@@ -105,6 +108,7 @@ export default class ClientesListComponent {
     this.fTipo.set(c.tipo); this.fNome.set(c.nome); this.fCpfCnpj.set(c.cpfCnpj);
     this.fEmail.set(c.email ?? ''); this.fTelefone.set(c.telefone ?? '');
     this.fCnh.set(c.cnh ?? ''); this.fCnhValidade.set(c.cnhValidade?.slice(0, 10) ?? '');
+    this.fCnhUrl.set(c.cnhUrl ?? null);
     this.fRazaoSocial.set(c.razaoSocial ?? ''); this.fResponsavel.set(c.responsavel ?? '');
     this.dialogVisible.set(true);
   }
@@ -141,7 +145,11 @@ export default class ClientesListComponent {
       email: this.fEmail() || undefined, telefone: this.fTelefone() || undefined,
     };
     const pf = this.fTipo() === 'PF'
-      ? { cnh: this.fCnh() || undefined, cnhValidade: this.fCnhValidade() || undefined }
+      ? {
+          cnh: this.fCnh() || undefined,
+          cnhValidade: this.fCnhValidade() || undefined,
+          cnhUrl: this.fCnhUrl() || undefined,
+        }
       : {};
     const pj = this.fTipo() === 'PJ'
       ? { razaoSocial: this.fRazaoSocial() || undefined, responsavel: this.fResponsavel() || undefined }

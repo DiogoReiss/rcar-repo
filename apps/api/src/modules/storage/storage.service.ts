@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHmac, randomUUID } from 'crypto';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { randomUUID } from 'crypto';
 import { CreateUploadRequestDto } from './dto/create-upload-request.dto.js';
 import { GetSignedUrlQueryDto } from './dto/get-signed-url-query.dto.js';
 
@@ -9,22 +11,46 @@ const MAX_SIGNED_TTL_SECONDS = 3600;
 
 @Injectable()
 export class StorageService {
-  constructor(private readonly configService: ConfigService) {}
+  private readonly s3: S3Client;
 
-  createUploadRequest(dto: CreateUploadRequestDto) {
+  constructor(private readonly configService: ConfigService) {
+    const endpoint = this.configService.get<string>('STORAGE_ENDPOINT');
+    const accessKeyId = this.configService.get<string>('STORAGE_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>('STORAGE_SECRET_KEY');
+
+    this.s3 = new S3Client({
+      region: this.region,
+      endpoint,
+      // MinIO requires path-style requests; it is also valid for S3-compatible providers.
+      forcePathStyle: Boolean(endpoint),
+      credentials:
+        accessKeyId && secretAccessKey
+          ? {
+              accessKeyId,
+              secretAccessKey,
+            }
+          : undefined,
+    });
+  }
+
+  async createUploadRequest(dto: CreateUploadRequestDto) {
     const objectKey = this.buildObjectKey(dto.fileName, dto.folder);
     const expiresInSeconds = this.resolveTtl(dto.expiresInSeconds);
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    const uploadUrl = await getSignedUrl(
+      this.s3,
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: objectKey,
+        ContentType: dto.contentType,
+      }),
+      { expiresIn: expiresInSeconds },
+    );
 
     return {
       objectKey,
       bucket: this.bucket,
-      uploadUrl: this.buildSignedUrl({
-        objectKey,
-        method: 'PUT',
-        expiresInSeconds,
-        contentDisposition: undefined,
-      }),
+      uploadUrl,
       headers: {
         'Content-Type': dto.contentType,
       },
@@ -32,21 +58,25 @@ export class StorageService {
     };
   }
 
-  getSignedDownloadUrl(query: GetSignedUrlQueryDto) {
+  async getSignedDownloadUrl(query: GetSignedUrlQueryDto) {
     const expiresInSeconds = this.resolveTtl(query.expiresInSeconds);
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    const signedUrl = await getSignedUrl(
+      this.s3,
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: query.objectKey,
+        ResponseContentDisposition: query.downloadName
+          ? `attachment; filename="${this.normalizeSegment(query.downloadName)}"`
+          : undefined,
+      }),
+      { expiresIn: expiresInSeconds },
+    );
 
     return {
       objectKey: query.objectKey,
       bucket: this.bucket,
-      signedUrl: this.buildSignedUrl({
-        objectKey: query.objectKey,
-        method: 'GET',
-        expiresInSeconds,
-        contentDisposition: query.downloadName
-          ? `attachment; filename="${this.normalizeSegment(query.downloadName)}"`
-          : undefined,
-      }),
+      signedUrl,
       expiresAt,
     };
   }
@@ -63,31 +93,6 @@ export class StorageService {
     return Math.max(60, Math.min(raw, MAX_SIGNED_TTL_SECONDS));
   }
 
-  private buildSignedUrl(params: {
-    objectKey: string;
-    method: 'GET' | 'PUT';
-    expiresInSeconds: number;
-    contentDisposition?: string;
-  }): string {
-    const exp = Math.floor(Date.now() / 1000) + params.expiresInSeconds;
-    const payload = `${params.method}|${params.objectKey}|${exp}|${params.contentDisposition ?? ''}`;
-    const signature = createHmac('sha256', this.signingSecret).update(payload).digest('hex');
-
-    const encodedObjectKey = encodeURIComponent(params.objectKey);
-    const basePath = `${this.publicBaseUrl}/${this.bucket}/${encodedObjectKey}`;
-    const search = new URLSearchParams({
-      method: params.method,
-      exp: String(exp),
-      sig: signature,
-    });
-
-    if (params.contentDisposition) {
-      search.set('response-content-disposition', params.contentDisposition);
-    }
-
-    return `${basePath}?${search.toString()}`;
-  }
-
   private normalizeSegment(value: string): string {
     return value
       .trim()
@@ -96,16 +101,12 @@ export class StorageService {
       .replace(/[^a-z0-9-_.]/g, '');
   }
 
-  private get signingSecret(): string {
-    return this.configService.get('STORAGE_SIGNING_SECRET') ?? 'rcar-storage-dev-secret';
-  }
-
   private get bucket(): string {
     return this.configService.get('STORAGE_BUCKET') ?? 'rcar-documents';
   }
 
-  private get publicBaseUrl(): string {
-    return (this.configService.get('STORAGE_PUBLIC_BASE_URL') ?? 'http://localhost:9000').replace(/\/$/, '');
+  private get region(): string {
+    return this.configService.get('STORAGE_REGION') ?? 'us-east-1';
   }
 }
 

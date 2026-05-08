@@ -31,7 +31,7 @@
 |---|---|---|---|
 | 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend e cobertura inicial | Cobertura de testes mais ampla, UX de carregamento/empty states e estabilização final da trilha |
 | 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` + validações + testes iniciais | Motor real HTML->PDF e fluxo completo de assinatura D4Sign |
-| 3 | 🟡 Em andamento | Módulo `storage` scaffold com URLs assinadas e testes iniciais | Integração S3/MinIO real + fluxo frontend de upload/download fim a fim |
+| 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
 | 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes iniciais) | Cobertura ampla unit/E2E, Swagger completo, fechamento de lint/CI e checklist de go-live |
 
@@ -51,7 +51,7 @@
 | Aluguel (disponibilidade, contrato, devolução) | 🟢 (testes pendentes) | 🟡 | 🟡 |
 | Templates + PDF | 🟡 (scaffold pronto, motor real pendente) | 🟡 | 🟡 |
 | D4Sign | 🔴 | 🔴 | 🔴 |
-| Storage real S3/MinIO | 🟡 (scaffold) | 🔴 (integração upload pendente) | 🟡 |
+| Storage real S3/MinIO | 🟡 (presigned real) | 🟡 (upload CNH integrado, cobertura parcial) | 🟡 |
 | Financeiro e relatórios | 🟢 | 🟢 | 🟢 |
 | E-mail + jobs | 🟢 (templates ricos/testes pendentes) | n/a | 🟡 |
 | Testes (unit/integration/e2e) | 🟡 | 🟡 | 🟡 |
@@ -184,10 +184,9 @@
 
 ## 6) Storage e Uploads
 
-- 🟡 Backend `storage` scaffold pronto (endpoints protegidos e URL assinada GET/PUT em nível de scaffold).
-- 🔴 Integração real com `@aws-sdk/client-s3` e presigner pendente.
+- 🟡 Backend `storage` com integração real de URLs assinadas via `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`.
 - 🔴 Testes de upload real contra MinIO pendentes.
-- 🔴 Frontend ainda sem componente dedicado de upload integrado ao `storage` (integração fim-a-fim pendente).
+- 🟡 Frontend com `lync-file-upload` e integração de upload de CNH em clientes; pendente expandir para frota/vistorias e fluxo de download assinado.
 
 ---
 

@@ -17,7 +17,7 @@ export class StorageController {
 
   @Post('uploads')
   @ApiOperation({ summary: 'Gera URL assinada para upload de arquivo' })
-  createUpload(@Body() dto: CreateUploadRequestDto) {
+  async createUpload(@Body() dto: CreateUploadRequestDto) {
     return this.storageService.createUploadRequest(dto);
   }
 
@@ -26,7 +26,7 @@ export class StorageController {
   @ApiQuery({ name: 'objectKey', required: true })
   @ApiQuery({ name: 'downloadName', required: false })
   @ApiQuery({ name: 'expiresInSeconds', required: false, type: Number })
-  getSignedUrl(@Query() query: GetSignedUrlQueryDto) {
+  async getSignedUrl(@Query() query: GetSignedUrlQueryDto) {
     return this.storageService.getSignedDownloadUrl(query);
   }
 }

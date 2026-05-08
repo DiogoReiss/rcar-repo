@@ -1,0 +1,27 @@
+<div class="upload-box">
+  <input
+    type="file"
+    [accept]="accept()"
+    [disabled]="disabled() || uploading()"
+    (change)="onFileSelected($event)"
+  />
+
+  @if (uploading()) {
+    <p class="upload-status">Enviando arquivo...</p>
+  } @else {
+    @if (uploadedFileName()) {
+      <p class="upload-status upload-status--success">Arquivo enviado: {{ uploadedFileName() }}</p>
+    } @else if (value()) {
+      <p class="upload-status upload-status--info">Arquivo já vinculado.</p>
+    }
+  }
+
+  @if (error()) {
+    <p class="upload-error">{{ error() }}</p>
+  }
+
+  @if (!disabled() && (uploadedFileName() || value())) {
+    <button type="button" class="upload-clear" (click)="clear()">Remover vínculo</button>
+  }
+</div>
+

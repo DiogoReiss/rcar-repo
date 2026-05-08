@@ -36,6 +36,14 @@ export class CreateCustomerDto {
   @IsOptional()
   cnhValidade?: string;
 
+  @ApiPropertyOptional({
+    example: 'customers/8cf6dcec-c5b0-4f95-b4f5-cnh-frente.jpg',
+    description: 'Chave do arquivo de CNH armazenado no bucket',
+  })
+  @IsString()
+  @IsOptional()
+  cnhUrl?: string;
+
   // PJ
   @ApiPropertyOptional()
   @IsString()
