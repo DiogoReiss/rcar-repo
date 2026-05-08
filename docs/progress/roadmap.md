@@ -25,6 +25,12 @@
   - Schema: custo médio ponderado + campos financeiros de manutenção/incidentes
   - Frontend: gráfico de método de pagamento, rentabilidade por veículo, valoração de estoque e export CSV/PDF
 
+### Ordem de execução atualizada (2026-05-08)
+
+- Sequência operacional vigente: **5 -> 2 -> 3 -> 4 -> 1**.
+- **Ponto 5 iniciado**: dashboard com seletor de período (`7d`, `30d`, `mês atual`) ligado ao endpoint de gráficos.
+- **Ponto 2 iniciado**: fundação backend para geração de PDF com endpoint protegido (`documents/templates/:id/pdf`).
+
 ---
 
 ## Deep Code Review — Improvement Points

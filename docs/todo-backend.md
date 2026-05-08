@@ -6,6 +6,11 @@
 - 🟡 Em andamento
 - 🟢 Concluído
 
+## Execução Prioritária (2026-05-08)
+
+- Ordem ativa: **5 -> 2 -> 3 -> 4 -> 1**.
+- Kickoff do ponto 2 já entregue nesta etapa: endpoint protegido de geração de PDF com scaffold inicial em `documents`.
+
 ---
 
 ## 1. Inicialização do Projeto NestJS
@@ -240,7 +245,7 @@
 | 🟢 | 14.1 | Criar `src/modules/templates/templates.module.ts` |
 | 🟢 | 14.2 | Criar `src/modules/templates/templates.service.ts` com CRUD + `preview` (interpolação de variáveis) |
 | 🟢 | 14.3 | Criar `src/modules/templates/templates.controller.ts` (GET /, POST, GET /:id, PATCH /:id, POST /:id/preview) |
-| 🔴 | 14.4 | Geração de PDF real: instalar `puppeteer`, criar `pdf-generator.service.ts` que renderiza HTML e retorna Buffer |
+| 🟡 | 14.4 | Fundação de geração de PDF: `POST /documents/templates/:id/pdf` com serviço scaffold (Buffer PDF). Pendente evolução para renderização HTML->PDF real via Puppeteer |
 | 🔴 | 14.5 | Criar `src/modules/documents/services/d4sign.service.ts` (sendForSignature, getStatus, handleWebhook) |
 | 🔴 | 14.6 | Endpoint webhook D4Sign: `POST /webhooks/d4sign` |
 | 🔴 | 14.7 | Testes unitários: template interpolation, pdf-generator (mock puppeteer) |

@@ -22,6 +22,12 @@
   - pipeline CI em `.github/workflows/ci.yml`
   - lacunas relevantes: ausência de `apps/api/src/modules/storage/`, `apps/api/src/modules/documents/`, `d4sign` e geração de PDF no backend
 
+### Ordem de execução ativa (2026-05-08)
+
+- Ordem priorizada para execução incremental: **5 -> 2 -> 3 -> 4 -> 1**.
+- Entrega inicial do ponto 5 iniciada: seletor de período no dashboard (`7d/30d/mês`) com suporte de endpoint e mock.
+- Entrega inicial do ponto 2 iniciada: fundação de geração de PDF no backend com endpoint protegido.
+
 ---
 
 ## Fase 1 — MVP (baseline histórico)
@@ -252,8 +258,9 @@
 
 ## Próximos Passos Imediatos
 
-1. **Qualidade**: ampliar cobertura de testes da feature financeiro no backend (payments/reports).
-2. **Integração online**: avançar para Pagar.me + webhook de confirmação automática.
-3. **Refino analítico**: aging avançado, custo-benefício preventiva/corretiva, rentabilidade histórica por veículo.
-4. **Governança de docs**: manter `todo-backend.md`, `todo-frontend.md` e `06-financeiro.md` sincronizados como fonte operacional.
+1. **Ponto 5 (em execução)**: operacional/UX e escala — começar por dashboard com seletor de período fim a fim.
+2. **Ponto 2 (em execução)**: pipeline de documentos e assinatura — fundação de geração de PDF no backend.
+3. **Ponto 3**: módulo de storage (upload real S3/MinIO).
+4. **Ponto 4**: pagamentos online (Pagar.me + webhook).
+5. **Ponto 1**: hardening de qualidade e testes (backend/frontend/E2E).
 
