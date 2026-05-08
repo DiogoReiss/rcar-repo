@@ -1,14 +1,33 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  UseGuards, Sse, HttpCode, HttpStatus, ParseUUIDPipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Sse,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Observable, switchMap, startWith } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LavajatoService } from './lavajato.service.js';
 import { CreateScheduleDto } from './dto/create-schedule.dto.js';
 import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
-import { CreateQueueEntryDto, CreatePaymentDto } from './dto/create-queue-entry.dto.js';
+import {
+  CreateQueueEntryDto,
+  CreatePaymentDto,
+} from './dto/create-queue-entry.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { QueueEventsService } from './queue-events.service.js';
 import { from } from 'rxjs';
@@ -26,11 +45,17 @@ export class LavajatoController {
   // ─── Schedules ──────────────────────────────────────────────────────────
 
   @Get('schedules/availability')
-  @ApiOperation({ summary: 'Retorna slots disponíveis para um dia (lógica sem sobreposição)' })
-  @ApiQuery({ name: 'date',      required: true,  example: '2026-05-10' })
-  @ApiQuery({ name: 'serviceId', required: false, description: 'UUID do serviço para calcular duração' })
+  @ApiOperation({
+    summary: 'Retorna slots disponíveis para um dia (lógica sem sobreposição)',
+  })
+  @ApiQuery({ name: 'date', required: true, example: '2026-05-10' })
+  @ApiQuery({
+    name: 'serviceId',
+    required: false,
+    description: 'UUID do serviço para calcular duração',
+  })
   getAvailability(
-    @Query('date')      date: string,
+    @Query('date') date: string,
     @Query('serviceId') serviceId?: string,
   ) {
     return this.lavajatoService.getAvailability(date, serviceId);
@@ -38,8 +63,13 @@ export class LavajatoController {
 
   @Get('schedules')
   @ApiOperation({ summary: 'Lista agendamentos (filtro por data ou mês)' })
-  @ApiQuery({ name: 'date',  required: false, example: '2026-05-10' })
-  @ApiQuery({ name: 'month', required: false, example: '2026-05', description: 'Todos agendamentos do mês (YYYY-MM)' })
+  @ApiQuery({ name: 'date', required: false, example: '2026-05-10' })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    example: '2026-05',
+    description: 'Todos agendamentos do mês (YYYY-MM)',
+  })
   getSchedules(@Query('date') date?: string, @Query('month') month?: string) {
     return this.lavajatoService.getSchedules(date, month);
   }
@@ -52,14 +82,19 @@ export class LavajatoController {
 
   @Patch('schedules/:id/status')
   @ApiOperation({ summary: 'Atualiza status do agendamento' })
-  updateScheduleStatus(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: UpdateScheduleDto) {
+  updateScheduleStatus(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: UpdateScheduleDto,
+  ) {
     return this.lavajatoService.updateScheduleStatus(id, dto);
   }
 
   @Delete('schedules/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Cancela agendamento' })
-  async cancelSchedule(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  async cancelSchedule(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     await this.lavajatoService.cancelSchedule(id);
   }
 
@@ -78,7 +113,9 @@ export class LavajatoController {
   }
 
   @Patch('queue/:id/advance')
-  @ApiOperation({ summary: 'Avança status na fila (aguardando → em atendimento → concluído)' })
+  @ApiOperation({
+    summary: 'Avança status na fila (aguardando → em atendimento → concluído)',
+  })
   advanceQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.lavajatoService.advanceQueue(id);
   }
@@ -86,19 +123,27 @@ export class LavajatoController {
   @Delete('queue/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove/conclui entrada da fila' })
-  async removeFromQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  async removeFromQueue(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     await this.lavajatoService.removeFromQueue(id);
   }
 
   @Sse('queue/stream')
-  @ApiOperation({ summary: 'SSE: stream de atualizações da fila (push on change, not polling)' })
+  @ApiOperation({
+    summary:
+      'SSE: stream de atualizações da fila (push on change, not polling)',
+  })
   queueStream(): Observable<MessageEvent> {
     // A15: Push queue snapshot only on actual change (event-driven, not polling)
     // S12: Auth is via httpOnly cookie (JwtAuthGuard reads cookie) — no ?token= query param
     return this.queueEvents.queueChanged$().pipe(
       startWith(null),
       switchMap(() => from(this.lavajatoService.getQueue())),
-      map(queue => ({ data: { queue, ts: new Date().toISOString() } } as MessageEvent)),
+      map(
+        (queue) =>
+          ({ data: { queue, ts: new Date().toISOString() } }) as MessageEvent,
+      ),
     );
   }
 
@@ -115,14 +160,19 @@ export class LavajatoController {
 
   @Post('schedules/:id/payment')
   @ApiOperation({ summary: 'Registra pagamento de agendamento' })
-  paySchedule(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: CreatePaymentDto) {
+  paySchedule(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: CreatePaymentDto,
+  ) {
     return this.lavajatoService.registerPayment('WASH_SCHEDULE', id, dto);
   }
 
   @Post('queue/:id/payment')
   @ApiOperation({ summary: 'Registra pagamento de atendimento na fila' })
-  payQueue(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: CreatePaymentDto) {
+  payQueue(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: CreatePaymentDto,
+  ) {
     return this.lavajatoService.registerPayment('WASH_QUEUE', id, dto);
   }
 }
-

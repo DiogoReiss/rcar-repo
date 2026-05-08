@@ -7,11 +7,89 @@
         @else if (lastUpdate()) { Ao vivo · {{ lastUpdate() }} }
         @else { Conectando... }
       </span>
-      <a routerLink="/lavajato/fila/adicionar" class="btn-primary">
+      <button type="button" class="btn-primary" (click)="openAddDialog()">
         <i class="pi pi-plus" aria-hidden="true"></i> Entrar na Fila
-      </a>
+      </button>
     </div>
   </lync-page-header>
+
+  <p-dialog
+    [visible]="addDialogVisible()"
+    (visibleChange)="addDialogVisible.set($event)"
+    [header]="'Entrar na Fila'"
+    styleClass="queue-add-dialog"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '560px', maxWidth: '96vw' }"
+  >
+    <div class="mode-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        [class.active]="addMode() === 'avulso'"
+        (click)="addMode.set('avulso')"
+        [attr.aria-selected]="addMode() === 'avulso'"
+      >
+        Walk-in (avulso)
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.active]="addMode() === 'cadastrado'"
+        (click)="addMode.set('cadastrado')"
+        [attr.aria-selected]="addMode() === 'cadastrado'"
+      >
+        Cliente cadastrado
+      </button>
+    </div>
+
+    <div class="form-grid add-dialog-grid">
+      @if (addMode() === 'avulso') {
+        <lync-form-field label="Nome do Cliente" [required]="true" [full]="true">
+          <input
+            name="addNome"
+            [ngModel]="addNome()"
+            (ngModelChange)="addNome.set($event)"
+            placeholder="Nome ou apelido"
+          />
+        </lync-form-field>
+      } @else {
+        <lync-form-field label="Cliente" [required]="true" [full]="true">
+          <select name="addCliente" [ngModel]="addClienteId()" (ngModelChange)="addClienteId.set($event)">
+            <option value="">— Selecione —</option>
+            @for (c of customers(); track c.id) {
+              <option [value]="c.id">{{ c.nome }} · {{ c.cpfCnpj }}</option>
+            }
+          </select>
+        </lync-form-field>
+      }
+
+      <lync-form-field label="Serviço" [required]="true">
+        <select name="addService" [ngModel]="addServiceId()" (ngModelChange)="addServiceId.set($event)">
+          @for (s of services(); track s.id) {
+            <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }}</option>
+          }
+        </select>
+      </lync-form-field>
+
+      <lync-form-field label="Placa do Veículo">
+        <input
+          name="addPlaca"
+          [ngModel]="addPlaca()"
+          (ngModelChange)="addPlaca.set($event)"
+          placeholder="ABC-1234 (opcional)"
+        />
+      </lync-form-field>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="detail-footer">
+        <lync-btn label="Cancelar" variant="secondary" (clicked)="closeAddDialog()" [disabled]="addSaving()" />
+        <lync-btn label="Entrar na Fila" (clicked)="onSubmitAdd()" [loading]="addSaving()" [disabled]="!canSubmitAdd" />
+      </div>
+    </ng-template>
+  </p-dialog>
 
 
   @if (loading()) {
@@ -154,6 +232,7 @@
       [visible]="true"
       (visibleChange)="!$event && closeDetail()"
       [header]="q.customer?.nome ?? q.nomeAvulso ?? 'Detalhes'"
+      styleClass="queue-detail-dialog"
       [modal]="true"
       [draggable]="false"
       [resizable]="false"

@@ -19,7 +19,11 @@ describe('MailService', () => {
     const config = new ConfigService({ SMTP_FROM: 'noreply@rcar.com.br' });
     const service = new MailService(config);
 
-    await service.send({ to: 'cliente@rcar.com.br', subject: 'Teste', html: '<p>ok</p>' });
+    await service.send({
+      to: 'cliente@rcar.com.br',
+      subject: 'Teste',
+      html: '<p>ok</p>',
+    });
 
     expect(sendMail).toHaveBeenCalledWith({
       from: 'noreply@rcar.com.br',
@@ -34,9 +38,11 @@ describe('MailService', () => {
     const service = new MailService(new ConfigService());
 
     await expect(
-      service.send({ to: 'cliente@rcar.com.br', subject: 'Teste', html: '<p>ok</p>' }),
+      service.send({
+        to: 'cliente@rcar.com.br',
+        subject: 'Teste',
+        html: '<p>ok</p>',
+      }),
     ).resolves.toBeUndefined();
   });
 });
-
-

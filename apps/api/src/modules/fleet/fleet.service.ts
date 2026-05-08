@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { VehicleStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateVehicleDto } from './dto/create-vehicle.dto.js';
@@ -18,10 +22,21 @@ export class FleetService {
       ...(status && { status }),
     };
     const [data, total] = await Promise.all([
-      this.prisma.vehicle.findMany({ where, orderBy: { modelo: 'asc' }, skip: (safePage - 1) * perPage, take: perPage }),
+      this.prisma.vehicle.findMany({
+        where,
+        orderBy: { modelo: 'asc' },
+        skip: (safePage - 1) * perPage,
+        take: perPage,
+      }),
       this.prisma.vehicle.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findOne(id: string) {
@@ -41,7 +56,9 @@ export class FleetService {
   }
 
   async create(dto: CreateVehicleDto) {
-    const existing = await this.prisma.vehicle.findUnique({ where: { placa: dto.placa } });
+    const existing = await this.prisma.vehicle.findUnique({
+      where: { placa: dto.placa },
+    });
     if (existing) throw new ConflictException('Placa já cadastrada');
     return this.prisma.vehicle.create({ data: dto });
   }
@@ -63,10 +80,20 @@ export class FleetService {
     await this.findOne(vehicleId);
     const [maintenance] = await this.prisma.$transaction([
       this.prisma.vehicleMaintenance.create({
-        data: { vehicleId, descricao: dto.descricao, custo: dto.custo, data: new Date(dto.data) },
+        data: {
+          vehicleId,
+          descricao: dto.descricao,
+          custo: dto.custo,
+          data: new Date(dto.data),
+        },
       }),
       ...(dto.setMantencao
-        ? [this.prisma.vehicle.update({ where: { id: vehicleId }, data: { status: 'MANUTENCAO' } })]
+        ? [
+            this.prisma.vehicle.update({
+              where: { id: vehicleId },
+              data: { status: 'MANUTENCAO' },
+            }),
+          ]
         : []),
     ]);
     return maintenance;
@@ -75,7 +102,10 @@ export class FleetService {
   async completeMaintenance(vehicleId: string) {
     const vehicle = await this.findOne(vehicleId);
     if (vehicle.status !== 'MANUTENCAO') return vehicle;
-    return this.prisma.vehicle.update({ where: { id: vehicleId }, data: { status: 'DISPONIVEL' } });
+    return this.prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: { status: 'DISPONIVEL' },
+    });
   }
 
   async getMaintenances(vehicleId: string) {
@@ -86,4 +116,3 @@ export class FleetService {
     });
   }
 }
-

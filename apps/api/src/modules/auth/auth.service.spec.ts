@@ -25,7 +25,9 @@ const mockJwtService = {
 };
 
 const mockConfig = {
-  get: jest.fn().mockImplementation((key: string, fallback?: string) => fallback ?? ''),
+  get: jest
+    .fn()
+    .mockImplementation((key: string, fallback?: string) => fallback ?? ''),
 };
 
 const mockBlacklist = {
@@ -86,9 +88,9 @@ describe('AuthService', () => {
   describe('resetPassword', () => {
     it('should throw BadRequestException for invalid token', async () => {
       mockPrisma.passwordResetToken.findUnique.mockResolvedValue(null);
-      await expect(service.resetPassword('bad-token', 'newpass')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.resetPassword('bad-token', 'newpass'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for expired token', async () => {
@@ -114,4 +116,3 @@ describe('AuthService', () => {
     });
   });
 });
-

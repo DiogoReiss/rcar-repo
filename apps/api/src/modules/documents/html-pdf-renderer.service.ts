@@ -36,8 +36,8 @@ export class HtmlPdfRendererService {
   }
 
   private get executablePath(): string | undefined {
-    return this.configService.get<string>('PUPPETEER_EXECUTABLE_PATH') || undefined;
+    return (
+      this.configService.get<string>('PUPPETEER_EXECUTABLE_PATH') || undefined
+    );
   }
 }
-
-

@@ -9,4 +9,3 @@ export class UpdateWashServiceDto extends PartialType(CreateWashServiceDto) {
   @IsOptional()
   ativo?: boolean;
 }
-

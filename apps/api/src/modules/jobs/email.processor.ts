@@ -21,5 +21,3 @@ export class EmailProcessor {
     await this.mailService.send(job.data);
   }
 }
-
-

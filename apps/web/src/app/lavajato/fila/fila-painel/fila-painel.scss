@@ -52,6 +52,43 @@
   font-size: 0.9rem;
 }
 
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xs;
+  padding: $spacing-xs;
+  border-radius: 10px;
+  background: $color-neutral-100;
+
+  button {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: $color-neutral-500;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: $spacing-sm $spacing-xs;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover { color: $color-neutral-800; }
+
+    &.active {
+      background: #fff;
+      color: $color-primary;
+      border-color: rgba($color-primary, 0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.add-dialog-grid { margin-top: $spacing-sm; }
+
 // ─── Board ────────────────────────────────────────────────────────────────────
 .fila-board {
   display: grid;
@@ -222,8 +259,8 @@
 .detail-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: $spacing-sm 0;
+  gap: 4px;
+  padding: $spacing-xs 0;
 }
 
 .detail-row {
@@ -231,7 +268,7 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-sm;
-  padding: 7px 0;
+  padding: $spacing-xs 0;
   border-bottom: 1px solid $color-neutral-100;
 
   &:last-child { border-bottom: none; }

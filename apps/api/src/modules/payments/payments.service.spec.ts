@@ -37,4 +37,3 @@ describe('PaymentsService', () => {
     expect(result.totalQuantidade).toBe(3);
   });
 });
-

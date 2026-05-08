@@ -22,11 +22,16 @@ describe('FleetService', () => {
   });
 
   it('returns paginated vehicles filtered by status and deletedAt', async () => {
-    prisma.vehicle.findMany.mockResolvedValue([{ id: 'v1', placa: 'ABC-1234' }]);
+    prisma.vehicle.findMany.mockResolvedValue([
+      { id: 'v1', placa: 'ABC-1234' },
+    ]);
     prisma.vehicle.count.mockResolvedValue(1);
     const service = new FleetService(prisma as never);
 
-    const result = await service.findAll('DISPONIVEL' as never, { page: 2, perPage: 5 });
+    const result = await service.findAll('DISPONIVEL', {
+      page: 2,
+      perPage: 5,
+    });
 
     expect(prisma.vehicle.findMany).toHaveBeenCalledWith({
       where: { deletedAt: null, status: 'DISPONIVEL' },
@@ -43,7 +48,13 @@ describe('FleetService', () => {
     const service = new FleetService(prisma as never);
 
     await expect(
-      service.create({ placa: 'ABC-1234', modelo: 'Onix', ano: 2020, cor: 'Branco', categoria: 'ECONOMICO' } as never),
+      service.create({
+        placa: 'ABC-1234',
+        modelo: 'Onix',
+        ano: 2020,
+        cor: 'Branco',
+        categoria: 'ECONOMICO',
+      } as never),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -51,14 +62,25 @@ describe('FleetService', () => {
     prisma.vehicle.findUnique.mockResolvedValue(null);
     const service = new FleetService(prisma as never);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('adds maintenance and sets status to MANUTENCAO when requested', async () => {
-    prisma.vehicle.findUnique.mockResolvedValue({ id: 'v1', status: 'DISPONIVEL' });
-    prisma.vehicleMaintenance.create.mockResolvedValue({ id: 'm1', descricao: 'Troca de óleo' });
+    prisma.vehicle.findUnique.mockResolvedValue({
+      id: 'v1',
+      status: 'DISPONIVEL',
+    });
+    prisma.vehicleMaintenance.create.mockResolvedValue({
+      id: 'm1',
+      descricao: 'Troca de óleo',
+    });
     prisma.vehicle.update.mockResolvedValue({ id: 'v1', status: 'MANUTENCAO' });
-    prisma.$transaction.mockResolvedValue([{ id: 'm1', descricao: 'Troca de óleo' }, { id: 'v1', status: 'MANUTENCAO' }]);
+    prisma.$transaction.mockResolvedValue([
+      { id: 'm1', descricao: 'Troca de óleo' },
+      { id: 'v1', status: 'MANUTENCAO' },
+    ]);
 
     const service = new FleetService(prisma as never);
 
@@ -70,8 +92,10 @@ describe('FleetService', () => {
     });
 
     expect(prisma.vehicleMaintenance.create).toHaveBeenCalled();
-    expect(prisma.vehicle.update).toHaveBeenCalledWith({ where: { id: 'v1' }, data: { status: 'MANUTENCAO' } });
+    expect(prisma.vehicle.update).toHaveBeenCalledWith({
+      where: { id: 'v1' },
+      data: { status: 'MANUTENCAO' },
+    });
     expect(result).toEqual({ id: 'm1', descricao: 'Troca de óleo' });
   });
 });
-

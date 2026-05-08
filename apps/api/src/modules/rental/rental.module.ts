@@ -8,4 +8,3 @@ import { RentalService } from './rental.service.js';
   exports: [RentalService],
 })
 export class RentalModule {}
-

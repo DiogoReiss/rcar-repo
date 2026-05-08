@@ -14,7 +14,10 @@ describe('TemplatesService', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders preview using handlebars variables', async () => {
-    prisma.template.findUnique.mockResolvedValue({ id: 't1', conteudoHtml: '<p>Olá {{nome}}</p>' });
+    prisma.template.findUnique.mockResolvedValue({
+      id: 't1',
+      conteudoHtml: '<p>Olá {{nome}}</p>',
+    });
     const service = new TemplatesService(prisma as never);
 
     const result = await service.preview('t1', { nome: 'Maria' });
@@ -26,7 +29,8 @@ describe('TemplatesService', () => {
     prisma.template.findUnique.mockResolvedValue(null);
     const service = new TemplatesService(prisma as never);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 });
-

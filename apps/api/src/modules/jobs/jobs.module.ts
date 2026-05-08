@@ -24,4 +24,3 @@ import { ScheduledJobsService } from './scheduled-jobs.service.js';
   exports: [BullModule],
 })
 export class JobsModule {}
-

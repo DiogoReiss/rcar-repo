@@ -15,7 +15,9 @@ describe('WashService', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns paginated active services by default', async () => {
-    prisma.washService.findMany.mockResolvedValue([{ id: 's1', nome: 'Lavagem' }]);
+    prisma.washService.findMany.mockResolvedValue([
+      { id: 's1', nome: 'Lavagem' },
+    ]);
     prisma.washService.count.mockResolvedValue(1);
     const service = new WashService(prisma as never);
 
@@ -34,7 +36,8 @@ describe('WashService', () => {
     prisma.washService.findUnique.mockResolvedValue(null);
     const service = new WashService(prisma as never);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 });
-

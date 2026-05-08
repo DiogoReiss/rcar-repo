@@ -27,7 +27,9 @@ describe('InventoryService', () => {
     prisma.product.findUnique.mockResolvedValue(null);
     const service = new InventoryService(prisma as never);
 
-    await expect(service.findProductById('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findProductById('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('blocks stock output when quantity is insufficient', async () => {
@@ -40,8 +42,10 @@ describe('InventoryService', () => {
     const service = new InventoryService(prisma as never);
 
     await expect(
-      service.createMovement({ productId: 'prod-1', tipo: 'SAIDA', quantidade: 2 }, 'user-1'),
+      service.createMovement(
+        { productId: 'prod-1', tipo: 'SAIDA', quantidade: 2 },
+        'user-1',
+      ),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });
-

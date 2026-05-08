@@ -29,7 +29,9 @@ export class LoginAttemptsService {
     const record = this.store.get(email) ?? { count: 0 };
     record.count++;
     if (record.count >= LoginAttemptsService.MAX_ATTEMPTS) {
-      record.lockedUntil = new Date(Date.now() + LoginAttemptsService.LOCK_DURATION_MS);
+      record.lockedUntil = new Date(
+        Date.now() + LoginAttemptsService.LOCK_DURATION_MS,
+      );
     }
     this.store.set(email, record);
   }
@@ -44,4 +46,3 @@ export class LoginAttemptsService {
     return Math.max(0, record.lockedUntil.getTime() - Date.now());
   }
 }
-

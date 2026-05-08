@@ -17,8 +17,13 @@ describe('ScheduledJobsService', () => {
   });
 
   it('enqueues low-stock alert when products are below minimum', async () => {
-    prisma.$queryRaw.mockResolvedValue([{ nome: 'Shampoo', quantidade_atual: 1, estoque_minimo: 5 }]);
-    const service = new ScheduledJobsService(prisma as never, emailQueue as never);
+    prisma.$queryRaw.mockResolvedValue([
+      { nome: 'Shampoo', quantidade_atual: 1, estoque_minimo: 5 },
+    ]);
+    const service = new ScheduledJobsService(
+      prisma as never,
+      emailQueue as never,
+    );
 
     await service.checkLowStock();
 
@@ -41,7 +46,10 @@ describe('ScheduledJobsService', () => {
         service: { nome: 'Lavagem Simples' },
       },
     ]);
-    const service = new ScheduledJobsService(prisma as never, emailQueue as never);
+    const service = new ScheduledJobsService(
+      prisma as never,
+      emailQueue as never,
+    );
 
     await service.sendDailyReminders();
 
@@ -52,4 +60,3 @@ describe('ScheduledJobsService', () => {
     );
   });
 });
-

@@ -41,12 +41,18 @@ describe('UsersService', () => {
     prisma.user.findUnique.mockResolvedValue(null);
     const service = new UsersService(prisma as never);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('creates user with hashed password', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockResolvedValue({ id: 'u2', nome: 'Maria', email: 'm@x.com' });
+    prisma.user.create.mockResolvedValue({
+      id: 'u2',
+      nome: 'Maria',
+      email: 'm@x.com',
+    });
     const service = new UsersService(prisma as never);
 
     const result = await service.create({
@@ -70,9 +76,12 @@ describe('UsersService', () => {
     const service = new UsersService(prisma as never);
 
     await expect(
-      service.create({ nome: 'Maria', email: 'm@x.com', senha: '12345678', role: 'OPERADOR' }),
+      service.create({
+        nome: 'Maria',
+        email: 'm@x.com',
+        senha: '12345678',
+        role: 'OPERADOR',
+      }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });
-
-

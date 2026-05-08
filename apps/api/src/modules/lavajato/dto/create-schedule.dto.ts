@@ -2,7 +2,9 @@ import { IsString, IsOptional, IsDateString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateScheduleDto {
-  @ApiPropertyOptional({ description: 'ID do cliente cadastrado (ou use nomeAvulso)' })
+  @ApiPropertyOptional({
+    description: 'ID do cliente cadastrado (ou use nomeAvulso)',
+  })
   @IsUUID()
   @IsOptional()
   customerId?: string;
@@ -30,4 +32,3 @@ export class CreateScheduleDto {
   @IsOptional()
   observacoes?: string;
 }
-

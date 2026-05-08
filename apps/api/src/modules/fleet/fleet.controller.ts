@@ -1,5 +1,23 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { VehicleStatus } from '@prisma/client';
 import { FleetService } from './fleet.service.js';
 import { CreateVehicleDto } from './dto/create-vehicle.dto.js';
@@ -20,33 +38,49 @@ export class FleetController {
   @Get()
   @ApiOperation({ summary: 'Lista veículos da frota (paginado)' })
   @ApiQuery({ name: 'status', enum: VehicleStatus, required: false })
-  findAll(@Query('status') status?: VehicleStatus, @Query() pagination?: PaginationDto) {
+  findAll(
+    @Query('status') status?: VehicleStatus,
+    @Query() pagination?: PaginationDto,
+  ) {
     return this.fleetService.findAll(status, pagination);
   }
 
   @Get('available')
   @ApiOperation({ summary: 'Lista veículos disponíveis para aluguel' })
-  findAvailable() { return this.fleetService.findAvailable(); }
+  findAvailable() {
+    return this.fleetService.findAvailable();
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhe do veículo' })
-  findOne(@Param('id', ParseUUIDPipe) id: string) { return this.fleetService.findOne(id); }
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.fleetService.findOne(id);
+  }
 
   @Post()
   @Roles('GESTOR_GERAL')
   @ApiOperation({ summary: 'Cadastra veículo' })
-  create(@Body() dto: CreateVehicleDto) { return this.fleetService.create(dto); }
+  create(@Body() dto: CreateVehicleDto) {
+    return this.fleetService.create(dto);
+  }
 
   @Patch(':id')
   @Roles('GESTOR_GERAL')
   @ApiOperation({ summary: 'Atualiza veículo' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateVehicleDto) { return this.fleetService.update(id, dto); }
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateVehicleDto,
+  ) {
+    return this.fleetService.update(id, dto);
+  }
 
   @Delete(':id')
   @Roles('GESTOR_GERAL')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove veículo (soft delete)' })
-  async remove(@Param('id', ParseUUIDPipe) id: string) { await this.fleetService.remove(id); }
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.fleetService.remove(id);
+  }
 
   // ── Maintenance ────────────────────────────────────────────────────────────
 
@@ -59,15 +93,19 @@ export class FleetController {
   @Post(':id/maintenances')
   @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Registra manutenção para o veículo' })
-  addMaintenance(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateMaintenanceDto) {
+  addMaintenance(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateMaintenanceDto,
+  ) {
     return this.fleetService.addMaintenance(id, dto);
   }
 
   @Patch(':id/complete-maintenance')
   @Roles('GESTOR_GERAL', 'OPERADOR')
-  @ApiOperation({ summary: 'Conclui manutenção — retorna veículo como DISPONIVEL' })
+  @ApiOperation({
+    summary: 'Conclui manutenção — retorna veículo como DISPONIVEL',
+  })
   completeMaintenance(@Param('id', ParseUUIDPipe) id: string) {
     return this.fleetService.completeMaintenance(id);
   }
 }
-

@@ -1,5 +1,23 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { CustomersService } from './customers.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
 import { UpdateCustomerDto } from './dto/update-customer.dto.js';
@@ -20,25 +38,39 @@ export class CustomersController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
-  findAll(@Query('search') search?: string, @Query() pagination?: PaginationDto) {
+  findAll(
+    @Query('search') search?: string,
+    @Query() pagination?: PaginationDto,
+  ) {
     return this.customersService.findAll(search, pagination);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhe do cliente' })
-  findOne(@Param('id', ParseUUIDPipe) id: string) { return this.customersService.findOne(id); }
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.customersService.findOne(id);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Cadastra cliente' })
-  create(@Body() dto: CreateCustomerDto) { return this.customersService.create(dto); }
+  create(@Body() dto: CreateCustomerDto) {
+    return this.customersService.create(dto);
+  }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza cliente' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCustomerDto) { return this.customersService.update(id, dto); }
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCustomerDto,
+  ) {
+    return this.customersService.update(id, dto);
+  }
 
   @Delete(':id')
   @Roles('GESTOR_GERAL')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Desativa cliente' })
-  async remove(@Param('id', ParseUUIDPipe) id: string) { await this.customersService.remove(id); }
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.customersService.remove(id);
+  }
 }

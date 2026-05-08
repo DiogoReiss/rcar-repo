@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 import { CreateUploadRequestDto } from './dto/create-upload-request.dto.js';
@@ -16,7 +20,8 @@ export class StorageService {
   constructor(private readonly configService: ConfigService) {
     const endpoint = this.configService.get<string>('STORAGE_ENDPOINT');
     const accessKeyId = this.configService.get<string>('STORAGE_ACCESS_KEY');
-    const secretAccessKey = this.configService.get<string>('STORAGE_SECRET_KEY');
+    const secretAccessKey =
+      this.configService.get<string>('STORAGE_SECRET_KEY');
 
     this.s3 = new S3Client({
       region: this.region,
@@ -36,7 +41,9 @@ export class StorageService {
   async createUploadRequest(dto: CreateUploadRequestDto) {
     const objectKey = this.buildObjectKey(dto.fileName, dto.folder);
     const expiresInSeconds = this.resolveTtl(dto.expiresInSeconds);
-    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    const expiresAt = new Date(
+      Date.now() + expiresInSeconds * 1000,
+    ).toISOString();
     const uploadUrl = await getSignedUrl(
       this.s3,
       new PutObjectCommand({
@@ -60,7 +67,9 @@ export class StorageService {
 
   async getSignedDownloadUrl(query: GetSignedUrlQueryDto) {
     const expiresInSeconds = this.resolveTtl(query.expiresInSeconds);
-    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    const expiresAt = new Date(
+      Date.now() + expiresInSeconds * 1000,
+    ).toISOString();
     const signedUrl = await getSignedUrl(
       this.s3,
       new GetObjectCommand({
@@ -82,13 +91,17 @@ export class StorageService {
   }
 
   private buildObjectKey(fileName: string, folder?: string): string {
-    const safeFolder = this.normalizeSegment(folder ?? 'documents') || 'documents';
+    const safeFolder =
+      this.normalizeSegment(folder ?? 'documents') || 'documents';
     const safeFileName = this.normalizeSegment(fileName) || 'file';
     return `${safeFolder}/${randomUUID()}-${safeFileName}`;
   }
 
   private resolveTtl(ttl?: number): number {
-    const envTtl = Number(this.configService.get('STORAGE_SIGNED_URL_TTL_SECONDS') ?? DEFAULT_SIGNED_TTL_SECONDS);
+    const envTtl = Number(
+      this.configService.get('STORAGE_SIGNED_URL_TTL_SECONDS') ??
+        DEFAULT_SIGNED_TTL_SECONDS,
+    );
     const raw = ttl ?? envTtl;
     return Math.max(60, Math.min(raw, MAX_SIGNED_TTL_SECONDS));
   }
@@ -109,4 +122,3 @@ export class StorageService {
     return this.configService.get('STORAGE_REGION') ?? 'us-east-1';
   }
 }
-

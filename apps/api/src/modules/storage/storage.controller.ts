@@ -1,5 +1,10 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from '@common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/roles.guard';
@@ -22,7 +27,9 @@ export class StorageController {
   }
 
   @Get('signed-url')
-  @ApiOperation({ summary: 'Gera URL assinada temporária para download de arquivo' })
+  @ApiOperation({
+    summary: 'Gera URL assinada temporária para download de arquivo',
+  })
   @ApiQuery({ name: 'objectKey', required: true })
   @ApiQuery({ name: 'downloadName', required: false })
   @ApiQuery({ name: 'expiresInSeconds', required: false, type: Number })
@@ -30,4 +37,3 @@ export class StorageController {
     return this.storageService.getSignedDownloadUrl(query);
   }
 }
-

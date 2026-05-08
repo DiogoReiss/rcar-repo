@@ -1,8 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { Prisma, ContractStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateContractDto } from './dto/create-contract.dto.js';
-import { OpenContractDto, CloseContractDto } from './dto/contract-operations.dto.js';
+import {
+  OpenContractDto,
+  CloseContractDto,
+} from './dto/contract-operations.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
@@ -19,15 +27,12 @@ export class RentalService {
     const busyContracts = await this.prisma.rentalContract.findMany({
       where: {
         status: { in: ['RESERVADO', 'ATIVO'] },
-        AND: [
-          { dataRetirada: { lt: end } },
-          { dataDevolucao: { gt: start } },
-        ],
+        AND: [{ dataRetirada: { lt: end } }, { dataDevolucao: { gt: start } }],
       },
       select: { vehicleId: true },
     });
 
-    const busyIds = busyContracts.map(c => c.vehicleId);
+    const busyIds = busyContracts.map((c) => c.vehicleId);
 
     const available = await this.prisma.vehicle.findMany({
       where: {
@@ -43,7 +48,11 @@ export class RentalService {
 
   // ─── Contracts ────────────────────────────────────────────────────────────
 
-  async findAll(status?: ContractStatus, customerId?: string, pagination?: PaginationDto) {
+  async findAll(
+    status?: ContractStatus,
+    customerId?: string,
+    pagination?: PaginationDto,
+  ) {
     const { page = 1, perPage = 20 } = pagination ?? {};
     const safePage = Math.max(1, page);
     const where: Prisma.RentalContractWhereInput = {
@@ -63,7 +72,13 @@ export class RentalService {
       }),
       this.prisma.rentalContract.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findOne(id: string) {
@@ -85,72 +100,100 @@ export class RentalService {
     const start = new Date(dto.dataRetirada);
     const end = new Date(dto.dataDevolucao);
 
-    if (start >= end) throw new BadRequestException('Data de devolução deve ser posterior à retirada');
+    if (start >= end)
+      throw new BadRequestException(
+        'Data de devolução deve ser posterior à retirada',
+      );
 
     // D3: Wrap availability check + create in a serializable transaction to prevent double booking
-    return this.prisma.$transaction(async (tx) => {
-      const conflict = await tx.rentalContract.findFirst({
-        where: {
-          vehicleId: dto.vehicleId,
-          status: { in: ['RESERVADO', 'ATIVO'] },
-          AND: [{ dataRetirada: { lt: end } }, { dataDevolucao: { gt: start } }],
-        },
-      });
-      if (conflict) throw new ConflictException('Veículo indisponível para o período selecionado');
+    return this.prisma.$transaction(
+      async (tx) => {
+        const conflict = await tx.rentalContract.findFirst({
+          where: {
+            vehicleId: dto.vehicleId,
+            status: { in: ['RESERVADO', 'ATIVO'] },
+            AND: [
+              { dataRetirada: { lt: end } },
+              { dataDevolucao: { gt: start } },
+            ],
+          },
+        });
+        if (conflict)
+          throw new ConflictException(
+            'Veículo indisponível para o período selecionado',
+          );
 
-      const diffMs = end.getTime() - start.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-      const valorTotal = new Prisma.Decimal(dto.valorDiaria).mul(diffDays)
-        .add(dto.seguro && dto.valorSeguro ? new Prisma.Decimal(dto.valorSeguro) : 0);
+        const diffMs = end.getTime() - start.getTime();
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const valorTotal = new Prisma.Decimal(dto.valorDiaria)
+          .mul(diffDays)
+          .add(
+            dto.seguro && dto.valorSeguro
+              ? new Prisma.Decimal(dto.valorSeguro)
+              : 0,
+          );
 
-      return tx.rentalContract.create({
-        data: {
-          customerId: dto.customerId,
-          vehicleId: dto.vehicleId,
-          modalidade: dto.modalidade,
-          dataRetirada: start,
-          dataDevolucao: end,
-          valorDiaria: dto.valorDiaria,
-          valorTotal,
-          seguro: dto.seguro ?? false,
-          valorSeguro: dto.valorSeguro,
-          kmLimite: dto.kmLimite,
-          observacoes: dto.observacoes,
-        },
-        include: {
-          customer: { select: { id: true, nome: true } },
-          vehicle: { select: { id: true, placa: true, modelo: true } },
-        },
-      });
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+        return tx.rentalContract.create({
+          data: {
+            customerId: dto.customerId,
+            vehicleId: dto.vehicleId,
+            modalidade: dto.modalidade,
+            dataRetirada: start,
+            dataDevolucao: end,
+            valorDiaria: dto.valorDiaria,
+            valorTotal,
+            seguro: dto.seguro ?? false,
+            valorSeguro: dto.valorSeguro,
+            kmLimite: dto.kmLimite,
+            observacoes: dto.observacoes,
+          },
+          include: {
+            customer: { select: { id: true, nome: true } },
+            vehicle: { select: { id: true, placa: true, modelo: true } },
+          },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   // ─── Open contract (vistoria de saída) ───────────────────────────────────
 
   async openContract(id: string, dto: OpenContractDto) {
-    const contract = await this.prisma.rentalContract.findUnique({ where: { id } });
+    const contract = await this.prisma.rentalContract.findUnique({
+      where: { id },
+    });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
     // D8: Re-read status inside the transaction to avoid partially-applied state on concurrent calls
     if (contract.status === 'ATIVO') return this.findOne(id); // already open — idempotent
-    if (contract.status !== 'RESERVADO') throw new BadRequestException('Contrato não está em status RESERVADO');
+    if (contract.status !== 'RESERVADO')
+      throw new BadRequestException('Contrato não está em status RESERVADO');
 
     await this.prisma.$transaction([
       this.prisma.rentalContract.update({
         where: { id },
-        data: { status: 'ATIVO', kmRetirada: dto.kmRetirada, combustivelSaida: dto.combustivelSaida },
+        data: {
+          status: 'ATIVO',
+          kmRetirada: dto.kmRetirada,
+          combustivelSaida: dto.combustivelSaida,
+        },
       }),
       this.prisma.vehicle.update({
         where: { id: contract.vehicleId },
         data: { status: 'ALUGADO' },
       }),
-      ...(dto.checklist ? [this.prisma.inspection.create({
-          data: {
-            contractId: id,
-            tipo: 'SAIDA',
-            checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
-            fotos: [],
-          },
-      })] : []),
+      ...(dto.checklist
+        ? [
+            this.prisma.inspection.create({
+              data: {
+                contractId: id,
+                tipo: 'SAIDA',
+                checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
+                fotos: [],
+              },
+            }),
+          ]
+        : []),
     ]);
 
     return this.findOne(id);
@@ -159,25 +202,33 @@ export class RentalService {
   // ─── Close contract (vistoria de chegada + devolução) ────────────────────
 
   async closeContract(id: string, dto: CloseContractDto) {
-    const contract = await this.prisma.rentalContract.findUnique({ where: { id } });
+    const contract = await this.prisma.rentalContract.findUnique({
+      where: { id },
+    });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
     // D7: Guard against double-close — idempotent retry safety (must come before status check)
     if (contract.status === 'ENCERRADO') return this.findOne(id);
-    if (contract.status !== 'ATIVO') throw new BadRequestException('Contrato não está ATIVO');
+    if (contract.status !== 'ATIVO')
+      throw new BadRequestException('Contrato não está ATIVO');
 
     const now = new Date();
     const diffMs = now.getTime() - contract.dataRetirada.getTime();
     const diffDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-    const kmExcedente = contract.kmLimite && dto.kmDevolucao
-      ? Math.max(0, dto.kmDevolucao - (contract.kmRetirada ?? 0) - contract.kmLimite)
-      : 0;
-    const valorReal = new Prisma.Decimal(contract.valorDiaria).mul(diffDays)
+    const valorReal = new Prisma.Decimal(contract.valorDiaria)
+      .mul(diffDays)
       .add(contract.seguro && contract.valorSeguro ? contract.valorSeguro : 0);
 
     const incidents = dto.incidents ?? [];
-    const incidentesCobrados = incidents.filter((i) => i.cobradoCliente !== false);
-    const totalIncidentesCobrados = incidentesCobrados.reduce((a, i) => a + Number(i.valor ?? 0), 0);
-    const valorRealFinal = valorReal.add(new Prisma.Decimal(totalIncidentesCobrados));
+    const incidentesCobrados = incidents.filter(
+      (i) => i.cobradoCliente !== false,
+    );
+    const totalIncidentesCobrados = incidentesCobrados.reduce(
+      (a, i) => a + Number(i.valor ?? 0),
+      0,
+    );
+    const valorRealFinal = valorReal.add(
+      new Prisma.Decimal(totalIncidentesCobrados),
+    );
 
     const incidentCreates = incidents.map((incident) =>
       this.prisma.contractIncident.create({
@@ -209,9 +260,18 @@ export class RentalService {
         where: { id: contract.vehicleId },
         data: { status: 'DISPONIVEL', kmAtual: dto.kmDevolucao },
       }),
-      ...(dto.checklist ? [this.prisma.inspection.create({
-        data: { contractId: id, tipo: 'CHEGADA', checklist: (dto.checklist ?? {}) as Prisma.JsonObject, fotos: [] },
-      })] : []),
+      ...(dto.checklist
+        ? [
+            this.prisma.inspection.create({
+              data: {
+                contractId: id,
+                tipo: 'CHEGADA',
+                checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
+                fotos: [],
+              },
+            }),
+          ]
+        : []),
       ...incidentCreates,
     ]);
 
@@ -219,19 +279,32 @@ export class RentalService {
   }
 
   async cancelContract(id: string) {
-    const contract = await this.prisma.rentalContract.findUnique({ where: { id } });
+    const contract = await this.prisma.rentalContract.findUnique({
+      where: { id },
+    });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
-    if (contract.status === 'ATIVO') throw new BadRequestException('Contratos ativos não podem ser cancelados direto; use devolução');
+    if (contract.status === 'ATIVO')
+      throw new BadRequestException(
+        'Contratos ativos não podem ser cancelados direto; use devolução',
+      );
 
     await this.prisma.$transaction([
-      this.prisma.rentalContract.update({ where: { id }, data: { status: 'CANCELADO' } }),
-      this.prisma.vehicle.update({ where: { id: contract.vehicleId }, data: { status: 'DISPONIVEL' } }),
+      this.prisma.rentalContract.update({
+        where: { id },
+        data: { status: 'CANCELADO' },
+      }),
+      this.prisma.vehicle.update({
+        where: { id: contract.vehicleId },
+        data: { status: 'DISPONIVEL' },
+      }),
     ]);
     return this.findOne(id);
   }
 
   async registerPayment(contractId: string, metodo: PaymentMethod) {
-    const contract = await this.prisma.rentalContract.findUnique({ where: { id: contractId } });
+    const contract = await this.prisma.rentalContract.findUnique({
+      where: { id: contractId },
+    });
     if (!contract) throw new NotFoundException('Contrato não encontrado');
 
     // D6: Idempotency — return existing payment if already registered (client retry safety)
@@ -252,6 +325,3 @@ export class RentalService {
     });
   }
 }
-
-
-

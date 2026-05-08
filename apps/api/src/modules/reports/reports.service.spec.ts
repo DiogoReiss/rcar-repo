@@ -39,5 +39,3 @@ describe('ReportsService charts period', () => {
     expect(data.weeklyServices.labels).toHaveLength(expectedLength);
   });
 });
-
-

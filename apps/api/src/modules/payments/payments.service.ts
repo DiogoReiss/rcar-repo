@@ -8,7 +8,10 @@ import { PaginationDto } from '../../common/dto/pagination.dto.js';
 export class PaymentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private periodWhere(from?: string, to?: string): Prisma.DateTimeFilter | undefined {
+  private periodWhere(
+    from?: string,
+    to?: string,
+  ): Prisma.DateTimeFilter | undefined {
     if (!from && !to) return undefined;
     const dateFrom = from ? new Date(from) : new Date('1970-01-01');
     const dateTo = to ? new Date(to) : new Date();
@@ -25,7 +28,9 @@ export class PaymentsService {
       ...(query.refType ? { refType: query.refType } : {}),
       ...(query.status ? { status: query.status } : {}),
       ...(query.metodo ? { metodo: query.metodo } : {}),
-      ...(this.periodWhere(query.from, query.to) ? { createdAt: this.periodWhere(query.from, query.to) } : {}),
+      ...(this.periodWhere(query.from, query.to)
+        ? { createdAt: this.periodWhere(query.from, query.to) }
+        : {}),
     };
 
     const [data, total] = await Promise.all([
@@ -33,7 +38,12 @@ export class PaymentsService {
         where,
         include: {
           customer: { select: { id: true, nome: true, cpfCnpj: true } },
-          contract: { select: { id: true, vehicle: { select: { placa: true, modelo: true } } } },
+          contract: {
+            select: {
+              id: true,
+              vehicle: { select: { placa: true, modelo: true } },
+            },
+          },
           schedule: { select: { id: true, dataHora: true } },
           queue: { select: { id: true, createdAt: true } },
         },
@@ -44,14 +54,24 @@ export class PaymentsService {
       this.prisma.payment.count({ where }),
     ]);
 
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
-  async methodSummary(query: Pick<QueryPaymentsDto, 'from' | 'to' | 'status' | 'refType'>) {
+  async methodSummary(
+    query: Pick<QueryPaymentsDto, 'from' | 'to' | 'status' | 'refType'>,
+  ) {
     const where: Prisma.PaymentWhereInput = {
       ...(query.refType ? { refType: query.refType } : {}),
       ...(query.status ? { status: query.status } : { status: 'CONFIRMADO' }),
-      ...(this.periodWhere(query.from, query.to) ? { createdAt: this.periodWhere(query.from, query.to) } : {}),
+      ...(this.periodWhere(query.from, query.to)
+        ? { createdAt: this.periodWhere(query.from, query.to) }
+        : {}),
     };
 
     const rows = await this.prisma.payment.findMany({
@@ -59,7 +79,10 @@ export class PaymentsService {
       select: { metodo: true, valor: true },
     });
 
-    const methods: Record<PaymentMethod, { metodo: PaymentMethod; quantidade: number; valor: number }> = {
+    const methods: Record<
+      PaymentMethod,
+      { metodo: PaymentMethod; quantidade: number; valor: number }
+    > = {
       DINHEIRO: { metodo: 'DINHEIRO', quantidade: 0, valor: 0 },
       PIX: { metodo: 'PIX', quantidade: 0, valor: 0 },
       CARTAO_CREDITO: { metodo: 'CARTAO_CREDITO', quantidade: 0, valor: 0 },
@@ -108,5 +131,3 @@ export class PaymentsService {
     };
   }
 }
-
-

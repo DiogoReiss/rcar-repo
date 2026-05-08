@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma, WashScheduleStatus, WashQueueStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateScheduleDto } from './dto/create-schedule.dto.js';
 import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
-import { CreateQueueEntryDto, CreatePaymentDto } from './dto/create-queue-entry.dto.js';
+import {
+  CreateQueueEntryDto,
+  CreatePaymentDto,
+} from './dto/create-queue-entry.dto.js';
 import { QueueEventsService } from './queue-events.service.js';
 
 @Injectable()
@@ -27,12 +34,15 @@ export class LavajatoService {
       // month format: YYYY-MM
       const [y, m] = month.split('-').map(Number);
       const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
-      const end   = new Date(y, m, 0, 23, 59, 59, 999);
+      const end = new Date(y, m, 0, 23, 59, 59, 999);
       where.dataHora = { gte: start, lte: end };
     }
     return this.prisma.washSchedule.findMany({
       where,
-      include: { service: true, customer: { select: { id: true, nome: true, telefone: true } } },
+      include: {
+        service: true,
+        customer: { select: { id: true, nome: true, telefone: true } },
+      },
       orderBy: { dataHora: 'asc' },
     });
   }
@@ -41,21 +51,26 @@ export class LavajatoService {
   // 11b.4: Calculate free slots for a given date, respecting service durations.
   // Business hours: 08:00–18:00. Each slot length = selected service duration (or 30 min default).
   async getAvailability(date: string, serviceId?: string) {
-    const OPEN_HOUR  = 8;
+    const OPEN_HOUR = 8;
     const CLOSE_HOUR = 18;
     const DEFAULT_DURATION = 30;
 
     let duration = DEFAULT_DURATION;
     if (serviceId) {
-      const svc = await this.prisma.washService.findUnique({ where: { id: serviceId } });
+      const svc = await this.prisma.washService.findUnique({
+        where: { id: serviceId },
+      });
       if (svc) duration = svc.duracaoMin;
     }
 
     // All non-cancelled schedules for the requested day, with their service durations
     const start = new Date(`${date}T00:00:00`);
-    const end   = new Date(`${date}T23:59:59`);
+    const end = new Date(`${date}T23:59:59`);
     const existing = await this.prisma.washSchedule.findMany({
-      where: { dataHora: { gte: start, lte: end }, status: { not: 'CANCELADO' } },
+      where: {
+        dataHora: { gte: start, lte: end },
+        status: { not: 'CANCELADO' },
+      },
       include: { service: true },
     });
 
@@ -70,14 +85,14 @@ export class LavajatoService {
     for (let m = 0; m < totalMinutes; m += duration) {
       const absMinutes = OPEN_HOUR * 60 + m;
       const hour = Math.floor(absMinutes / 60);
-      const min  = absMinutes % 60;
+      const min = absMinutes % 60;
       const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
       const slotStart = new Date(`${date}T${time}:00`);
-      const slotEnd   = new Date(slotStart.getTime() + duration * 60_000);
+      const slotEnd = new Date(slotStart.getTime() + duration * 60_000);
 
-      const conflict = existing.find(s => {
+      const conflict = existing.find((s) => {
         const sStart = new Date(s.dataHora);
-        const sEnd   = new Date(sStart.getTime() + s.service.duracaoMin * 60_000);
+        const sEnd = new Date(sStart.getTime() + s.service.duracaoMin * 60_000);
         return slotStart < sEnd && slotEnd > sStart;
       });
 
@@ -96,7 +111,9 @@ export class LavajatoService {
     if (!dto.customerId && !dto.nomeAvulso) {
       throw new BadRequestException('Informe customerId ou nomeAvulso');
     }
-    const service = await this.prisma.washService.findUnique({ where: { id: dto.serviceId } });
+    const service = await this.prisma.washService.findUnique({
+      where: { id: dto.serviceId },
+    });
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
     return this.prisma.washSchedule.create({
@@ -108,18 +125,25 @@ export class LavajatoService {
         dataHora: new Date(dto.dataHora),
         observacoes: dto.observacoes,
       },
-      include: { service: true, customer: { select: { id: true, nome: true } } },
+      include: {
+        service: true,
+        customer: { select: { id: true, nome: true } },
+      },
     });
   }
 
   async updateScheduleStatus(id: string, dto: UpdateScheduleDto) {
-    const schedule = await this.prisma.washSchedule.findUnique({ where: { id } });
+    const schedule = await this.prisma.washSchedule.findUnique({
+      where: { id },
+    });
     if (!schedule) throw new NotFoundException('Agendamento não encontrado');
 
     const updated = await this.prisma.washSchedule.update({
       where: { id },
       data: dto,
-      include: { service: { include: { products: { include: { product: true } } } } },
+      include: {
+        service: { include: { products: { include: { product: true } } } },
+      },
     });
 
     // Auto-debit stock when service is completed
@@ -131,7 +155,9 @@ export class LavajatoService {
   }
 
   async cancelSchedule(id: string) {
-    const schedule = await this.prisma.washSchedule.findUnique({ where: { id } });
+    const schedule = await this.prisma.washSchedule.findUnique({
+      where: { id },
+    });
     if (!schedule) throw new NotFoundException('Agendamento não encontrado');
     return this.prisma.washSchedule.update({
       where: { id },
@@ -144,7 +170,10 @@ export class LavajatoService {
   async getQueue() {
     return this.prisma.washQueue.findMany({
       where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
-      include: { service: true, customer: { select: { id: true, nome: true } } },
+      include: {
+        service: true,
+        customer: { select: { id: true, nome: true } },
+      },
       orderBy: { posicao: 'asc' },
     });
   }
@@ -153,28 +182,36 @@ export class LavajatoService {
     if (!dto.customerId && !dto.nomeAvulso) {
       throw new BadRequestException('Informe customerId ou nomeAvulso');
     }
-    const service = await this.prisma.washService.findUnique({ where: { id: dto.serviceId } });
+    const service = await this.prisma.washService.findUnique({
+      where: { id: dto.serviceId },
+    });
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
     // D2: Use serializable transaction to prevent duplicate queue positions
-    const result = await this.prisma.$transaction(async (tx) => {
-      const lastEntry = await tx.washQueue.findFirst({
-        where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
-        orderBy: { posicao: 'desc' },
-      });
-      const posicao = (lastEntry?.posicao ?? 0) + 1;
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        const lastEntry = await tx.washQueue.findFirst({
+          where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
+          orderBy: { posicao: 'desc' },
+        });
+        const posicao = (lastEntry?.posicao ?? 0) + 1;
 
-      return tx.washQueue.create({
-        data: {
-          customerId: dto.customerId,
-          nomeAvulso: dto.nomeAvulso,
-          serviceId: dto.serviceId,
-          veiculoPlaca: dto.veiculoPlaca,
-          posicao,
-        },
-        include: { service: true, customer: { select: { id: true, nome: true } } },
-      });
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+        return tx.washQueue.create({
+          data: {
+            customerId: dto.customerId,
+            nomeAvulso: dto.nomeAvulso,
+            serviceId: dto.serviceId,
+            veiculoPlaca: dto.veiculoPlaca,
+            posicao,
+          },
+          include: {
+            service: true,
+            customer: { select: { id: true, nome: true } },
+          },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
     this.queueEvents.emit_queueChanged();
     return result;
   }
@@ -182,7 +219,9 @@ export class LavajatoService {
   async advanceQueue(id: string) {
     const entry = await this.prisma.washQueue.findUnique({
       where: { id },
-      include: { service: { include: { products: { include: { product: true } } } } },
+      include: {
+        service: { include: { products: { include: { product: true } } } },
+      },
     });
     if (!entry) throw new NotFoundException('Entrada na fila não encontrada');
 
@@ -228,11 +267,17 @@ export class LavajatoService {
     const [schedules, queues] = await Promise.all([
       this.prisma.washSchedule.findMany({
         where: { dataHora: { gte: target, lte: end }, status: 'CONCLUIDO' },
-        include: { service: true, customer: { select: { id: true, nome: true } } },
+        include: {
+          service: true,
+          customer: { select: { id: true, nome: true } },
+        },
       }),
       this.prisma.washQueue.findMany({
         where: { concluidoAt: { gte: target, lte: end } },
-        include: { service: true, customer: { select: { id: true, nome: true } } },
+        include: {
+          service: true,
+          customer: { select: { id: true, nome: true } },
+        },
       }),
     ]);
 
@@ -248,7 +293,9 @@ export class LavajatoService {
   ) {
     // D5: Check for existing payment (idempotency) via unique scheduleId/queueId FK
     if (refType === 'WASH_SCHEDULE') {
-      const existing = await this.prisma.payment.findUnique({ where: { scheduleId: refId } });
+      const existing = await this.prisma.payment.findUnique({
+        where: { scheduleId: refId },
+      });
       if (existing) return existing;
 
       const s = await this.prisma.washSchedule.findUnique({
@@ -268,7 +315,9 @@ export class LavajatoService {
         },
       });
     } else {
-      const existing = await this.prisma.payment.findUnique({ where: { queueId: refId } });
+      const existing = await this.prisma.payment.findUnique({
+        where: { queueId: refId },
+      });
       if (existing) return existing;
 
       const q = await this.prisma.washQueue.findUnique({
@@ -333,4 +382,3 @@ export class LavajatoService {
     });
   }
 }
-

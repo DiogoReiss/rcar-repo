@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
@@ -28,10 +32,21 @@ export class InventoryService {
     const safePage = Math.max(1, page);
     const where = includeInactive ? {} : { ativo: true, deletedAt: null };
     const [data, total] = await Promise.all([
-      this.prisma.product.findMany({ where, orderBy: { nome: 'asc' }, skip: (safePage - 1) * perPage, take: perPage }),
+      this.prisma.product.findMany({
+        where,
+        orderBy: { nome: 'asc' },
+        skip: (safePage - 1) * perPage,
+        take: perPage,
+      }),
       this.prisma.product.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findProductById(id: string) {
@@ -63,22 +78,35 @@ export class InventoryService {
   }
 
   async findLowStock() {
-    return this.prisma.$queryRaw<Array<{ id: string; nome: string; unidade: string; quantidade_atual: number; estoque_minimo: number }>>(
+    return this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        nome: string;
+        unidade: string;
+        quantidade_atual: number;
+        estoque_minimo: number;
+      }>
+    >(
       Prisma.sql`SELECT id, nome, unidade, quantidade_atual, estoque_minimo FROM products WHERE ativo = true AND deleted_at IS NULL AND quantidade_atual <= estoque_minimo ORDER BY nome`,
     );
   }
 
-  async createMovement(dto: CreateStockMovementDto, userId?: string, idempotencyKey?: string) {
+  async createMovement(
+    dto: CreateStockMovementDto,
+    userId?: string,
+    idempotencyKey?: string,
+  ) {
     // D9: Idempotency — skip duplicate if same key already processed
     if (idempotencyKey) {
       const existing = await this.prisma.stockMovement.findFirst({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         where: { idempotencyKey } as any,
       });
       if (existing) return existing;
     }
 
-    const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
+    const product = await this.prisma.product.findUnique({
+      where: { id: dto.productId },
+    });
     if (!product) throw new NotFoundException('Produto não encontrado');
 
     let novaQuantidade: Prisma.Decimal;
@@ -122,15 +150,17 @@ export class InventoryService {
           custoUnitario: dto.custoUnitario,
           motivo: dto.motivo,
           userId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(idempotencyKey && { idempotencyKey } as any),
+
+          ...(idempotencyKey && ({ idempotencyKey } as any)),
         },
       }),
       this.prisma.product.update({
         where: { id: dto.productId },
         data: {
           quantidadeAtual: novaQuantidade,
-          ...(dto.tipo === 'ENTRADA' ? { custoUnitario: novoCustoUnitario } : {}),
+          ...(dto.tipo === 'ENTRADA'
+            ? { custoUnitario: novoCustoUnitario }
+            : {}),
         },
       }),
     ]);
@@ -152,7 +182,12 @@ export class InventoryService {
       }),
       this.prisma.stockMovement.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 }
-

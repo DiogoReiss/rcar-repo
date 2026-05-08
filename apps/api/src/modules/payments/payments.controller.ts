@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
@@ -16,18 +21,26 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lista pagamentos com filtros globais (financeiro)' })
+  @ApiOperation({
+    summary: 'Lista pagamentos com filtros globais (financeiro)',
+  })
   @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
   @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
   @ApiQuery({ name: 'refType', required: false })
   @ApiQuery({ name: 'status', required: false })
   @ApiQuery({ name: 'metodo', required: false })
-  findAll(@Query() query: QueryPaymentsDto, @Query() pagination?: PaginationDto) {
+  findAll(
+    @Query() query: QueryPaymentsDto,
+    @Query() pagination?: PaginationDto,
+  ) {
     return this.paymentsService.findAll(query, pagination);
   }
 
   @Get('method-summary')
-  @ApiOperation({ summary: 'Resumo financeiro por método de pagamento (valor, quantidade, percentual)' })
+  @ApiOperation({
+    summary:
+      'Resumo financeiro por método de pagamento (valor, quantidade, percentual)',
+  })
   @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
   @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
   @ApiQuery({ name: 'status', required: false, example: 'CONFIRMADO' })
@@ -37,11 +50,11 @@ export class PaymentsController {
   }
 
   @Get('reconciliation')
-  @ApiOperation({ summary: 'Reconciliação de pagamentos pendentes há mais de N dias' })
+  @ApiOperation({
+    summary: 'Reconciliação de pagamentos pendentes há mais de N dias',
+  })
   @ApiQuery({ name: 'days', required: false, type: Number, example: 7 })
   reconciliation(@Query('days') days?: number) {
     return this.paymentsService.reconciliation(Number(days ?? 7));
   }
 }
-
-

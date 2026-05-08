@@ -1,37 +1,59 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Dialog } from 'primeng/dialog';
 import { FilaService } from '../fila.service';
-import { PaymentMethod, WashQueueEntry } from '@shared/models/entities.model';
+import { ApiService } from '@core/services/api.service';
+import { Customer, PaginatedResponse, PaymentMethod, WashQueueEntry } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
+import FormFieldComponent from '@shared/components/form-field/form-field';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 
 const STATUS_ORDER = ['AGUARDANDO', 'EM_ATENDIMENTO', 'CONCLUIDO'] as const;
 
 @Component({
   selector: 'lync-fila-painel',
-  imports: [RouterLink, PageHeaderComponent, PaymentDialogComponent, Dialog, AppButtonComponent, CurrencyBrlPipe],
+  imports: [
+    FormsModule,
+    PageHeaderComponent,
+    PaymentDialogComponent,
+    Dialog,
+    AppButtonComponent,
+    FormFieldComponent,
+    CurrencyBrlPipe,
+  ],
   templateUrl: './fila-painel.html',
   styleUrl: './fila-painel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class FilaPainelComponent implements OnDestroy {
   private readonly filaService = inject(FilaService);
+  private readonly api = inject(ApiService);
   private readonly toast = inject(MessageService);
   private sseSub?: Subscription;
 
   readonly queue      = this.filaService.queue;
+  readonly services   = this.filaService.services;
   readonly loading    = this.filaService.loading;
   readonly lastUpdate = signal('');
   readonly sseError   = signal(false);
 
   // Detail dialog
   readonly detailItem = signal<WashQueueEntry | null>(null);
+
+  // Add dialog
+  readonly addDialogVisible = signal(false);
+  readonly customers = signal<Customer[]>([]);
+  readonly addMode = signal<'avulso' | 'cadastrado'>('avulso');
+  readonly addSaving = signal(false);
+  readonly addNome = signal('');
+  readonly addPlaca = signal('');
+  readonly addClienteId = signal('');
+  readonly addServiceId = signal('');
 
   // Payment dialog
   readonly payingId   = signal<string | null>(null);
@@ -47,8 +69,15 @@ export default class FilaPainelComponent implements OnDestroy {
   readonly concluidos    = () => this.queue().filter(q => q.status === 'CONCLUIDO');
 
   constructor() {
-    this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe();
+    this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe({
+      next: (res) => {
+        if (res.data.length && !this.addServiceId()) this.addServiceId.set(res.data[0].id);
+      },
+    });
     this.filaService.loadQueue().pipe(takeUntilDestroyed()).subscribe();
+    this.api.get<PaginatedResponse<Customer>>('/customers').pipe(takeUntilDestroyed()).subscribe({
+      next: (res) => this.customers.set(res.data ?? []),
+    });
     this.connectSSE();
   }
 
@@ -64,6 +93,41 @@ export default class FilaPainelComponent implements OnDestroy {
       },
       error: () => this.sseError.set(true),
     });
+  }
+
+  openAddDialog() {
+    this.addMode.set('avulso');
+    this.addNome.set('');
+    this.addPlaca.set('');
+    this.addClienteId.set('');
+    this.addDialogVisible.set(true);
+  }
+
+  closeAddDialog() {
+    this.addDialogVisible.set(false);
+  }
+
+  get canSubmitAdd(): boolean {
+    if (!this.addServiceId()) return false;
+    return this.addMode() === 'avulso' ? !!this.addNome().trim() : !!this.addClienteId();
+  }
+
+  async onSubmitAdd() {
+    if (!this.canSubmitAdd) return;
+    this.addSaving.set(true);
+    try {
+      await firstValueFrom(this.filaService.addToQueue({
+        nomeAvulso: this.addMode() === 'avulso' ? this.addNome().trim() : undefined,
+        customerId: this.addMode() === 'cadastrado' ? this.addClienteId() : undefined,
+        serviceId: this.addServiceId(),
+        veiculoPlaca: this.addPlaca().trim() || undefined,
+      }));
+      await firstValueFrom(this.filaService.loadQueue());
+      this.toast.add({ severity: 'success', summary: 'Adicionado à fila', life: 3000 });
+      this.closeAddDialog();
+    } finally {
+      this.addSaving.set(false);
+    }
   }
 
   // ─── Detail dialog ────────────────────────────────────────────────

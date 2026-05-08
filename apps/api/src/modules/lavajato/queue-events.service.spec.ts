@@ -13,4 +13,3 @@ describe('QueueEventsService', () => {
     expect(event.ts).toEqual(expect.any(String));
   });
 });
-

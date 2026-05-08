@@ -8,4 +8,3 @@ import { TemplatesService } from './templates.service.js';
   exports: [TemplatesService],
 })
 export class TemplatesModule {}
-

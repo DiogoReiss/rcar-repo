@@ -1,4 +1,11 @@
-import { IsString, IsInt, IsEnum, IsOptional, IsArray, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsEnum,
+  IsOptional,
+  IsArray,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VehicleCategory, VehicleStatus } from '@prisma/client';
 
@@ -41,4 +48,3 @@ export class CreateVehicleDto {
   @IsOptional()
   kmAtual?: number;
 }
-

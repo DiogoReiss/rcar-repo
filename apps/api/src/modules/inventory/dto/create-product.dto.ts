@@ -31,4 +31,3 @@ export class CreateProductDto {
   @IsOptional()
   custoUnitario?: number;
 }
-

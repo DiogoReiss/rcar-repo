@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsEnum, IsNumber, Min } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentMethod } from '@prisma/client';
 
@@ -33,4 +33,3 @@ export class CreatePaymentDto {
   @IsOptional()
   observacoes?: string;
 }
-

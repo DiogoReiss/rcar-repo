@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
@@ -22,7 +32,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login com e-mail e senha' })
   @ApiResponse({ status: 200, type: TokenResponseDto })
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.login(dto, res);
   }
 
@@ -64,8 +77,19 @@ export class AuthController {
   // S9: Token freshness check — guards call this to validate cookie is still active
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Verifica se a sessão atual é válida e retorna o perfil do usuário' })
-  me(@CurrentUser() user: { id: string; nome: string; email: string; role: string }) {
+  @ApiOperation({
+    summary:
+      'Verifica se a sessão atual é válida e retorna o perfil do usuário',
+  })
+  me(
+    @CurrentUser()
+    user: {
+      id: string;
+      nome: string;
+      email: string;
+      role: string;
+    },
+  ) {
     return user;
   }
 }

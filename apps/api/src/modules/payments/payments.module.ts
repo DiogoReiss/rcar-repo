@@ -8,4 +8,3 @@ import { PaymentsService } from './payments.service.js';
   exports: [PaymentsService],
 })
 export class PaymentsModule {}
-

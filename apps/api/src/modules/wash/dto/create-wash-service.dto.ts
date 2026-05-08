@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateWashServiceDto {
@@ -21,4 +21,3 @@ export class CreateWashServiceDto {
   @Min(5)
   duracaoMin: number;
 }
-

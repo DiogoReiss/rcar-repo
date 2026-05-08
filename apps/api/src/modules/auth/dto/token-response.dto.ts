@@ -7,4 +7,3 @@ export class TokenResponseDto {
   @ApiProperty()
   refreshToken: string;
 }
-

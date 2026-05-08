@@ -13,10 +13,21 @@ export class WashService {
     const safePage = Math.max(1, page);
     const where = includeInactive ? {} : { ativo: true };
     const [data, total] = await Promise.all([
-      this.prisma.washService.findMany({ where, orderBy: { nome: 'asc' }, skip: (safePage - 1) * perPage, take: perPage }),
+      this.prisma.washService.findMany({
+        where,
+        orderBy: { nome: 'asc' },
+        skip: (safePage - 1) * perPage,
+        take: perPage,
+      }),
       this.prisma.washService.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findAll_unbounded(includeInactive = false) {
@@ -47,7 +58,9 @@ export class WashService {
   // Q11: Soft-delete wash service
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.washService.update({ where: { id }, data: { ativo: false } });
+    return this.prisma.washService.update({
+      where: { id },
+      data: { ativo: false },
+    });
   }
 }
-

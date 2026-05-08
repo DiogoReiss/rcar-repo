@@ -17,7 +17,9 @@ describe('CustomersService', () => {
   });
 
   it('returns paginated customers with active+not deleted filter', async () => {
-    prisma.customer.findMany.mockResolvedValue([{ id: 'c1', nome: 'Cliente A' }]);
+    prisma.customer.findMany.mockResolvedValue([
+      { id: 'c1', nome: 'Cliente A' },
+    ]);
     prisma.customer.count.mockResolvedValue(1);
     const service = new CustomersService(prisma as never);
 
@@ -51,7 +53,9 @@ describe('CustomersService', () => {
     prisma.customer.findUnique.mockResolvedValue(null);
     const service = new CustomersService(prisma as never);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('throws conflict when cpfCnpj already exists', async () => {
@@ -63,4 +67,3 @@ describe('CustomersService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });
-

@@ -119,6 +119,143 @@
   (cancelled)="payingId.set(null)"
 />
 
+<!-- ── Contract detail dialog ─────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="detailId() !== null"
+  (visibleChange)="!$event && closeDetail()"
+  [header]="'Detalhe do Contrato'"
+  styleClass="contract-detail-dialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '920px', maxWidth: '96vw' }"
+>
+  @if (detailLoading()) {
+    <div class="loading-hint"><i class="pi pi-spin pi-spinner"></i>&nbsp;Carregando...</div>
+  } @else if (detailError()) {
+    <div class="error-hint">{{ detailError() }}</div>
+  } @else if (detailData(); as c) {
+    <div class="detail-grid">
+      <section class="detail-card">
+        <h2>Contrato</h2>
+        <dl class="info-list">
+          <dt>Status</dt>
+          <dd><span class="badge" [class]="statusClass[c.status]">{{ statusLabel[c.status] }}</span></dd>
+          <dt>Modalidade</dt><dd>{{ modalidadeLabels[c.modalidade] }}</dd>
+          <dt>Retirada</dt><dd>{{ c.dataRetirada | dateBr:'datetime' }}</dd>
+          <dt>Devolução prev.</dt><dd>{{ c.dataDevolucao | dateBr:'datetime' }}</dd>
+          @if (c.dataDevReal) { <dt>Devolução real</dt><dd>{{ c.dataDevReal | dateBr:'datetime' }}</dd> }
+          @if (c.observacoes) { <dt>Obs.</dt><dd>{{ c.observacoes }}</dd> }
+        </dl>
+      </section>
+
+      <section class="detail-card">
+        <h2>Cliente</h2>
+        <dl class="info-list">
+          <dt>Nome</dt><dd>{{ c.customer?.nome ?? '—' }}</dd>
+          <dt>CPF/CNPJ</dt><dd>{{ c.customer?.cpfCnpj ?? '—' }}</dd>
+        </dl>
+      </section>
+
+      <section class="detail-card">
+        <h2>Veículo</h2>
+        <dl class="info-list">
+          <dt>Placa</dt><dd>{{ c.vehicle?.placa ?? '—' }}</dd>
+          <dt>Modelo</dt><dd>{{ c.vehicle?.modelo ?? '—' }}</dd>
+          <dt>KM saída</dt><dd>{{ c.kmRetirada ?? '—' }}</dd>
+          <dt>Combustível saída</dt><dd>{{ c.combustivelSaida ?? '—' }}</dd>
+          @if (c.kmDevolucao) { <dt>KM chegada</dt><dd>{{ c.kmDevolucao }}</dd> }
+          @if (c.combustivelChegada) { <dt>Combustível chegada</dt><dd>{{ c.combustivelChegada }}</dd> }
+        </dl>
+      </section>
+
+      <section class="detail-card">
+        <h2>Financeiro</h2>
+        <dl class="info-list">
+          <dt>Diária</dt><dd>{{ c.valorDiaria | currencyBrl }}</dd>
+          <dt>Total previsto</dt><dd>{{ c.valorTotal | currencyBrl }}</dd>
+          @if (c.seguro) { <dt>Seguro</dt><dd>{{ c.valorSeguro | currencyBrl }}</dd> }
+          @if (c.valorTotalReal) { <dt>Total real</dt><dd class="total-real">{{ c.valorTotalReal | currencyBrl }}</dd> }
+        </dl>
+      </section>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="detail-footer">
+      <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
+      @if (detailData()?.status === 'ATIVO') {
+        <lync-btn label="Registrar Devolução" icon="pi pi-undo" (clicked)="openDevolucao(detailData()!.id)" />
+      }
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ── Devolução dialog ───────────────────────────────────────────────────── -->
+<p-dialog
+  [visible]="devolucaoId() !== null"
+  (visibleChange)="!$event && closeDevolucao()"
+  [header]="'Registrar Devolução'"
+  styleClass="contract-return-dialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '900px', maxWidth: '96vw' }"
+>
+  @if (devolucaoLoading()) {
+    <div class="loading-hint"><i class="pi pi-spin pi-spinner"></i>&nbsp;Carregando contrato...</div>
+  } @else if (devolucaoData(); as c) {
+    <div class="contract-summary">
+      <div class="summary-item"><span>Cliente</span><strong>{{ c.customer?.nome }}</strong></div>
+      <div class="summary-item"><span>Veículo</span><strong>{{ c.vehicle?.placa }} {{ c.vehicle?.modelo }}</strong></div>
+      <div class="summary-item"><span>Retirada</span><strong>{{ formatDate(c.dataRetirada) }}</strong></div>
+      <div class="summary-item"><span>Prev. Devolução</span><strong>{{ formatDate(c.dataDevolucao) }}</strong></div>
+      <div class="summary-item"><span>KM Saída</span><strong>{{ c.kmRetirada ?? '—' }}</strong></div>
+      <div class="summary-item"><span>Valor Estimado</span><strong>{{ formatPrice(c.valorTotal) }}</strong></div>
+    </div>
+
+    @if (devolucaoError()) { <div class="error-hint">{{ devolucaoError() }}</div> }
+
+    <div class="form-grid form-grid--spaced">
+      <lync-form-field label="KM na Devolução" [required]="true">
+        <input type="number" min="0" [ngModel]="kmDevolucao()" (ngModelChange)="kmDevolucao.set(+$event)" name="kmDevolucao" />
+      </lync-form-field>
+      <lync-form-field label="Combustível na Chegada" [required]="true">
+        <select [ngModel]="combustivelChegada()" (ngModelChange)="combustivelChegada.set($event)" name="combustivelChegada">
+          <option value="CHEIO">Cheio</option>
+          <option value="3/4">3/4</option>
+          <option value="1/2">1/2</option>
+          <option value="1/4">1/4</option>
+          <option value="VAZIO">Vazio</option>
+        </select>
+      </lync-form-field>
+
+      <lync-form-field label="Checklist de Vistoria" [full]="true">
+        <div class="checklist-grid">
+          @for (item of checklistItems; track item) {
+            <label class="checklist-item" [class.ok]="checklist()[item]" [class.nok]="!checklist()[item]">
+              <input type="checkbox" [ngModel]="checklist()[item]" (ngModelChange)="toggleChecklist(item)" [name]="item" />
+              {{ item }}
+              <span class="item-status">{{ checklist()[item] ? '✓ OK' : '✗ Avaria' }}</span>
+            </label>
+          }
+        </div>
+      </lync-form-field>
+
+      <lync-form-field label="Observações" [full]="true">
+        <textarea [ngModel]="devolucaoObs()" (ngModelChange)="devolucaoObs.set($event)" name="devolucaoObs" rows="2"></textarea>
+      </lync-form-field>
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="detail-footer">
+      <lync-btn label="Cancelar" variant="secondary" (clicked)="closeDevolucao()" [disabled]="devolucaoSaving()" />
+      <lync-btn label="Confirmar Devolução" (clicked)="onSubmitDevolucao()" [loading]="devolucaoSaving()" [disabled]="devolucaoLoading()" />
+    </div>
+  </ng-template>
+</p-dialog>
+
 <!-- ── Cancel confirm ────────────────────────────────────────────────────── -->
 <lync-confirm-dialog
   [open]="!!cancelTarget()"

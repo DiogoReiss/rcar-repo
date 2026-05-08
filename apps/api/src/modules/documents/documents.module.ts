@@ -10,4 +10,3 @@ import { HtmlPdfRendererService } from './html-pdf-renderer.service.js';
   providers: [DocumentsService, HtmlPdfRendererService],
 })
 export class DocumentsModule {}
-

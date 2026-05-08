@@ -1,8 +1,25 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query, Headers,
-  UseGuards, HttpCode, HttpStatus, ParseUUIDPipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Headers,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiHeader } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiHeader,
+} from '@nestjs/swagger';
 import { InventoryService } from './inventory.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
@@ -25,8 +42,14 @@ export class InventoryController {
   @Get('products')
   @ApiOperation({ summary: 'Lista todos os produtos do estoque (paginado)' })
   @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
-  async findAllProducts(@Query('includeInactive') includeInactive?: string, @Query() pagination?: PaginationDto) {
-    return this.inventoryService.findAllProducts(includeInactive === 'true', pagination);
+  async findAllProducts(
+    @Query('includeInactive') includeInactive?: string,
+    @Query() pagination?: PaginationDto,
+  ) {
+    return this.inventoryService.findAllProducts(
+      includeInactive === 'true',
+      pagination,
+    );
   }
 
   @Get('products/low-stock')
@@ -36,7 +59,9 @@ export class InventoryController {
   }
 
   @Get('products/:id')
-  @ApiOperation({ summary: 'Detalhe de um produto com histórico de movimentações' })
+  @ApiOperation({
+    summary: 'Detalhe de um produto com histórico de movimentações',
+  })
   async findProductById(@Param('id', ParseUUIDPipe) id: string) {
     return this.inventoryService.findProductById(id);
   }
@@ -51,7 +76,10 @@ export class InventoryController {
   @Patch('products/:id')
   @Roles('GESTOR_GERAL')
   @ApiOperation({ summary: 'Atualiza um produto' })
-  async updateProduct(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateProductDto) {
+  async updateProduct(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProductDto,
+  ) {
     return this.inventoryService.updateProduct(id, dto);
   }
 
@@ -67,7 +95,11 @@ export class InventoryController {
 
   @Post('movements')
   @ApiOperation({ summary: 'Registra uma movimentação de estoque' })
-  @ApiHeader({ name: 'x-idempotency-key', description: 'Chave de idempotência opcional para evitar duplicação', required: false })
+  @ApiHeader({
+    name: 'x-idempotency-key',
+    description: 'Chave de idempotência opcional para evitar duplicação',
+    required: false,
+  })
   async createMovement(
     @Body() dto: CreateStockMovementDto,
     @CurrentUser('id') userId: string,
@@ -79,7 +111,10 @@ export class InventoryController {
   @Get('movements')
   @ApiOperation({ summary: 'Histórico de movimentações (paginado)' })
   @ApiQuery({ name: 'productId', required: false })
-  async findMovements(@Query('productId') productId?: string, @Query() pagination?: PaginationDto) {
+  async findMovements(
+    @Query('productId') productId?: string,
+    @Query() pagination?: PaginationDto,
+  ) {
     return this.inventoryService.findMovements(productId, pagination);
   }
 }

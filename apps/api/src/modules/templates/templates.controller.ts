@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, ValidationPipe, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  ValidationPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TemplatesService } from './templates.service.js';
 import { CreateTemplateDto } from './dto/create-template.dto.js';
@@ -17,19 +27,28 @@ export class TemplatesController {
 
   @Get()
   @ApiOperation({ summary: 'Lista templates' })
-  findAll() { return this.templatesService.findAll(); }
+  findAll() {
+    return this.templatesService.findAll();
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhe do template' })
-  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) { return this.templatesService.findOne(id); }
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.templatesService.findOne(id);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Cria template' })
-  create(@Body() dto: CreateTemplateDto) { return this.templatesService.create(dto); }
+  create(@Body() dto: CreateTemplateDto) {
+    return this.templatesService.create(dto);
+  }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza template' })
-  update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() dto: UpdateTemplateDto) {
+  update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: UpdateTemplateDto,
+  ) {
     return this.templatesService.update(id, dto);
   }
 
@@ -37,9 +56,9 @@ export class TemplatesController {
   @ApiOperation({ summary: 'Renderiza template com variáveis (preview)' })
   preview(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body(new ValidationPipe({ transform: false, whitelist: false })) variables: Record<string, unknown>,
+    @Body(new ValidationPipe({ transform: false, whitelist: false }))
+    variables: Record<string, unknown>,
   ) {
     return this.templatesService.preview(id, variables);
   }
 }
-

@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ReportsService } from './reports.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
@@ -36,20 +41,34 @@ export class ReportsController {
 
   // A10: Single aggregated endpoint replacing 5 parallel frontend calls
   @Get('dashboard')
-  @ApiOperation({ summary: 'KPIs do dashboard (usuários, veículos, clientes, serviços, baixo estoque)' })
+  @ApiOperation({
+    summary:
+      'KPIs do dashboard (usuários, veículos, clientes, serviços, baixo estoque)',
+  })
   dashboard() {
     return this.reportsService.getDashboardKpis();
   }
 
   @Get('charts')
-  @ApiOperation({ summary: 'Dados de gráficos do dashboard (serviços semanais, hora de pico, uso de produtos, receita)' })
-  @ApiQuery({ name: 'period', required: false, enum: ['7d', '30d', 'month'], description: 'Período dos gráficos: 7d, 30d ou month' })
+  @ApiOperation({
+    summary:
+      'Dados de gráficos do dashboard (serviços semanais, hora de pico, uso de produtos, receita)',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: ['7d', '30d', 'month'],
+    description: 'Período dos gráficos: 7d, 30d ou month',
+  })
   charts(@Query('period') period?: string) {
     return this.reportsService.getChartsData(period);
   }
 
   @Get('financial-summary')
-  @ApiOperation({ summary: 'Resumo financeiro (DRE simplificado): receita, custos diretos e margem' })
+  @ApiOperation({
+    summary:
+      'Resumo financeiro (DRE simplificado): receita, custos diretos e margem',
+  })
   @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })
   @ApiQuery({ name: 'to', required: false, example: '2026-05-31' })
   financialSummary(@Query('from') from?: string, @Query('to') to?: string) {
@@ -57,7 +76,10 @@ export class ReportsController {
   }
 
   @Get('rental/receivables')
-  @ApiOperation({ summary: 'Contas a receber de aluguel (contratos encerrados com saldo pendente)' })
+  @ApiOperation({
+    summary:
+      'Contas a receber de aluguel (contratos encerrados com saldo pendente)',
+  })
   rentalReceivables() {
     return this.reportsService.getRentalReceivables();
   }

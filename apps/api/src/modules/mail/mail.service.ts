@@ -38,7 +38,12 @@ export class MailService {
     }
   }
 
-  async sendScheduleConfirmation(to: string, clienteNome: string, servicoNome: string, dataHora: string) {
+  async sendScheduleConfirmation(
+    to: string,
+    clienteNome: string,
+    servicoNome: string,
+    dataHora: string,
+  ) {
     await this.send({
       to,
       subject: `✅ Agendamento confirmado — ${servicoNome}`,
@@ -67,4 +72,3 @@ export class MailService {
     });
   }
 }
-

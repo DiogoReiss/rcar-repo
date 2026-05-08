@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
@@ -13,7 +17,7 @@ export class CustomersService {
     const { page = 1, perPage = 20 } = pagination ?? {};
     const safePage = Math.max(1, page); // Q13: prevent page=0 causing negative skip
     const where: Prisma.CustomerWhereInput = {
-      ativo: true,   // D4: consistently filter both ativo AND deletedAt
+      ativo: true, // D4: consistently filter both ativo AND deletedAt
       deletedAt: null,
       ...(search && {
         OR: [
@@ -32,17 +36,26 @@ export class CustomersService {
       }),
       this.prisma.customer.count({ where }),
     ]);
-    return { data, total, page: safePage, perPage, totalPages: Math.ceil(total / perPage) };
+    return {
+      data,
+      total,
+      page: safePage,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
   }
 
   async findOne(id: string) {
     const c = await this.prisma.customer.findUnique({ where: { id } });
-    if (!c || c.deletedAt) throw new NotFoundException('Cliente não encontrado');
+    if (!c || c.deletedAt)
+      throw new NotFoundException('Cliente não encontrado');
     return c;
   }
 
   async create(dto: CreateCustomerDto) {
-    const existing = await this.prisma.customer.findUnique({ where: { cpfCnpj: dto.cpfCnpj } });
+    const existing = await this.prisma.customer.findUnique({
+      where: { cpfCnpj: dto.cpfCnpj },
+    });
     if (existing) throw new ConflictException('CPF/CNPJ já cadastrado');
     return this.prisma.customer.create({ data: dto });
   }
@@ -60,4 +73,3 @@ export class CustomersService {
     });
   }
 }
-

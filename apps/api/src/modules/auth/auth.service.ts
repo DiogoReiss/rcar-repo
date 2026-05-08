@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
@@ -29,16 +35,29 @@ export class AuthService {
   ) {}
 
   private get refreshSecret() {
-    return this.configService.get<string>('JWT_REFRESH_SECRET', 'dev-refresh-secret');
+    return this.configService.get<string>(
+      'JWT_REFRESH_SECRET',
+      'dev-refresh-secret',
+    );
   }
 
   private getRefreshOptions(): JwtSignOptions {
     return { secret: this.refreshSecret, expiresIn: '7d' };
   }
 
-  private setTokenCookies(res: Response, accessToken: string, refreshToken: string) {
-    res.cookie('access_token', accessToken, { ...COOKIE_BASE, maxAge: 15 * 60 * 1000 });
-    res.cookie('refresh_token', refreshToken, { ...COOKIE_BASE, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  private setTokenCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    res.cookie('access_token', accessToken, {
+      ...COOKIE_BASE,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', refreshToken, {
+      ...COOKIE_BASE,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 
   private clearTokenCookies(res: Response) {
@@ -56,7 +75,9 @@ export class AuthService {
       );
     }
 
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
 
     if (!user || !user.ativo || user.deletedAt) {
       this.loginAttempts.recordFailure(dto.email);
@@ -74,23 +95,37 @@ export class AuthService {
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, this.getRefreshOptions());
+    const refreshToken = this.jwtService.sign(
+      payload,
+      this.getRefreshOptions(),
+    );
 
     // S5: Set httpOnly cookies
     this.setTokenCookies(res, accessToken, refreshToken);
 
     return {
-      user: { id: user.id, nome: user.nome, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+      },
       // Also return tokens in body for Swagger/non-browser clients
       accessToken,
       refreshToken,
     };
   }
 
-  async refresh(user: { id: string; email: string; role: string }, res: Response) {
+  async refresh(
+    user: { id: string; email: string; role: string },
+    res: Response,
+  ) {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, this.getRefreshOptions());
+    const refreshToken = this.jwtService.sign(
+      payload,
+      this.getRefreshOptions(),
+    );
 
     this.setTokenCookies(res, accessToken, refreshToken);
 
@@ -110,7 +145,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
     // Always same response to avoid email enumeration
     if (!user || !user.ativo || user.deletedAt) {
-      return { message: 'Se o e-mail existir, enviaremos instruções de recuperação.' };
+      return {
+        message: 'Se o e-mail existir, enviaremos instruções de recuperação.',
+      };
     }
 
     // S2: Generate secure random token, valid 1 hour
@@ -129,11 +166,15 @@ export class AuthService {
       // Log but don't leak info
     }
 
-    return { message: 'Se o e-mail existir, enviaremos instruções de recuperação.' };
+    return {
+      message: 'Se o e-mail existir, enviaremos instruções de recuperação.',
+    };
   }
 
   async resetPassword(token: string, novaSenha: string) {
-    const resetToken = await this.prisma.passwordResetToken.findUnique({ where: { token } });
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+    });
 
     if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
       throw new BadRequestException('Token inválido ou expirado.');
@@ -142,8 +183,14 @@ export class AuthService {
     const hash = await bcrypt.hash(novaSenha, 12);
 
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: resetToken.userId }, data: { senhaHash: hash } }),
-      this.prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt: new Date() } }),
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { senhaHash: hash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
     ]);
 
     return { message: 'Senha redefinida com sucesso.' };

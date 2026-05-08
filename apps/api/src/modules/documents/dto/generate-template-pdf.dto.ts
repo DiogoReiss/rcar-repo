@@ -3,8 +3,13 @@ import { IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class GenerateTemplatePdfDto {
   @ApiProperty({
-    description: 'Dados usados para preencher variáveis do template (Handlebars)',
-    example: { nomeCliente: 'Carlos Andrade', placa: 'ABC-1234', valorTotal: '720,00' },
+    description:
+      'Dados usados para preencher variáveis do template (Handlebars)',
+    example: {
+      nomeCliente: 'Carlos Andrade',
+      placa: 'ABC-1234',
+      valorTotal: '720,00',
+    },
     type: 'object',
     additionalProperties: true,
   })
@@ -20,4 +25,3 @@ export class GenerateTemplatePdfDto {
   @MaxLength(120)
   fileName?: string;
 }
-

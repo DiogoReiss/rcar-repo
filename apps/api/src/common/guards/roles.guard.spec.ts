@@ -4,8 +4,11 @@ import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard.js';
 import { ExecutionContext } from '@nestjs/common';
 
-function createMockContext(user: { role?: string } | null, handlerRoles?: string[], classRoles?: string[]): ExecutionContext {
-  const reflector = new Reflector();
+function createMockContext(
+  user: { role?: string } | null,
+  handlerRoles?: string[],
+  classRoles?: string[],
+): ExecutionContext {
   return {
     getHandler: () => (handlerRoles ? { __roles: handlerRoles } : {}),
     getClass: () => (classRoles ? { __roles: classRoles } : {}),
@@ -39,21 +42,26 @@ describe('RolesGuard', () => {
   });
 
   it('should allow when user has required role', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['GESTOR_GERAL']);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['GESTOR_GERAL']);
     const ctx = createMockContext({ role: 'GESTOR_GERAL' });
     expect(guard.canActivate(ctx)).toBe(true);
   });
 
   it('should deny when user lacks required role', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['GESTOR_GERAL']);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['GESTOR_GERAL']);
     const ctx = createMockContext({ role: 'OPERADOR' });
     expect(guard.canActivate(ctx)).toBe(false);
   });
 
   it('should deny when no user', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['GESTOR_GERAL']);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['GESTOR_GERAL']);
     const ctx = createMockContext(null);
     expect(guard.canActivate(ctx)).toBe(false);
   });
 });
-

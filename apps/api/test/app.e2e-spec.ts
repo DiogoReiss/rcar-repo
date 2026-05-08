@@ -29,19 +29,43 @@ describe('API happy paths (e2e)', () => {
     findAll: jest.fn().mockResolvedValue([{ id: 'u1', nome: 'Admin' }]),
   };
   const customersService = {
-    findAll: jest.fn().mockResolvedValue({ data: [{ id: 'c1', nome: 'Cliente' }], total: 1, page: 1, perPage: 20, totalPages: 1 }),
+    findAll: jest.fn().mockResolvedValue({
+      data: [{ id: 'c1', nome: 'Cliente' }],
+      total: 1,
+      page: 1,
+      perPage: 20,
+      totalPages: 1,
+    }),
   };
   const fleetService = {
-    findAll: jest.fn().mockResolvedValue({ data: [{ id: 'v1', placa: 'ABC1D23' }], total: 1, page: 1, perPage: 20, totalPages: 1 }),
+    findAll: jest.fn().mockResolvedValue({
+      data: [{ id: 'v1', placa: 'ABC1D23' }],
+      total: 1,
+      page: 1,
+      perPage: 20,
+      totalPages: 1,
+    }),
   };
   const washService = {
-    findAll: jest.fn().mockResolvedValue({ data: [{ id: 'ws1', nome: 'Lavagem' }], total: 1, page: 1, perPage: 20, totalPages: 1 }),
+    findAll: jest.fn().mockResolvedValue({
+      data: [{ id: 'ws1', nome: 'Lavagem' }],
+      total: 1,
+      page: 1,
+      perPage: 20,
+      totalPages: 1,
+    }),
   };
   const lavajatoService = {
     getSchedules: jest.fn().mockResolvedValue([]),
   };
   const rentalService = {
-    findAll: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, perPage: 20, totalPages: 0 }),
+    findAll: jest.fn().mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      perPage: 20,
+      totalPages: 0,
+    }),
   };
   const templatesService = {
     findAll: jest.fn().mockResolvedValue([{ id: 't1', nome: 'Contrato' }]),
@@ -57,13 +81,27 @@ describe('API happy paths (e2e)', () => {
     getDashboardKpis: jest.fn().mockResolvedValue({ usersCount: 1 }),
   };
   const paymentsService = {
-    findAll: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, perPage: 20, totalPages: 0 }),
+    findAll: jest.fn().mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      perPage: 20,
+      totalPages: 0,
+    }),
   };
   const inventoryService = {
-    findAllProducts: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, perPage: 20, totalPages: 0 }),
+    findAllProducts: jest.fn().mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      perPage: 20,
+      totalPages: 0,
+    }),
   };
   const storageService = {
-    getSignedDownloadUrl: jest.fn().mockResolvedValue({ signedUrl: 'https://storage.local/file' }),
+    getSignedDownloadUrl: jest
+      .fn()
+      .mockResolvedValue({ signedUrl: 'https://storage.local/file' }),
   };
 
   beforeAll(async () => {
@@ -127,23 +165,33 @@ describe('API happy paths (e2e)', () => {
   });
 
   it('customers happy path', () => {
-    return request(app.getHttpServer()).get('/customers?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/customers?page=1&perPage=20')
+      .expect(200);
   });
 
   it('fleet happy path', () => {
-    return request(app.getHttpServer()).get('/fleet?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/fleet?page=1&perPage=20')
+      .expect(200);
   });
 
   it('wash happy path', () => {
-    return request(app.getHttpServer()).get('/wash/services?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/wash/services?page=1&perPage=20')
+      .expect(200);
   });
 
   it('lavajato happy path', () => {
-    return request(app.getHttpServer()).get('/lavajato/schedules?date=2026-05-08').expect(200);
+    return request(app.getHttpServer())
+      .get('/lavajato/schedules?date=2026-05-08')
+      .expect(200);
   });
 
   it('rental happy path', () => {
-    return request(app.getHttpServer()).get('/rental/contracts?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/rental/contracts?page=1&perPage=20')
+      .expect(200);
   });
 
   it('templates happy path', () => {
@@ -163,11 +211,15 @@ describe('API happy paths (e2e)', () => {
   });
 
   it('payments happy path', () => {
-    return request(app.getHttpServer()).get('/payments?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/payments?page=1&perPage=20')
+      .expect(200);
   });
 
   it('inventory happy path', () => {
-    return request(app.getHttpServer()).get('/inventory/products?page=1&perPage=20').expect(200);
+    return request(app.getHttpServer())
+      .get('/inventory/products?page=1&perPage=20')
+      .expect(200);
   });
 
   it('storage happy path', () => {

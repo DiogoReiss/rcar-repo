@@ -1,4 +1,13 @@
-import { IsString, IsEnum, IsOptional, IsDateString, IsNumber, IsBoolean, IsUUID, Min } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+  IsNumber,
+  IsBoolean,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RentalModality } from '@prisma/client';
 
@@ -23,7 +32,7 @@ export class CreateContractDto {
   @IsDateString()
   dataDevolucao: string;
 
-  @ApiProperty({ example: 120.00 })
+  @ApiProperty({ example: 120.0 })
   @IsNumber()
   @Min(0)
   valorDiaria: number;
@@ -33,7 +42,7 @@ export class CreateContractDto {
   @IsOptional()
   seguro?: boolean;
 
-  @ApiPropertyOptional({ example: 25.00 })
+  @ApiPropertyOptional({ example: 25.0 })
   @IsNumber()
   @Min(0)
   @IsOptional()
@@ -50,4 +59,3 @@ export class CreateContractDto {
   @IsOptional()
   observacoes?: string;
 }
-

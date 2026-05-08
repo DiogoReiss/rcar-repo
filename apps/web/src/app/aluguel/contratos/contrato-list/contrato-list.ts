@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy, Component, inject, signal, computed, OnInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { Dialog } from 'primeng/dialog';
 import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
@@ -29,7 +29,7 @@ type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
     FormsModule,
     ConfirmDialogComponent, EntityDialogComponent, FormFieldComponent,
     PaymentDialogComponent, PageHeaderComponent, RowMenuComponent,
-    WizardDialogComponent, AppButtonComponent, CurrencyBrlPipe, DateBrPipe,
+    WizardDialogComponent, AppButtonComponent, CurrencyBrlPipe, DateBrPipe, Dialog,
   ],
   templateUrl: './contrato-list.html',
   styleUrl: './contrato-list.scss',
@@ -38,7 +38,6 @@ type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
 export default class ContratoListComponent implements OnInit {
   private readonly api    = inject(ApiService);
   private readonly toast  = inject(MessageService);
-  private readonly router = inject(Router);
 
   // ── List state ────────────────────────────────────────────────────────────
   readonly contracts = signal<RentalContract[]>([]);
@@ -80,6 +79,24 @@ export default class ContratoListComponent implements OnInit {
   // ── Payment dialog ────────────────────────────────────────────────────────
   readonly payingId   = signal<string | null>(null);
   readonly payLoading = signal(false);
+
+  // ── Detail dialog ─────────────────────────────────────────────────────────
+  readonly detailId      = signal<string | null>(null);
+  readonly detailLoading = signal(false);
+  readonly detailError   = signal<string | null>(null);
+  readonly detailData    = signal<RentalContract | null>(null);
+
+  // ── Devolução dialog ──────────────────────────────────────────────────────
+  readonly devolucaoId      = signal<string | null>(null);
+  readonly devolucaoLoading = signal(false);
+  readonly devolucaoSaving  = signal(false);
+  readonly devolucaoError   = signal<string | null>(null);
+  readonly devolucaoData    = signal<RentalContract | null>(null);
+  readonly kmDevolucao      = signal(0);
+  readonly combustivelChegada = signal('CHEIO');
+  readonly devolucaoObs = signal('');
+  readonly checklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
+  readonly checklist = signal<Record<string, boolean>>({});
 
   // ── Cancel confirm ────────────────────────────────────────────────────────
   readonly cancelTarget = signal<string | null>(null);
@@ -158,7 +175,7 @@ export default class ContratoListComponent implements OnInit {
 
   getRowMenuItems(c: RentalContract): RowMenuItem[] {
     const items: RowMenuItem[] = [];
-    items.push({ label: 'Ver detalhes', icon: 'pi pi-eye', command: () => this.router.navigate(['/aluguel/contratos', c.id]) });
+    items.push({ label: 'Ver detalhes', icon: 'pi pi-eye', command: () => this.openDetail(c.id) });
     if (c.status === 'RESERVADO') {
       items.push(
         { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
@@ -167,11 +184,87 @@ export default class ContratoListComponent implements OnInit {
     }
     if (c.status === 'ATIVO') {
       items.push(
-        { label: 'Registrar devolução', icon: 'pi pi-undo',        command: () => this.router.navigate(['/aluguel/devolucao', c.id]) },
+        { label: 'Registrar devolução', icon: 'pi pi-undo',        command: () => this.openDevolucao(c.id) },
         { label: 'Registrar pagamento', icon: 'pi pi-credit-card', command: () => this.payingId.set(c.id) },
       );
     }
     return items;
+  }
+
+  async openDetail(id: string) {
+    this.detailId.set(id);
+    this.detailLoading.set(true);
+    this.detailError.set(null);
+    this.detailData.set(null);
+    try {
+      const res = await firstValueFrom(this.api.get<RentalContract>(`/rental/contracts/${id}`));
+      this.detailData.set(res);
+    } catch {
+      this.detailError.set('Contrato não encontrado.');
+    } finally {
+      this.detailLoading.set(false);
+    }
+  }
+
+  closeDetail() {
+    this.detailId.set(null);
+    this.detailData.set(null);
+    this.detailError.set(null);
+  }
+
+  async openDevolucao(id: string) {
+    this.devolucaoId.set(id);
+    this.devolucaoLoading.set(true);
+    this.devolucaoError.set(null);
+    this.devolucaoData.set(null);
+
+    const initial: Record<string, boolean> = {};
+    this.checklistItems.forEach((i) => { initial[i] = true; });
+    this.checklist.set(initial);
+    this.combustivelChegada.set('CHEIO');
+    this.devolucaoObs.set('');
+
+    try {
+      const res = await firstValueFrom(this.api.get<RentalContract>(`/rental/contracts/${id}`));
+      this.devolucaoData.set(res);
+      this.kmDevolucao.set(res.vehicle?.kmAtual ?? 0);
+    } catch {
+      this.devolucaoError.set('Não foi possível carregar o contrato para devolução.');
+    } finally {
+      this.devolucaoLoading.set(false);
+    }
+  }
+
+  closeDevolucao() {
+    this.devolucaoId.set(null);
+    this.devolucaoData.set(null);
+    this.devolucaoError.set(null);
+  }
+
+  toggleChecklist(item: string) {
+    this.checklist.update((c) => ({ ...c, [item]: !c[item] }));
+  }
+
+  async onSubmitDevolucao() {
+    const id = this.devolucaoId();
+    if (!id) return;
+    this.devolucaoSaving.set(true);
+    this.devolucaoError.set(null);
+    try {
+      await firstValueFrom(this.api.patch(`/rental/contracts/${id}/close`, {
+        kmDevolucao: this.kmDevolucao(),
+        combustivelChegada: this.combustivelChegada(),
+        checklist: this.checklist(),
+        observacoes: this.devolucaoObs() || undefined,
+      }));
+      this.toast.add({ severity: 'success', summary: 'Devolução registrada', life: 3000 });
+      this.closeDevolucao();
+      await this.load();
+    } catch (e: any) {
+      this.devolucaoError.set(e?.error?.message ?? 'Erro ao registrar devolução.');
+    } finally {
+      this.devolucaoSaving.set(false);
+    }
   }
 
   // ── Abertura ──────────────────────────────────────────────────────────────
@@ -280,6 +373,7 @@ export default class ContratoListComponent implements OnInit {
   }
 
   formatDate(d: string) { return new Date(d).toLocaleDateString('pt-BR'); }
+  formatDateTime(d: string) { return new Date(d).toLocaleString('pt-BR'); }
   formatPrice(v: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
   d4signClass(s: string) { return s === 'SIGNED' ? 'badge--success' : s === 'PENDING' ? 'badge--warning' : 'badge--inactive'; }
 }

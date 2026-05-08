@@ -17,4 +17,3 @@ export class PaginationDto {
   @Min(1)
   perPage?: number = 20;
 }
-

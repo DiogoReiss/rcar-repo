@@ -27,4 +27,3 @@ export class GetSignedUrlQueryDto {
   @Max(3600)
   expiresInSeconds?: number;
 }
-

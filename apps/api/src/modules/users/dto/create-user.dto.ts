@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsEnum, IsOptional, MinLength } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsEmail, IsEnum, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
 export class CreateUserDto {
@@ -20,4 +20,3 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   role: UserRole;
 }
-

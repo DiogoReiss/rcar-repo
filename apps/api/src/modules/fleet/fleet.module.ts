@@ -8,4 +8,3 @@ import { FleetService } from './fleet.service.js';
   exports: [FleetService],
 })
 export class FleetModule {}
-

@@ -26,7 +26,10 @@ export class OpenContractDto {
   @Min(0)
   kmRetirada: number;
 
-  @ApiPropertyOptional({ description: 'Nível de combustível na saída', example: 'CHEIO' })
+  @ApiPropertyOptional({
+    description: 'Nível de combustível na saída',
+    example: 'CHEIO',
+  })
   @IsString()
   @IsOptional()
   combustivelSaida?: string;
@@ -58,7 +61,8 @@ export class CloseContractDto {
 
   @ApiPropertyOptional({
     type: [Object],
-    description: 'Incidentes registrados na devolução (avaria, multa, km excedente, etc.)',
+    description:
+      'Incidentes registrados na devolução (avaria, multa, km excedente, etc.)',
   })
   @IsOptional()
   incidents?: ContractIncidentDto[];
@@ -71,4 +75,3 @@ export class CheckAvailabilityDto {
   @ApiProperty()
   dataDevolucao: string;
 }
-

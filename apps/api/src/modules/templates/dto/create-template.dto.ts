@@ -11,13 +11,18 @@ export class CreateTemplateDto {
   @IsEnum(TemplateType)
   tipo: TemplateType;
 
-  @ApiProperty({ description: 'Conteúdo HTML com variáveis Handlebars {{variavel}}' })
+  @ApiProperty({
+    description: 'Conteúdo HTML com variáveis Handlebars {{variavel}}',
+  })
   @IsString()
   conteudoHtml: string;
 
-  @ApiProperty({ type: [String], description: 'Lista de variáveis disponíveis', example: ['clienteNome', 'valorTotal'] })
+  @ApiProperty({
+    type: [String],
+    description: 'Lista de variáveis disponíveis',
+    example: ['clienteNome', 'valorTotal'],
+  })
   @IsArray()
   @IsString({ each: true })
   variaveis: string[];
 }
-

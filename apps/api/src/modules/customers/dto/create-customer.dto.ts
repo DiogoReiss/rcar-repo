@@ -1,4 +1,10 @@
-import { IsString, IsEmail, IsEnum, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CustomerType } from '@prisma/client';
 
@@ -55,4 +61,3 @@ export class CreateCustomerDto {
   @IsOptional()
   responsavel?: string;
 }
-

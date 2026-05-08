@@ -15,11 +15,12 @@ export class QueueEventsService extends EventEmitter {
   static readonly QUEUE_CHANGED = 'queue:changed';
 
   emit_queueChanged(): boolean {
-    return this.emit(QueueEventsService.QUEUE_CHANGED, { ts: new Date().toISOString() });
+    return this.emit(QueueEventsService.QUEUE_CHANGED, {
+      ts: new Date().toISOString(),
+    });
   }
 
   queueChanged$(): Observable<QueueChangedEvent> {
     return fromEvent<QueueChangedEvent>(this, QueueEventsService.QUEUE_CHANGED);
   }
 }
-

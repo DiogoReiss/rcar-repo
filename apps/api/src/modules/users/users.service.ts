@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -9,8 +13,13 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   private readonly select = {
-    id: true, nome: true, email: true, role: true, ativo: true,
-    createdAt: true, updatedAt: true,
+    id: true,
+    nome: true,
+    email: true,
+    role: true,
+    ativo: true,
+    createdAt: true,
+    updatedAt: true,
   } as const;
 
   async findAll() {
@@ -31,7 +40,9 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (existing) throw new ConflictException('E-mail já cadastrado');
 
     const senhaHash = await bcrypt.hash(dto.senha, 12); // S8: consistent 12 rounds
@@ -48,7 +59,11 @@ export class UsersService {
       data.senhaHash = await bcrypt.hash(dto.senha, 12); // S8: consistent 12 rounds
       delete data.senha;
     }
-    return this.prisma.user.update({ where: { id }, data, select: this.select });
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: this.select,
+    });
   }
 
   async remove(id: string) {
@@ -60,4 +75,3 @@ export class UsersService {
     });
   }
 }
-

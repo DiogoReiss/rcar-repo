@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { HtmlPdfRendererService } from './html-pdf-renderer.service.js';
 import { TemplatesService } from '../templates/templates.service.js';
 
@@ -12,22 +16,32 @@ export class DocumentsService {
     private readonly htmlPdfRendererService: HtmlPdfRendererService,
   ) {}
 
-  async generateTemplatePdf(templateId: string, variables: Record<string, unknown>, fileName?: string) {
+  async generateTemplatePdf(
+    templateId: string,
+    variables: Record<string, unknown>,
+    fileName?: string,
+  ) {
     const { html } = await this.templatesService.preview(templateId, variables);
     if (!html?.trim()) {
-      throw new BadRequestException('Não foi possível gerar PDF: template vazio.');
+      throw new BadRequestException(
+        'Não foi possível gerar PDF: template vazio.',
+      );
     }
 
     const text = this.extractTextFromHtml(html);
     if (!text) {
-      throw new BadRequestException('Não foi possível gerar PDF: conteúdo sem texto renderizável.');
+      throw new BadRequestException(
+        'Não foi possível gerar PDF: conteúdo sem texto renderizável.',
+      );
     }
 
     let pdfBuffer: Buffer;
     try {
       pdfBuffer = await this.htmlPdfRendererService.render(html);
     } catch {
-      throw new InternalServerErrorException('Não foi possível renderizar o PDF no servidor.');
+      throw new InternalServerErrorException(
+        'Não foi possível renderizar o PDF no servidor.',
+      );
     }
     const safeFileName = this.normalizeFileName(fileName);
 
@@ -61,8 +75,8 @@ export class DocumentsService {
       .slice(0, 80);
 
     const normalized = baseName || `documento-${Date.now()}`;
-    return normalized.endsWith(PDF_EXTENSION) ? normalized : `${normalized}${PDF_EXTENSION}`;
+    return normalized.endsWith(PDF_EXTENSION)
+      ? normalized
+      : `${normalized}${PDF_EXTENSION}`;
   }
-
 }
-

@@ -9,7 +9,9 @@ describe('DocumentsController', () => {
       fileName: 'documento.pdf',
       size: buffer.byteLength,
     });
-    const controller = new DocumentsController({ generateTemplatePdf } as never);
+    const controller = new DocumentsController({
+      generateTemplatePdf,
+    } as never);
 
     const setHeader = jest.fn();
     const response = { setHeader } as never;
@@ -26,10 +28,11 @@ describe('DocumentsController', () => {
       undefined,
     );
     expect(setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
-    expect(setHeader).toHaveBeenCalledWith('Content-Disposition', 'attachment; filename="documento.pdf"');
+    expect(setHeader).toHaveBeenCalledWith(
+      'Content-Disposition',
+      'attachment; filename="documento.pdf"',
+    );
     expect(setHeader).toHaveBeenCalledWith('Content-Length', buffer.byteLength);
     expect(file).toBeInstanceOf(StreamableFile);
   });
 });
-
-

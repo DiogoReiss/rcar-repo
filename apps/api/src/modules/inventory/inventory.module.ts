@@ -8,4 +8,3 @@ import { InventoryService } from './inventory.service.js';
   exports: [InventoryService],
 })
 export class InventoryModule {}
-

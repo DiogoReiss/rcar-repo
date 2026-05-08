@@ -16,14 +16,21 @@ export class ScheduledJobsService {
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async checkLowStock() {
     this.logger.log('Running low-stock check…');
-    const lowStock = await this.prisma.$queryRaw<Array<{ nome: string; quantidade_atual: number; estoque_minimo: number }>>`
+    const lowStock = await this.prisma.$queryRaw<
+      Array<{ nome: string; quantidade_atual: number; estoque_minimo: number }>
+    >`
       SELECT nome, quantidade_atual, estoque_minimo
       FROM products WHERE ativo = true AND deleted_at IS NULL
       AND quantidade_atual <= estoque_minimo ORDER BY nome
     `;
 
     if (lowStock.length > 0) {
-      const items = lowStock.map(p => `• ${p.nome}: ${p.quantidade_atual} (mín. ${p.estoque_minimo})`).join('\n');
+      const items = lowStock
+        .map(
+          (p) =>
+            `• ${p.nome}: ${p.quantidade_atual} (mín. ${p.estoque_minimo})`,
+        )
+        .join('\n');
       await this.emailQueue.add('send', {
         to: process.env.ALERT_EMAIL ?? 'admin@rcar.com.br',
         subject: `⚠️ Alerta: ${lowStock.length} produto(s) com estoque baixo`,
@@ -35,7 +42,7 @@ export class ScheduledJobsService {
 
   @Cron(CronExpression.EVERY_DAY_AT_7AM)
   async sendDailyReminders() {
-    this.logger.log('Checking today\'s schedules for reminders…');
+    this.logger.log("Checking today's schedules for reminders…");
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const end = new Date(today);
@@ -43,7 +50,10 @@ export class ScheduledJobsService {
 
     const schedules = await this.prisma.washSchedule.findMany({
       where: { dataHora: { gte: today, lte: end }, status: 'AGENDADO' },
-      include: { customer: { select: { email: true, nome: true } }, service: { select: { nome: true } } },
+      include: {
+        customer: { select: { email: true, nome: true } },
+        service: { select: { nome: true } },
+      },
     });
 
     for (const s of schedules) {
@@ -58,5 +68,3 @@ export class ScheduledJobsService {
     this.logger.log(`Sent ${schedules.length} reminders`);
   }
 }
-
-

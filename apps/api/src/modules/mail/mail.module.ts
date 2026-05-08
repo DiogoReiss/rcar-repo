@@ -7,4 +7,3 @@ import { MailService } from './mail.service.js';
   exports: [MailService],
 })
 export class MailModule {}
-

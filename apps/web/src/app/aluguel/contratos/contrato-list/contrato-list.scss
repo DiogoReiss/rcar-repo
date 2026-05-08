@@ -64,6 +64,140 @@
 .loading-hint { color: $color-neutral-400; padding: $spacing-md; font-size: 0.875rem; display: flex; align-items: center; gap: $spacing-xs; }
 .error-hint   { padding: $spacing-md; color: #dc2626; background: #fef2f2; border-radius: 8px; }
 
+.form-grid--spaced { margin-top: $spacing-md; }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-md;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-card {
+  background: #fff;
+  border: 1px solid $color-neutral-200;
+  border-radius: 10px;
+  padding: $spacing-md;
+
+  h2 {
+    margin: 0 0 $spacing-sm;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $color-neutral-700;
+  }
+}
+
+.info-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $spacing-xs $spacing-sm;
+
+  dt {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $color-neutral-500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+    color: $color-neutral-800;
+    font-size: 0.875rem;
+  }
+}
+
+.total-real {
+  font-weight: 700;
+  color: #047857;
+}
+
+.contract-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  border: 1px solid $color-neutral-200;
+  border-radius: 10px;
+  background: $color-neutral-100;
+
+  @media (max-width: 840px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  span {
+    font-size: 0.72rem;
+    color: $color-neutral-500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+
+  strong {
+    color: $color-neutral-800;
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $spacing-sm;
+}
+
+.checklist-item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: $spacing-xs;
+  border: 1px solid $color-neutral-200;
+  border-radius: 8px;
+  padding: $spacing-xs $spacing-sm;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  input { margin: 0; }
+
+  &.ok {
+    border-color: #86efac;
+    background: #f0fdf4;
+  }
+
+  &.nok {
+    border-color: #fecaca;
+    background: #fef2f2;
+  }
+}
+
+.item-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $color-neutral-500;
+}
+
+.detail-footer {
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: flex-end;
+}
+
 .empty-state {
   text-align: center;
   padding: $spacing-xl;

@@ -9,4 +9,3 @@ import { QueueEventsService } from './queue-events.service.js';
   exports: [LavajatoService, QueueEventsService],
 })
 export class LavajatoModule {}
-

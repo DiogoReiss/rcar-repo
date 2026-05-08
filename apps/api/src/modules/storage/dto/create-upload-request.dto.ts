@@ -1,8 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsMimeType, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsInt,
+  IsMimeType,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateUploadRequestDto {
-  @ApiProperty({ example: 'vistoria-chegada.jpg', description: 'Nome original do arquivo' })
+  @ApiProperty({
+    example: 'vistoria-chegada.jpg',
+    description: 'Nome original do arquivo',
+  })
   @IsString()
   @MaxLength(180)
   fileName!: string;
@@ -13,7 +24,8 @@ export class CreateUploadRequestDto {
 
   @ApiPropertyOptional({
     example: 'inspections',
-    description: 'Pasta lógica para organização (ex.: inspections, customers, contracts)',
+    description:
+      'Pasta lógica para organização (ex.: inspections, customers, contracts)',
   })
   @IsOptional()
   @IsString()
@@ -30,4 +42,3 @@ export class CreateUploadRequestDto {
   @Max(3600)
   expiresInSeconds?: number;
 }
-

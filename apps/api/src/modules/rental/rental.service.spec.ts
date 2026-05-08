@@ -42,28 +42,43 @@ describe('RentalService', () => {
   });
 
   it('returns existing confirmed payment (idempotent)', async () => {
-    prisma.rentalContract.findUnique.mockResolvedValue({ id: 'rc1', customerId: 'c1', valorTotal: 100, valorTotalReal: null });
-    prisma.payment.findFirst.mockResolvedValue({ id: 'p1', status: 'CONFIRMADO' });
+    prisma.rentalContract.findUnique.mockResolvedValue({
+      id: 'rc1',
+      customerId: 'c1',
+      valorTotal: 100,
+      valorTotalReal: null,
+    });
+    prisma.payment.findFirst.mockResolvedValue({
+      id: 'p1',
+      status: 'CONFIRMADO',
+    });
     const service = new RentalService(prisma as never);
 
-    const result = await service.registerPayment('rc1', 'PIX' as never);
+    const result = await service.registerPayment('rc1', 'PIX');
 
     expect(prisma.payment.create).not.toHaveBeenCalled();
     expect(result).toEqual({ id: 'p1', status: 'CONFIRMADO' });
   });
 
   it('throws when canceling an active contract directly', async () => {
-    prisma.rentalContract.findUnique.mockResolvedValue({ id: 'rc1', status: 'ATIVO', vehicleId: 'v1' });
+    prisma.rentalContract.findUnique.mockResolvedValue({
+      id: 'rc1',
+      status: 'ATIVO',
+      vehicleId: 'v1',
+    });
     const service = new RentalService(prisma as never);
 
-    await expect(service.cancelContract('rc1')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.cancelContract('rc1')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('throws when paying an unknown contract', async () => {
     prisma.rentalContract.findUnique.mockResolvedValue(null);
     const service = new RentalService(prisma as never);
 
-    await expect(service.registerPayment('missing', 'PIX' as never)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      service.registerPayment('missing', 'PIX'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
-

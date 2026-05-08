@@ -12,4 +12,3 @@ export class UpdateScheduleDto {
   @IsOptional()
   observacoes?: string;
 }
-

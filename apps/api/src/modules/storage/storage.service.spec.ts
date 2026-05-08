@@ -38,8 +38,8 @@ describe('StorageService', () => {
     });
 
     expect(result.signedUrl).toContain('X-Amz-Signature=');
-    expect(result.signedUrl).toContain('response-content-disposition=attachment%3B%20filename%3D%22contrato-maio.pdf%22');
+    expect(result.signedUrl).toContain(
+      'response-content-disposition=attachment%3B%20filename%3D%22contrato-maio.pdf%22',
+    );
   });
 });
-
-

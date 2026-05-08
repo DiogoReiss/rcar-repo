@@ -16,17 +16,43 @@ import { Prisma } from '@prisma/client';
  */
 const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
   // ─── Infrastructure ────────────────────────────────────────────────────────
-  P1000: { status: 503, message: 'Serviço de banco de dados indisponível. Tente novamente mais tarde.' },
-  P1001: { status: 503, message: 'Não foi possível conectar ao banco de dados. Tente novamente mais tarde.' },
-  P1002: { status: 503, message: 'Tempo limite de conexão com o banco de dados excedido.' },
-  P1008: { status: 503, message: 'Operação de banco de dados excedeu o tempo limite.' },
-  P1017: { status: 503, message: 'Conexão com o banco de dados encerrada pelo servidor.' },
+  P1000: {
+    status: 503,
+    message:
+      'Serviço de banco de dados indisponível. Tente novamente mais tarde.',
+  },
+  P1001: {
+    status: 503,
+    message:
+      'Não foi possível conectar ao banco de dados. Tente novamente mais tarde.',
+  },
+  P1002: {
+    status: 503,
+    message: 'Tempo limite de conexão com o banco de dados excedido.',
+  },
+  P1008: {
+    status: 503,
+    message: 'Operação de banco de dados excedeu o tempo limite.',
+  },
+  P1017: {
+    status: 503,
+    message: 'Conexão com o banco de dados encerrada pelo servidor.',
+  },
 
   // ─── Data / request ────────────────────────────────────────────────────────
-  P2000: { status: 400, message: 'Valor fornecido é muito longo para o campo.' },
+  P2000: {
+    status: 400,
+    message: 'Valor fornecido é muito longo para o campo.',
+  },
   P2001: { status: 404, message: 'Registro não encontrado.' },
-  P2002: { status: 409, message: 'Já existe um registro com esse valor único.' },
-  P2003: { status: 400, message: 'Violação de chave estrangeira — registro relacionado não existe.' },
+  P2002: {
+    status: 409,
+    message: 'Já existe um registro com esse valor único.',
+  },
+  P2003: {
+    status: 400,
+    message: 'Violação de chave estrangeira — registro relacionado não existe.',
+  },
   P2004: { status: 400, message: 'Violação de restrição no banco de dados.' },
   P2005: { status: 400, message: 'Valor inválido para o campo.' },
   P2006: { status: 400, message: 'Valor fornecido inválido.' },
@@ -39,12 +65,21 @@ const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
   P2015: { status: 404, message: 'Registro relacionado não encontrado.' },
   P2016: { status: 400, message: 'Erro de interpretação de consulta.' },
   P2017: { status: 400, message: 'Registros da relação não estão conectados.' },
-  P2018: { status: 400, message: 'Registros conectados necessários não foram encontrados.' },
+  P2018: {
+    status: 400,
+    message: 'Registros conectados necessários não foram encontrados.',
+  },
   P2019: { status: 400, message: 'Erro de entrada de dados.' },
-  P2020: { status: 400, message: 'Valor fora do intervalo permitido para o campo.' },
+  P2020: {
+    status: 400,
+    message: 'Valor fora do intervalo permitido para o campo.',
+  },
   P2021: { status: 500, message: 'Tabela não encontrada no banco de dados.' },
   P2022: { status: 500, message: 'Coluna não encontrada no banco de dados.' },
-  P2025: { status: 404, message: 'Registro não encontrado ou operação dependente falhou.' },
+  P2025: {
+    status: 404,
+    message: 'Registro não encontrado ou operação dependente falhou.',
+  },
   P2034: { status: 409, message: 'Conflito de transação — tente novamente.' },
 };
 
@@ -63,9 +98,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const ctx      = host.switchToHttp();
+    const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request  = ctx.getRequest<Request>();
+    const request = ctx.getRequest<Request>();
 
     const { status, body } = this.resolve(exception);
 
@@ -76,7 +111,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         exception instanceof Error ? exception.stack : String(exception),
       );
     } else {
-      this.logger.warn(`${request.method} ${request.url} → ${status}: ${body.message}`);
+      this.logger.warn(
+        `${request.method} ${request.url} → ${status}: ${body.message}`,
+      );
     }
 
     response.status(status).json({
@@ -88,14 +125,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   // ─── Resolution logic ──────────────────────────────────────────────────────
 
-  private resolve(exception: unknown): { status: number; body: Record<string, unknown> } {
+  private resolve(exception: unknown): {
+    status: number;
+    body: Record<string, unknown>;
+  } {
     // 1. NestJS HttpException (includes class-validator BadRequestException, etc.)
     if (exception instanceof HttpException) {
-      const status   = exception.getStatus();
-      const raw      = exception.getResponse();
-      const body     = typeof raw === 'string'
-        ? { statusCode: status, message: raw, error: raw }
-        : { statusCode: status, ...(raw as object) };
+      const status = exception.getStatus();
+      const raw = exception.getResponse();
+      const body =
+        typeof raw === 'string'
+          ? { statusCode: status, message: raw, error: raw }
+          : { statusCode: status, ...raw };
       return { status, body };
     }
 
@@ -118,12 +159,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // 3. Prisma initialization / connection error (P1xxx via main runtime)
     if (exception instanceof Prisma.PrismaClientInitializationError) {
-      const mapped = exception.errorCode ? PRISMA_ERROR_MAP[exception.errorCode] : undefined;
-      const message = mapped?.message ?? 'Serviço de banco de dados indisponível.';
-      const status  = mapped?.status  ?? 503;
+      const mapped = exception.errorCode
+        ? PRISMA_ERROR_MAP[exception.errorCode]
+        : undefined;
+      const message =
+        mapped?.message ?? 'Serviço de banco de dados indisponível.';
+      const status = mapped?.status ?? 503;
       return {
         status,
-        body: { statusCode: status, error: exception.errorCode ?? 'DB_INIT', message },
+        body: {
+          statusCode: status,
+          error: exception.errorCode ?? 'DB_INIT',
+          message,
+        },
       };
     }
 
@@ -164,7 +212,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return baseMessage;
   }
 
-  private internalError(error: string): { status: number; body: Record<string, unknown> } {
+  private internalError(error: string): {
+    status: number;
+    body: Record<string, unknown>;
+  } {
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       body: {
@@ -175,4 +226,3 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
   }
 }
-

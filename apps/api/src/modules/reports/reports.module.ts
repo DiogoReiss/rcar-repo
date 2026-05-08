@@ -7,4 +7,3 @@ import { ReportsService } from './reports.service.js';
   providers: [ReportsService],
 })
 export class ReportsModule {}
-

@@ -8,4 +8,3 @@ import { WashService } from './wash.service.js';
   exports: [WashService],
 })
 export class WashModule {}
-

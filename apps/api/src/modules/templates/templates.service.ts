@@ -9,7 +9,10 @@ export class TemplatesService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.template.findMany({ where: { ativo: true }, orderBy: { nome: 'asc' } });
+    return this.prisma.template.findMany({
+      where: { ativo: true },
+      orderBy: { nome: 'asc' },
+    });
   }
 
   async findOne(id: string) {
@@ -33,4 +36,3 @@ export class TemplatesService {
     return { html: compiled(variables) };
   }
 }
-

@@ -11,4 +11,3 @@ export class LoginDto {
   @MinLength(8) // S10: NIST SP 800-63B minimum 8 chars
   senha: string;
 }
-
