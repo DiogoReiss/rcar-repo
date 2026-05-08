@@ -55,7 +55,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        run: pnpm --filter api prisma generate
+        run: pnpm --filter api exec prisma generate
 
       - name: Lint API
         run: pnpm --filter api lint
@@ -187,3 +187,4 @@ jobs:
           fi
 
           curl --fail --show-error --silent -X POST "$PRODUCTION_DEPLOY_HOOK_URL"
+

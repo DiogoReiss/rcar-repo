@@ -37,7 +37,7 @@ jobs:
 
       # Q10: Generate Prisma client before building so types are available
       - name: Generate Prisma client
-        run: pnpm --filter api prisma generate
+        run: pnpm --filter api exec prisma generate
 
       - name: Lint (API)
         run: pnpm --filter api lint
