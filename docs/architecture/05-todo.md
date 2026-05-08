@@ -1,4 +1,4 @@
-# RCar — TODO (Roadmap Macro de Implementação)
+# RCar — TODO Unificado (Backend + Frontend + Arquitetura)
 
 ## Legenda
 
@@ -9,259 +9,333 @@
 
 ---
 
-## Status Sync Notes (2026-05-08)
+## Objetivo deste arquivo (2026-05-08)
 
-- Este arquivo é um **roadmap macro de arquitetura** (planejamento por fases), não a fonte detalhada de execução diária.
-- O status granular (passo a passo) foi verificado no código e é mantido em:
+- Este arquivo passa a ser a **fonte consolidada** dos TODOs de implementação.
+- Conteúdo incorporado sem perda de escopo a partir de:
   - `docs/todo-backend.md`
   - `docs/todo-frontend.md`
-  - `docs/progress/improvement-fixes.md`
-- Evidências de codebase usadas na sincronização:
-  - módulos backend existentes em `apps/api/src/modules/`
-  - rotas/páginas frontend existentes em `apps/web/src/app/`
-  - pipeline CI em `.github/workflows/ci.yml`
-  - lacunas relevantes: integração `d4sign`, upload real S3/MinIO e renderização HTML→PDF completa no backend
+- `docs/progress/roadmap.md` deve refletir o mesmo status macro (sincronizado na mesma data).
 
-### Ordem de execução ativa (2026-05-08)
+### Ordem de execução ativa
 
-- Ordem priorizada para execução incremental: **5 -> 2 -> 3 -> 4 -> 1**.
-- Entrega inicial do ponto 5 iniciada: seletor de período no dashboard (`7d/30d/mês`) com suporte de endpoint e mock.
-- Entrega inicial do ponto 2 iniciada: fundação de geração de PDF no backend com endpoint protegido.
-- Entrega inicial do ponto 3 iniciada: módulo `storage` com scaffold de URL assinada para upload/download.
+1. **Ponto 5**: operacional/UX e escala (dashboard + qualidade de experiência)
+2. **Ponto 2**: documentos, PDF e assinatura
+3. **Ponto 3**: storage real S3/MinIO
+4. **Ponto 4**: pagamentos online
+5. **Ponto 1**: hardening final de testes/segurança/go-live
 
 ---
 
-## Fase 1 — MVP (baseline histórico)
+## Snapshot Consolidado (done/partial/not started)
 
-### Infraestrutura
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🟡     | Setup monorepo (pnpm workspaces: `apps/web`, `apps/api`) |
-| 🔴     | Configurar Angular 21 com standalone APIs            |
-| 🔴     | Configurar NestJS com Prisma + PostgreSQL             |
-| 🔴     | Docker Compose (PostgreSQL + Redis + MinIO)           |
-| 🔴     | CI/CD pipeline (lint, test, build)                    |
-| 🔴     | Configurar variáveis de ambiente (.env.example)       |
-| 🔴     | Setup Prisma schema + migration inicial               |
-| 🔴     | Seed com dados iniciais (admin, serviços, frota)      |
-
-### Autenticação
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: módulo auth (login, refresh, forgot/reset password) |
-| 🔴     | Backend: JWT strategy + guards                       |
-| 🔴     | Backend: RBAC (roles decorator + guard)              |
-| 🔴     | Frontend: tela de login                              |
-| 🔴     | Frontend: auth service + interceptors                |
-| 🔴     | Frontend: guards de rota (auth + role)               |
-| 🔴     | Frontend: fluxo de recuperação de senha              |
-
-### Admin — Gestão de Usuários
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/users                             |
-| 🔴     | Frontend: listagem de usuários com filtro             |
-| 🔴     | Frontend: formulário criar/editar usuário            |
-| 🔴     | Frontend: ativar/desativar usuário                   |
-
-### Admin — Catálogo de Serviços (Lavajato)
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/wash/services                     |
-| 🔴     | Frontend: listagem de serviços                       |
-| 🔴     | Frontend: formulário criar/editar serviço            |
-| 🔴     | Frontend: toggle ativar/desativar                    |
-
-### Admin — Gestão da Frota
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/fleet                             |
-| 🔴     | Backend: upload de fotos (S3/MinIO)                  |
-| 🔴     | Frontend: listagem de veículos com status            |
-| 🔴     | Frontend: formulário criar/editar veículo            |
-| 🔴     | Frontend: detalhe com histórico                      |
-
-### Admin — Gestão de Clientes
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/customers                         |
-| 🔴     | Backend: upload CNH (S3/MinIO)                       |
-| 🔴     | Frontend: listagem com filtro PF/PJ                  |
-| 🔴     | Frontend: formulário criar/editar (PF e PJ)          |
-| 🔴     | Frontend: detalhe com histórico unificado            |
-
-### Lavajato — Agendamento
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: lógica de disponibilidade (slots por duração)|
-| 🔴     | Backend: CRUD /api/wash/schedule                     |
-| 🔴     | Frontend: calendário com horários disponíveis        |
-| 🔴     | Frontend: formulário de agendamento                  |
-| 🔴     | Frontend: painel do operador (agendamentos do dia)   |
-| 🔴     | Frontend: alterar status do agendamento              |
-
-### Lavajato — Fila Presencial
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/wash/queue                        |
-| 🔴     | Frontend: painel de fila em tempo real               |
-| 🔴     | Frontend: formulário adicionar à fila                |
-| 🔴     | Frontend: controles de status (aguardando → concluído)|
-
-### Lavajato — Pagamentos
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: POST /api/payments (registro manual)        |
-| 🔴     | Frontend: modal de registro de pagamento             |
-| 🔴     | Frontend: seleção de método (dinheiro, pix, cartão)  |
-
-### Aluguel — Reservas
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: /api/fleet/available (veículos disponíveis por período)|
-| 🔴     | Backend: CRUD /api/rental/reservations               |
-| 🔴     | Backend: cálculo de preço (diária × período)         |
-| 🔴     | Frontend: seleção de categoria + período             |
-| 🔴     | Frontend: exibição de preço estimado                 |
-| 🔴     | Frontend: confirmação de reserva                     |
-
-### Aluguel — Contratos
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: POST /api/rental/contracts (abertura)       |
-| 🔴     | Backend: lógica de vistoria de saída                 |
-| 🔴     | Frontend: formulário de abertura (vincular veículo)  |
-| 🔴     | Frontend: checklist de vistoria + upload fotos       |
-| 🔴     | Frontend: listagem de contratos ativos               |
-| 🔴     | Frontend: detalhe do contrato                        |
-
-### Aluguel — Devolução
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: POST /api/rental/contracts/:id/close        |
-| 🔴     | Backend: lógica comparativo saída vs. chegada        |
-| 🔴     | Frontend: vistoria de chegada (checklist + fotos)    |
-| 🔴     | Frontend: tela de extras (km, combustível, avaria)   |
-| 🔴     | Frontend: fechamento do contrato                     |
-
-### Admin — Templates e PDF
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: CRUD /api/documents/templates               |
-| 🔴     | Backend: renderização HTML→PDF (Puppeteer)           |
-| 🔴     | Frontend: editor de template (HTML com variáveis)    |
-| 🔴     | Frontend: preview com dados de exemplo               |
-| 🔴     | Frontend: botão "Gerar PDF" em contratos/recibos     |
-
-### Integração D4Sign (Assinatura Digital)
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Criar conta D4Sign e obter credenciais               |
-| 🔴     | Backend: D4SignService (envio + consulta + webhook)   |
-| 🔴     | Backend: endpoint webhook para callbacks             |
-| 🔴     | Frontend: botão "Enviar para Assinatura"             |
-| 🔴     | Frontend: badge de status da assinatura              |
-
-### Notificações por E-mail
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: módulo de e-mail (Nodemailer + templates HBS)|
-| 🔴     | E-mail: confirmação de agendamento                   |
-| 🔴     | E-mail: confirmação de reserva                       |
-| 🔴     | E-mail: lembrete de devolução (D-1)                  |
-| 🔴     | E-mail: recuperação de senha                         |
+| Área | Backend | Frontend | Consolidado |
+|---|---|---|---|
+| Fundação de projeto (setup, build, env, monorepo) | 🟢 | 🟢 | 🟢 |
+| Docker + banco + seed | 🟢 (seed validação em banco real pendente) | n/a | 🟡 |
+| Common/core (guards, interceptors, auth base, layout, rotas) | 🟢 | 🟢 | 🟢 |
+| Admin CRUD (usuários, serviços, frota, clientes) | 🟢 (uploads pendentes) | 🟢 | 🟡 |
+| Lavajato (agenda/fila/pagamentos) | 🟢 (testes pendentes) | 🟢 | 🟡 |
+| Aluguel (disponibilidade, contrato, devolução) | 🟢 (testes pendentes) | 🟡 | 🟡 |
+| Templates + PDF | 🟡 (scaffold pronto, motor real pendente) | 🟡 | 🟡 |
+| D4Sign | 🔴 | 🔴 | 🔴 |
+| Storage real S3/MinIO | 🟡 (scaffold) | 🔴 (integração upload pendente) | 🟡 |
+| Financeiro e relatórios | 🟢 | 🟢 | 🟢 |
+| E-mail + jobs | 🟢 (templates ricos/testes pendentes) | n/a | 🟡 |
+| Testes (unit/integration/e2e) | 🟡 | 🟡 | 🟡 |
+| CI/lint/swagger hardening | 🟡 | 🟡 | 🟡 |
 
 ---
 
-## Fase 2 — Financeiro e Pagamentos Online
+## Backlog Unificado por Domínio
 
-> Detalhado em [`06-financeiro.md`](./06-financeiro.md)
+## 1) Fundação e Plataforma
 
-### 2a. Relatórios financeiros (quick wins)
+### 1.1 Backend (Infra + DB + Common + Auth base)
 
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🟢     | Backend: `GET /reports/financial-summary` (DRE simplificado: receita - custos = margem) |
-| 🟢     | Backend: custo de insumos e manutenção no `getDailySummary` / `getMonthlyStats` |
-| 🟢     | Backend: baixa automática de estoque ao concluir serviço (`ServiceProduct`) |
-| 🟢     | Backend: `GET /payments` standalone com filtros (data, tipo, status, método) |
-| 🟢     | Frontend: página `/admin/financeiro` com DRE visual + gráficos |
-| 🟢     | Frontend: card "Contas a receber" (contratos sem pagamento total) |
-| 🟢     | Frontend: rentabilidade por veículo (receita - manutenção) |
+- 🟢 Inicialização NestJS concluída (`apps/api`, strict mode, aliases, config, build).
+- 🟢 Infra local concluída (`postgres`, `redis`, `minio`, scripts docker).
+- 🔴 Documentação operacional de ambiente local no README ainda pendente.
+- 🟢 Prisma/schema/migrations e `PrismaService` concluídos.
+- 🔴 Execução/validação do seed contra banco real ainda pendente.
+- 🟢 Common module concluído (decorators, guards, logging interceptor, filters, paginação DTO).
+- 🟡 Aplicação de guards permanece por controller (intencional), não global.
+- 🟢 Auth module concluído (login/refresh/logout/forgot/reset + strategies + DTOs + spec do service).
+- 🔴 E2E real de auth ainda pendente (há stub em `test/app.e2e-spec.ts`).
 
-### 2b. Pagamentos online (Pagar.me)
+### 1.2 Frontend (setup + testes base + core + shell + rotas + shared)
 
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Criar conta Pagar.me e obter credenciais             |
-| 🔴     | Backend: PagarmeService (criar cobrança Pix/cartão)  |
-| 🔴     | Backend: webhook de confirmação de pagamento         |
-| 🔴     | Frontend: fluxo de pagamento online (lavajato)       |
-| 🔴     | Frontend: cobrança no fechamento de aluguel          |
-
----
-
-## Fase 3 — Análise Avançada, UX e Portal
-
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | Backend: /api/reports/fleet-occupation               |
-| 🔴     | Backend: análise custo-benefício preventiva vs. corretiva |
-| 🔴     | Frontend: export CSV/PDF de relatórios financeiros   |
-| 🔴     | Frontend: dashboard com seletor de período (7d/30d/mês) |
-| 🔴     | Frontend: portal do cliente (meus agendamentos, reservas, histórico)|
-| 🔴     | Audit log: registrar ações críticas                  |
-| 🔴     | UX: loading skeletons, toasts, empty states          |
-| 🔴     | Schema: `custoAquisicao` em Vehicle + depreciation schedule |
+- 🟢 Angular 21, build, aliases, environments concluídos.
+- 🟢 Stack de testes configurada (Vitest unit/browser + Playwright + scripts).
+- 🟢 Dependências core e PrimeNG configurados.
+- 🟢 Core concluído (`ApiService`, auth service/interceptors/guards, store base).
+- 🟢 Shell/layout e acessibilidade base concluídos.
+- 🟢 Roteamento lazy por áreas concluído.
+- 🟢 Biblioteca shared concluída (`confirm-dialog`, `entity-dialog`, `form-field`, `lync-btn`, `row-menu`, pipes, directives, wizard).
 
 ---
 
-## Fase 4 — Expansão
+## 2) Admin Operacional
 
-| Status | Tarefa                                              |
-|--------|-----------------------------------------------------|
-| 🔴     | PWA: manifest + service worker para acesso offline   |
-| 🔴     | Notificações WhatsApp (API oficial ou Evolution API) |
-| 🔴     | Programa de fidelidade (pontos por lavagem)          |
-| 🔴     | Multi-unidade (field `unidade_id` + filtro global)   |
-| 🔴     | Integração DETRAN (validação de CNH)                 |
-| 🔴     | App mobile nativo (se necessário após PWA)           |
+### 2.1 Usuários
+
+- 🟢 Backend CRUD users + RBAC concluído.
+- 🔴 Backend unit tests users.service pendentes.
+- 🔴 Backend E2E CRUD users pendente.
+- 🟢 Frontend listagem + dialog create/edit + ativar/desativar + service com signals concluídos.
+- 🔴 Frontend unit tests da feature pendentes.
+
+### 2.2 Serviços (Lavajato)
+
+- 🟢 Backend CRUD wash/services concluído.
+- 🔴 Backend unit tests pendentes.
+- 🟢 Frontend listagem + dialog create/edit + toggle + service concluídos.
+- 🔴 Frontend unit tests pendentes.
+
+### 2.3 Frota
+
+- 🟢 Backend CRUD + disponibilidade + manutenção (registrar/concluir/histórico) concluídos.
+- 🔴 Upload real de fotos por storage pendente.
+- 🔴 Backend unit tests da feature pendentes.
+- 🟢 Frontend listagem + dialog + detail + ações de manutenção no menu concluídos.
+- 🔴 Frontend unit tests pendentes.
+
+### 2.4 Clientes
+
+- 🟢 Backend CRUD e histórico concluídos.
+- 🔴 Upload real de CNH por storage pendente.
+- 🔴 Backend unit tests pendentes.
+- 🟢 Frontend listagem + dialog + detail/histórico em dialog + paginação concluídos.
 
 ---
 
-## Decisões Técnicas Pendentes
+## 3) Lavajato
 
-| Decisão                              | Opções                                      | Status |
-|--------------------------------------|---------------------------------------------|--------|
-| Design System do frontend            | **PrimeNG**                                 | 🟢     |
-| Hosting                              | AWS / GCP / VPS (Hetzner, DigitalOcean)     | 🔴     |
-| CDN para assets/fotos                | CloudFront / Cloudflare R2                  | 🔴     |
-| Monorepo tool                        | **pnpm workspaces puro**                    | 🟢     |
-| Real-time na fila (WebSocket vs SSE) | **SSE nativo**                              | 🟢     |
-| Editor de templates                  | **textarea + preview**                      | 🟢     |
+### 3.1 Agendamento
+
+- 🟢 Backend schedules + disponibilidade por slots + sumário mensal concluídos.
+- 🔴 Unit tests de disponibilidade pendentes.
+- 🟢 Frontend calendário dia/semana, form, painel do dia, status e service concluídos.
+- 🔴 Unit tests pendentes.
+
+### 3.2 Fila presencial
+
+- 🟢 Backend queue CRUD + SSE em tempo real concluídos.
+- 🔴 Unit tests pendentes.
+- 🟢 Frontend painel kanban, fluxo de avanço, dialog de detalhes e SSE concluídos.
+- 🔴 Unit tests pendentes.
+
+### 3.3 Pagamentos
+
+- 🟢 Backend pagamentos embedded concluídos e módulo `payments` standalone com filtros/summary/reconciliation concluído.
+- 🔴 Unit tests do módulo standalone pendentes.
+- 🟢 Frontend dialogs e seleção de método concluídos.
+- 🔴 Unit tests pendentes.
 
 ---
 
-## Próximos Passos Imediatos
+## 4) Aluguel
 
-1. **Ponto 5 (em execução)**: operacional/UX e escala — começar por dashboard com seletor de período fim a fim.
-2. **Ponto 2 (em execução)**: pipeline de documentos e assinatura — fundação de geração de PDF no backend.
-3. **Ponto 3**: módulo de storage (upload real S3/MinIO).
-4. **Ponto 4**: pagamentos online (Pagar.me + webhook).
-5. **Ponto 1**: hardening de qualidade e testes (backend/frontend/E2E).
+### 4.1 Backend
+
+- 🟢 Disponibilidade, ciclo completo de contrato (open/close/cancel), inspeções e pagamentos concluídos.
+- 🔴 Unit tests de disponibilidade e lifecycle pendentes.
+
+### 4.2 Frontend
+
+- 🟢 `disponibilidade` implementada.
+- 🔴 `reserva-form`, `reserva-confirmacao`, `ReservaService` ainda pendentes no checklist original.
+- 🟢 `contrato-list` e `contrato-detail` implementados.
+- 🔴 `contrato-abertura`, `vistoria-saida`, `ContratoService` ainda pendentes no checklist original.
+- 🟢 `vistoria-chegada` implementada.
+- 🔴 `fechamento`, integração total de pagamento na devolução e testes ainda pendentes.
+- 🟢 fluxo wizard de reserva (`lync-wizard-dialog`) já adotado.
+
+---
+
+## 5) Documentos, PDF e Assinatura
+
+### 5.1 Templates e PDF
+
+- 🟢 Backend templates CRUD + preview concluídos.
+- 🟡 `POST /documents/templates/:id/pdf` disponível com scaffold seguro (validação + filename normalizado + headers) e testes iniciais.
+- 🔴 Renderização HTML->PDF real (Puppeteer/engine) pendente.
+- 🟢 Frontend templates list + editor inline + preview live concluídos.
+- 🔴 Preview dedicado com dados mock estruturados e botão "Gerar PDF" em contratos/recibos pendentes.
+
+### 5.2 D4Sign
+
+- 🔴 Backend `D4SignService`, webhook e fluxo completo pendentes.
+- 🔴 Frontend botão "Enviar para Assinatura", badge robusto e service dedicado pendentes.
+
+---
+
+## 6) Storage e Uploads
+
+- 🟡 Backend `storage` scaffold pronto (endpoints protegidos e URL assinada GET/PUT em nível de scaffold).
+- 🔴 Integração real com `@aws-sdk/client-s3` e presigner pendente.
+- 🔴 Testes de upload real contra MinIO pendentes.
+- 🔴 Frontend ainda sem componente dedicado de upload integrado ao `storage` (integração fim-a-fim pendente).
+
+---
+
+## 7) Financeiro e Analytics
+
+- 🟢 Backend financeiro entregue: `financial-summary`, receivables, maintenance-costs, stock-cost-analysis, enrich daily/monthly.
+- 🟢 Backend automações financeiras entregues (baixa de estoque, custo médio ponderado, migrações correlatas).
+- 🟢 Frontend `/admin/financeiro` entregue com cards, gráficos, receivables, rentabilidade, valoração e export CSV/PDF.
+- 🟢 Dashboard com seletor de período (`7d/30d/mês`) entregue no endpoint + frontend + cobertura inicial.
+- 🟡 Cobertura de testes do dashboard ainda parcial.
+
+---
+
+## 8) E-mail, Jobs e Operações
+
+- 🟢 Mail module com env + envios principais implementado.
+- 🔴 Templates HTML mais ricos pendentes.
+- 🔴 Unit tests de mail e processors pendentes.
+- 🟢 Jobs BullMQ e crons principais implementados.
+- 🔴 Queue dedicada de geração de PDF pendente (dependente de motor PDF real).
+
+---
+
+## 9) Qualidade, Testes, Swagger e CI
+
+### 9.1 Backend
+
+- 🟢 Testes unitários iniciais adicionados (`documents`, `reports`, `storage`).
+- 🔴 Suite unit ampla (users/customers/fleet/wash/rental/payments/mail/jobs) pendente.
+- 🔴 E2E real com Supertest pendente.
+- 🟡 Swagger configurado, mas cobertura total de `@ApiProperty`/`@ApiResponse` ainda parcial.
+- 🔴 Prettier dedicado no `apps/api` pendente.
+
+### 9.2 Frontend
+
+- 🟢 Unit tests existentes: `app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`.
+- 🔴 Cobertura de features críticas ainda pendente (CRUDs, lavajato, aluguel, templates).
+- 🟡 Playwright existe com cenários iniciais, mas cobertura E2E ainda parcial.
+- 🔴 Checklist de lint frontend em `todo-frontend` continua pendente (21.1-21.4) até validação final de pipeline.
+
+---
+
+## 10) Decisões Técnicas e Dependências Externas
+
+| Tema | Situação |
+|---|---|
+| Design System frontend | 🟢 PrimeNG adotado |
+| Monorepo | 🟢 pnpm workspaces |
+| Real-time fila | 🟢 SSE adotado |
+| Editor templates | 🟢 textarea + preview |
+| Hosting produção | 🔴 pendente decisão |
+| CDN para assets/fotos | 🔴 pendente decisão |
+| Credenciais D4Sign | 📌 pendente externo |
+| Credenciais Pagar.me | 📌 pendente externo |
+
+---
+
+## 10.1) Matriz de cobertura da fusão (sem perda de informação)
+
+### Origem `docs/todo-backend.md`
+
+| Seções originais | Cobertura neste arquivo |
+|---|---|
+| 1 (Inicialização NestJS), 2 (Docker), 3 (Prisma/Schema), 4 (Seed), 5 (Common), 6 (Auth) | Seção `1) Fundação e Plataforma` |
+| 7 (Users), 8 (Customers), 9 (Fleet) | Seção `2) Admin Operacional` |
+| 10 (Storage) | Seção `6) Storage e Uploads` |
+| 11 (Wash/Lavajato) | Seção `3) Lavajato` |
+| 12 (Rental) | Seção `4) Aluguel` |
+| 13 (Payments standalone) | Seções `3.3 Pagamentos` e `7) Financeiro e Analytics` |
+| 14 (Documents/Templates/PDF/D4Sign) | Seção `5) Documentos, PDF e Assinatura` |
+| 15 (Notifications/Mail), 16 (Jobs) | Seção `8) E-mail, Jobs e Operações` |
+| 17 e 17b (Reports e automação financeira) | Seção `7) Financeiro e Analytics` |
+| 18 (Swagger), 19 (Lint/CI), 20 (E2E), 21 (Módulos extras) | Seção `9) Qualidade, Testes, Swagger e CI` e `1.1 Backend` |
+
+### Origem `docs/todo-frontend.md`
+
+| Seções originais | Cobertura neste arquivo |
+|---|---|
+| 1 (Inicialização Angular), 2 (Testes), 3 (Dependências), 4 (Core), 5 (Layout), 6 (Rotas), 7 (Shared) | Seção `1.2 Frontend` |
+| 8 (Auth Frontend) | Seção `1.2 Frontend` |
+| 9 (Usuários), 10 (Serviços), 11 (Frota), 12 (Clientes) | Seção `2) Admin Operacional` |
+| 13 (Agendamento), 14 (Fila), 15 (Pagamentos) | Seção `3) Lavajato` |
+| 16 (Reserva), 17 (Contratos), 18 (Devolução) | Seção `4) Aluguel` |
+| 19 (Templates/PDF), 20 (D4Sign) | Seção `5) Documentos, PDF e Assinatura` |
+| 21 (Lint/CI) | Seção `9.2 Frontend` |
+| 22 (Dashboard/Analytics), 24 (Financeiro) | Seção `7) Financeiro e Analytics` |
+| 23 (UX cross-cutting) | Seções `1.2 Frontend`, `2) Admin Operacional`, `3) Lavajato` e `4.2 Frontend` |
+
+---
+
+## 11) Diferenças encontradas entre `05-todo.md` e `roadmap.md` (agora alinhadas)
+
+### Antes da sincronização
+
+- `05-todo.md` marcava grandes blocos como 🔴 mesmo com ampla implementação já entregue.
+- `roadmap.md` listava itens de segurança e qualidade já mitigados (ex.: throttling/login hardening e expansão de unit tests iniciais).
+- `roadmap.md` tratava fases 2-6 como "entregues" sem refletir pendências funcionais reais (D4Sign, storage real, PDF real, e2e robusto).
+
+### Estado alinhado
+
+- **Totalmente concluído (🟢):** fundação de apps, core auth/base, módulos principais de negócio, financeiro base, dashboard com período, jobs e mail base.
+- **Parcialmente concluído (🟡):** storage, PDF, cobertura de testes, swagger completo, e2e, frontend aluguel (partes), uploads reais.
+- **A iniciar (🔴/📌):** D4Sign completo, pagamentos online, decisões de infraestrutura final, fases de expansão (PWA, WhatsApp, multi-unidade).
+
+---
+
+## 12) Plano completo para fechar 100% do projeto (business coverage)
+
+## Fase A — Fechamento de lacunas críticas (2-3 semanas)
+
+1. **Storage real**
+   - Integrar S3/MinIO real no backend (upload/delete/presigned URLs).
+   - Conectar uploads de CNH/fotos de frota e vistoria.
+   - Critério de saída: upload/download/deleção funcionando em ambiente local e staging.
+2. **PDF real**
+   - Substituir scaffold por renderização HTML->PDF real.
+   - Introduzir worker/queue de PDF para geração assíncrona quando necessário.
+   - Critério de saída: contratos/recibos gerados com layout final e testes automatizados.
+3. **D4Sign ponta a ponta**
+   - Serviço backend + webhook + persistência de status.
+   - Fluxo frontend de envio e acompanhamento.
+   - Critério de saída: assinatura real homologada com callback e download assinado.
+
+## Fase B — Qualidade técnica e confiabilidade (2 semanas)
+
+1. **Backend unit + integration**
+   - Priorizar `users`, `customers`, `fleet`, `lavajato`, `rental`, `payments`.
+2. **Frontend unit**
+   - Priorizar CRUDs admin, fluxos lavajato, reserva/contrato/devolução e templates.
+3. **E2E**
+   - Fluxos críticos: login, abertura-fechamento de contrato, pagamento, geração de PDF, envio assinatura.
+4. **Swagger/CI**
+   - Completar `@ApiProperty`/`@ApiResponse`.
+   - Pipeline com gates de lint+test+build para api/web.
+
+## Fase C — Cobertura de negócio final (2 semanas)
+
+1. **Pagamentos online (Pagar.me)**
+   - Cobrança Pix/cartão + webhook + reconciliação.
+2. **Portal do cliente completo**
+   - Meus agendamentos, reservas, documentos e histórico com dados reais.
+3. **Operação administrativa final**
+   - Relatórios exportáveis completos, toasts/empty/loading states padronizados.
+
+## Fase D — Go-live readiness (1 semana)
+
+1. **Hardening de produção**
+   - Secrets, backup, observabilidade e runbooks.
+2. **Decisões de infraestrutura**
+   - Hosting + CDN + estratégia de deploy/rollback.
+3. **Checklist de aceite**
+   - UAT por área (Lavajato, Aluguel, Financeiro, Administração).
+   - Critério de saída: sem blockers funcionais, sem gaps regulatórios e sem falhas críticas abertas.
+
+## Backlog pós-100% (expansão)
+
+- PWA/offline.
+- Notificações WhatsApp.
+- Programa de fidelidade.
+- Multi-unidade.
+- Integração DETRAN.
+- App mobile (se necessário).
 

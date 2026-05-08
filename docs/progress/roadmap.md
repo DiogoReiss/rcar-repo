@@ -1,237 +1,104 @@
-# Phase 2–6: Deep Review Backlog Roadmap
+# Phase 2–6: Deep Review Backlog Roadmap (Synced)
 
-**Status:** 🟡 Mixed — core phases delivered, backlog still open
-**Prerequisites:** Phase 1 ✅ Complete
-
----
-
-## Status Sync Notes (2026-05-08)
-
-- Este arquivo consolida **backlog técnico pós-entrega** (deep review), não substitui os TODOs detalhados.
-- Referência de status operacional (fonte primária):
-  - `docs/todo-backend.md`
-  - `docs/todo-frontend.md`
-- Verificações rápidas no codebase usadas na sincronização:
-  - Backend módulos presentes: `apps/api/src/modules/{auth,customers,fleet,inventory,lavajato,rental,reports,templates,...}`
-  - Frontend áreas presentes: `apps/web/src/app/{admin,lavajato,aluguel,core,shared}`
-  - CI ativo com build/test web+api: `.github/workflows/ci.yml`
-  - Lacunas ainda reais: integração `d4sign` ausente e renderização HTML->PDF real (Puppeteer/engine dedicado) ainda pendente.
-- Quick wins financeiros já entregues (2026-05-08):
-  - Backend: `GET /reports/financial-summary`, `/reports/rental/receivables`, `/reports/fleet/maintenance-costs`, `/reports/stock/cost-analysis`
-  - Backend: `getDailySummary` e `getMonthlyStats` enriquecidos com custos/métrica de recebíveis
-  - Frontend: `/admin/financeiro` com DRE, custos diretos e tabela de contas a receber
-- Fechamento do módulo financeiro (2026-05-08):
-  - Backend: `GET /payments` standalone + `GET /payments/method-summary`
-  - Schema: custo médio ponderado + campos financeiros de manutenção/incidentes
-  - Frontend: gráfico de método de pagamento, rentabilidade por veículo, valoração de estoque e export CSV/PDF
-
-### Ordem de execução atualizada (2026-05-08)
-
-- Sequência operacional vigente: **5 -> 2 -> 3 -> 4 -> 1**.
-- **Ponto 5 iniciado**: dashboard com seletor de período (`7d`, `30d`, `mês atual`) ligado ao endpoint de gráficos.
-- **Ponto 2 iniciado**: fundação backend para geração de PDF com endpoint protegido (`documents/templates/:id/pdf`).
-- **Ponto 3 iniciado**: scaffold do módulo `storage` com endpoints de URL assinada para upload/download.
+**Status:** 🟡 Mixed — base funcional entregue, lacunas críticas ainda abertas
+**Fonte de verdade detalhada:** `docs/architecture/05-todo.md`
+**Última sincronização:** 2026-05-08
 
 ---
 
-## Deep Code Review — Improvement Points
+## 1) Macro status alinhado com `05-todo.md`
 
-**Last updated:** 2026-05-06
-
-### 🔴 Critical — Security
-
-| # | Issue | Where | Impact |
-|---|-------|-------|--------|
-| S1 | **No rate limiting on login endpoint** — brute-force attacks can enumerate credentials | `auth.controller.ts` | Credential stuffing |
-| S2 | **`forgotPassword` and `resetPassword` are no-ops** — any token or password is accepted without validation | `auth.service.ts:54-67` | Account takeover |
-| S3 | **No Helmet middleware** — missing security headers (X-Frame-Options, CSP, HSTS) | `main.ts` | XSS/clickjacking |
-| S4 | **Refresh token not invalidated on logout** — reusable until expiry | `auth.service.ts` | Token replay |
-| S5 | **JWT stored in localStorage** — vulnerable to XSS; httpOnly cookies are safer | `auth.service.ts (web):66-68` | Token theft |
-| S6 | **SSE endpoint `/lavajato/queue/stream` has no auth** — `@UseGuards` is class-level but SSE uses EventSource which can't send Bearer header easily | `lavajato.controller.ts:78` | Data leakage |
-| S7 | **No CSRF protection** — relies only on CORS which is insufficient for cookie-based auth | `main.ts` | Cross-site request forgery |
-
-### 🟠 High — Data Integrity & Race Conditions
-
-| # | Issue | Where | Impact |
-|---|-------|-------|--------|
-| D1 | **Stock debit is not atomic across all products** — each product is debited in a separate transaction; crash mid-loop leaves inconsistent state | `lavajato.service.ts:216-235` | Inventory drift |
-| D2 | **Queue position has race condition** — two concurrent `addToQueue` calls read the same `lastEntry.posicao` and assign duplicates | `lavajato.service.ts:96-103` | Duplicate positions |
-| D3 | **Availability check doesn't lock vehicle** — user A gets availability, user B creates contract first, user A's create succeeds despite overlap query | `rental.service.ts:96-108` | Double booking |
-| D4 | **Soft-delete inconsistency** — customers use `ativo + deletedAt`, vehicles use `status=INATIVO + deletedAt`, but queries don't consistently filter both | Multiple services | Ghost data |
-| D5 | **No idempotency on payment creation** — client retry creates duplicate payments | `lavajato.service.ts:162-208` | Double charging |
-
-### 🟡 Medium — Architecture & Performance
-
-| # | Issue | Where | Impact |
-|---|-------|-------|--------|
-| A1 | **No pagination** — `findAll` endpoints return all records (customers, vehicles, schedules); will degrade as data grows | All `*.service.ts` | Performance |
-| A2 | **N+1 in stock debit** — iterates products and runs separate transaction per product instead of batching | `lavajato.service.ts:216` | DB load |
-| A3 | **No API health check endpoint** — containers and load balancers can't verify readiness | `main.ts` | Deployment gaps |
-| A4 | **No request/response logging** — hard to debug production issues | `main.ts` | Observability |
-| A5 | **Frontend services use `firstValueFrom` with `async/await` everywhere** — loses Angular's reactive patterns, can't cancel requests on route change | All admin pages | Memory leaks |
-| A6 | **`confirm()` used for destructive actions** — blocks the thread, not accessible, not customizable | `usuarios-list.ts`, `contrato-list.ts` | UX/A11y |
-| A7 | **No error boundary in frontend** — unhandled promise rejections silently fail | All `async` methods in components | Silent failures |
-| A8 | **ApiService has no interceptor for global error toasts** — each component handles errors differently | `api.service.ts` | UX inconsistency |
-| A9 | **SSE EventSource doesn't support auth tokens** — uses EventSource which has no header support; need token-in-query or polyfill | `fila-painel.ts:50-55` | Auth bypass |
-| A10 | **Dashboard makes 5 parallel requests** — should be a single `/api/dashboard` endpoint | `dashboard.ts:33-39` | Network overhead |
-
-### 🟢 Low — Code Quality & Testing
-
-| # | Issue | Where | Impact |
-|---|-------|-------|--------|
-| Q1 | **Only 1 unit test in entire web app** — `app.unit.spec.ts`; zero tests for services, guards, components | `apps/web` | Regression risk |
-| Q2 | **Zero unit tests in API** — no `.spec.ts` files at all | `apps/api` | Regression risk |
-| Q3 | **Zero E2E tests** — Playwright configured but no test files | `e2e/` | Integration gaps |
-| Q4 | **Inconsistent component selectors** — some use `rcar-`, others `lync-` (copilot instructions say `lync`) | Multiple `.ts` | Lint failures |
-| Q5 | **`any` types in stock debit** — `quantidadePorUso: any`, `quantidadeAtual: any` | `lavajato.service.ts:214` | Type safety |
-| Q6 | **Dead import `computed`** in `dashboard.ts` — imported but unused | `dashboard.ts:1` | Dead code |
-| Q7 | **No shared `ConfirmDialog` component** — uses native `confirm()` instead | Frontend | A11y/design |
-| Q8 | **`vistoria-chegada.ts:56`** sets kmDevolucao from `res.vehicle` as `any` — wrong cast | `vistoria-chegada.ts` | Runtime bug |
-| Q9 | **Models duplicated** — `entities.model.ts` in frontend duplicates backend Prisma types; no shared contract | Both apps | Drift |
-| Q10 | **CI doesn't generate Prisma client** — `pnpm --filter api build` may fail in CI without `prisma generate` | `ci.yml` | CI failures |
+| Macro domínio | Status |
+|---|---|
+| Fundação de plataforma (api/web, core, auth base, infra local) | 🟢 |
+| Operação administrativa (users, serviços, frota, clientes) | 🟡 |
+| Lavajato (agenda, fila, pagamentos) | 🟡 |
+| Aluguel (reserva, contratos, devolução) | 🟡 |
+| Financeiro e relatórios | 🟢 |
+| Documentos/PDF/assinatura | 🟡 |
+| Storage real e uploads | 🟡 |
+| Qualidade de testes/e2e/go-live hardening | 🟡 |
+| Expansão (PWA, WhatsApp, multi-unidade etc.) | 🔴 |
 
 ---
 
-## Prioritized Action Plan
+## 2) O que está totalmente concluído
 
-### Sprint 1 — Security Hardening (recommended first)
-- [ ] Install & configure `@nestjs/throttler` (rate limit login to 5 req/min)
-- [ ] Install `helmet` middleware for security headers
-- [ ] Implement real forgot/reset-password flow with time-limited tokens + email
-- [ ] Invalidate refresh tokens on logout (store blacklist in Redis)
-- [ ] Add `/api/health` endpoint
-- [ ] Fix SSE auth (use query-token approach or switch to WebSocket)
-
-### Sprint 2 — Data Integrity
-- [ ] Wrap entire stock debit in a single `$transaction` (read + update all products)
-- [ ] Use `SELECT FOR UPDATE` or Prisma serializable TX for queue position assignment
-- [ ] Add optimistic lock (version column) or `SELECT FOR UPDATE` on vehicle availability during contract creation
-- [ ] Add idempotency key to payment endpoints
-- [ ] Standardize soft-delete filter pattern (base service or middleware)
-
-### Sprint 3 — Performance & Architecture
-- [ ] Add cursor/offset pagination DTO to all list endpoints (reuse `PaginationDto`)
-- [ ] Create aggregated `/api/dashboard` endpoint (single query, cache 30s)
-- [ ] Add global exception logging middleware
-- [ ] Add request/response logging interceptor (NestJS `LoggingInterceptor`)
-
-### Sprint 4 — Frontend Quality
-- [ ] Replace `confirm()` with shared `ConfirmDialogComponent`
-- [ ] Switch from `firstValueFrom` to proper RxJS patterns or use `resource()` from Angular 19+
-- [ ] Add global HTTP error interceptor for toast notifications
-- [ ] Fix all `rcar-` selectors to `lync-`
-- [ ] Fix `vistoria-chegada.ts` kmDevolucao initialization bug
-
-### Sprint 5 — Testing
-- [ ] Write unit tests for `AuthService`, `AuthGuard`, `RolesGuard` (API)
-- [ ] Write unit tests for `InventoryService`, `LavajatoService` (API)
-- [ ] Write unit tests for key frontend services (AuthService, ApiService)
-- [ ] Write Playwright E2E tests for login flow and CRUD happy paths
-- [ ] Fix CI pipeline to run `prisma generate` before build
+- Backend: base NestJS + Prisma + schema/migrations + módulos principais (`auth`, `users`, `customers`, `fleet`, `wash/lavajato`, `rental`, `reports`, `payments`, `templates`, `mail`, `jobs`, `health`).
+- Frontend: base Angular 21 + shell + rotas lazy + áreas admin/lavajato/aluguel + financeiro completo + dashboard com período.
+- Financeiro ponta a ponta (quick wins): endpoints e UI de DRE, receivables, manutenção e custo de estoque.
+- Qualidade inicial: testes unitários em api (documents/reports/storage) e web (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`).
 
 ---
 
-## Phase 2: Auth End-to-End + Estoque Foundation ✅
+## 3) O que está parcialmente concluído
 
-### Backend:
-- [x] Start Docker + first migration
-- [x] Seed data (admin user, services, vehicles, template, products)
-- [x] Common module (decorators, guards, interceptors, filters)
-- [x] Auth module (JWT, login/refresh/forgot/reset)
-- [x] Inventory module (products CRUD, stock movements)
-
-### Frontend:
-- [x] Login, forgot-password, reset-password pages
-- [x] Auth service wired to real API
-- [x] Estoque placeholder pages + routes
-
-**Milestone:** ✅ User can log in and navigate to estoque pages.
+- **Storage**: scaffold backend de URL assinada pronto; integração real S3/MinIO e fluxo de upload frontend ainda pendentes.
+- **PDF**: endpoint protegido e scaffold de geração prontos; falta motor real HTML->PDF.
+- **Aluguel frontend**: fluxo wizard existe, mas itens do checklist original (form/confirm/services de reserva, abertura detalhada, fechamento final) ainda pendentes.
+- **Testes**: há base real, mas cobertura funcional completa (unit+e2e) ainda não atingida.
+- **Swagger/CI/lint**: estrutura pronta; falta fechamento de cobertura e validações finais de pipeline como gate de release.
 
 ---
 
-## Phase 3: Admin CRUD ✅
+## 4) O que ainda não iniciou (ou depende de terceiros)
 
-### Backend:
-- [x] Users module (CRUD with RBAC)
-- [x] Customers module (PF/PJ)
-- [x] Fleet module (vehicles, availability)
-- [x] Wash services catalog (CRUD)
-- [x] Inventory low-stock endpoint
-
-### Frontend:
-- [x] Dashboard with KPI cards + low-stock alerts
-- [x] Admin: Usuarios (list + form)
-- [x] Admin: Servicos (list + form)
-- [x] Admin: Estoque — Produtos (list + form + movimentações)
-- [x] Admin: Frota (list + form)
-- [x] Admin: Clientes (list + form, search)
-
-**Milestone:** ✅ Admin can manage all entities.
+- Integração D4Sign completa (backend webhook + frontend fluxo completo).
+- Pagamentos online Pagar.me (credenciais, service, webhook, UX de cobrança online).
+- Decisões finais de infraestrutura de produção (hosting/CDN).
+- Trilhas de expansão (PWA, WhatsApp, fidelidade, multi-unidade, DETRAN, app mobile).
 
 ---
 
-## Phase 4: Lavajato ✅
+## 5) Gaps de sincronização corrigidos neste ciclo
 
-### Backend:
-- [x] Schedule service (create, list by date, status transitions)
-- [x] Queue service (walk-in, position, SSE stream)
-- [x] Payments module
-- [x] Auto-debit stock on service completion
-
-### Frontend:
-- [x] Calendário + agendamento form + status actions
-- [x] Fila painel (SSE real-time, 2-column layout)
-- [x] Atendimentos do dia (KPIs + tables)
-- [x] Payment dialogs (schedule + queue)
-
-**Milestone:** ✅ Lavajato fully operational with automatic stock tracking.
+- Itens historicamente marcados como "não iniciado" em macro roadmap foram atualizados para refletir entregas reais já presentes no código.
+- Itens de segurança/qualidade que já possuem entrega parcial (ex.: throttling, health, interceptação de erro, cobertura unit inicial) deixaram de aparecer como 100% pendentes.
+- Fases que estavam marcadas como "production-ready" foram reclassificadas para 🟡 quando ainda possuem dependências críticas de negócio (storage real, PDF real, D4Sign, E2E robusto).
 
 ---
 
-## Phase 5: Aluguel ✅
+## 6) Plano de fechamento 100% (execução)
 
-### Backend:
-- [x] Availability check (period-based, excludes active contracts)
-- [x] Contract service (create, open, close, cancel)
-- [x] Inspections (saída + chegada with checklist)
-- [x] Rental payments
+## Wave 1 — Core blockers de negócio (2-3 semanas)
 
-### Frontend:
-- [x] Disponibilidade + reserva form (3-step wizard)
-- [x] Contrato list + inline abertura + payment dialog
-- [x] Vistoria de chegada + devolução (checklist okê/avaria)
+1. Storage real S3/MinIO + uploads fim a fim (CNH/frota/vistorias).
+2. Motor PDF real (HTML->PDF) + estabilidade de geração.
+3. D4Sign completo (send, webhook, status, download assinado).
 
-**Milestone:** ✅ Rental fully operational.
+**Saída da wave:** documentos e anexos operacionais de ponta a ponta.
+
+## Wave 2 — Confiabilidade e qualidade (2 semanas)
+
+1. Completar suites unitárias backend e frontend das áreas críticas.
+2. Construir E2E de fluxos de receita (auth, lavajato, aluguel, financeiro, documentos).
+3. Completar Swagger e gates de CI para release sem regressão.
+
+**Saída da wave:** qualidade de release com cobertura previsível e pipeline bloqueante.
+
+## Wave 3 — Fechamento funcional comercial (2 semanas)
+
+1. Pagamentos online (Pagar.me) com webhook e reconciliação.
+2. Portal do cliente com dados reais e documentos.
+3. Fechamento dos itens pendentes da trilha aluguel frontend.
+
+**Saída da wave:** operação comercial digital completa.
+
+## Wave 4 — Go-live readiness (1 semana)
+
+1. Decisão de infraestrutura (hosting + CDN) e estratégia de deploy/rollback.
+2. Hardening operacional (backup, observabilidade, runbooks).
+3. UAT final por área de negócio e checklist de aceite.
+
+**Saída da wave:** go-live com risco controlado.
 
 ---
 
-## Phase 6: Supporting & Polish ✅
+## 7) Backlog pós-100%
 
-### Backend:
-- [x] Reports module (daily summary, monthly stats, stock report)
-- [x] Templates module (CRUD + Handlebars rendering)
-- [x] Mail service (Nodemailer, schedule confirmation, password reset, contract ready)
-- [x] BullMQ email processor (async email queue)
-- [x] Scheduled jobs (daily low-stock alert, morning reminders)
-- [x] Swagger already configured in main.ts
-
-### Frontend:
-- [x] Template editor + live HTML preview
-- [x] D4Sign status badges in contracts list
-- [x] Prettier config (.prettierrc)
-- [x] GitHub Actions CI (build API, build web, unit tests)
-
-**Milestone:** ✅ Production-ready.
-
----
-
-## Post-launch Backlog (open)
-
-The following items were intentionally deferred and can be tackled independently:
-
-- [ ] Storage module: actual file upload to MinIO/S3 (CNH, fotos de vistoria)
-- [ ] D4Sign full API integration (send doc, webhook, signed PDF download)
-- [ ] PDF generation (puppeteer or weasyprint) from rendered templates
-- [ ] Portal do Cliente pages (histórico, agendamentos, reservas, documentos)
-- [ ] Expandir cobertura E2E (Playwright + cenários backend além do stub)
-- [ ] Multi-unit / multi-branch support
+- PWA/offline.
+- WhatsApp.
+- Fidelidade.
+- Multi-unidade.
+- DETRAN.
+- App mobile (se necessário).
