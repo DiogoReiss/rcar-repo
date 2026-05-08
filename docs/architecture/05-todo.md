@@ -33,7 +33,7 @@
 | 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validações e testes iniciais | Fluxo completo de assinatura D4Sign + expansão de geração/consumo no frontend |
 | 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
-| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes iniciais) | Cobertura ampla unit/E2E, Swagger completo, fechamento de lint/CI e checklist de go-live |
+| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários iniciais ampliados em `documents/reports/storage/users/customers/fleet`) | Cobertura ampla unit/E2E remanescente, Swagger completo, fechamento de lint/CI e checklist de go-live |
 
 **Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2`, `3` e `1` estão parcialmente implementados, e `4` depende de integração externa.
 
@@ -213,8 +213,8 @@
 
 ### 9.1 Backend
 
-- 🟢 Testes unitários iniciais adicionados (`documents`, `reports`, `storage`).
-- 🔴 Suite unit ampla (users/customers/fleet/wash/rental/payments/mail/jobs) pendente.
+- 🟢 Testes unitários iniciais adicionados (`documents`, `reports`, `storage`, `users`, `customers`, `fleet`).
+- 🟡 Suite unit ampla ainda pendente para módulos restantes (`wash`, `rental`, `payments`, `mail`, `jobs`).
 - 🔴 E2E real com Supertest pendente.
 - 🟡 Swagger configurado, mas cobertura total de `@ApiProperty`/`@ApiResponse` ainda parcial.
 - 🔴 Prettier dedicado no `apps/api` pendente.

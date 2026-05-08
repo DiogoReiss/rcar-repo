@@ -12,7 +12,7 @@
 | 2 (documentos/PDF/assinatura) | 🟡 | Renderização HTML->PDF backend já implementada; falta fluxo D4Sign e fechamento frontend |
 | 3 (storage) | 🟡 | Presigned real já implementado; falta expandir upload/download frontend fim a fim para todas as trilhas |
 | 4 (pagamentos online) | 🔴/📌 | Integração Pagar.me depende de credenciais e webhook homologado |
-| 1 (hardening final) | 🟡 | Cobertura de testes, Swagger completo e gates finais de CI/go-live |
+| 1 (hardening final) | 🟡 | Cobertura unit evoluiu (inclui users/customers/fleet), mas faltam E2E amplo, Swagger completo e gates finais de CI/go-live |
 
 ---
 
@@ -37,7 +37,7 @@
 - Backend: base NestJS + Prisma + schema/migrations + módulos principais (`auth`, `users`, `customers`, `fleet`, `wash/lavajato`, `rental`, `reports`, `payments`, `templates`, `mail`, `jobs`, `health`).
 - Frontend: base Angular 21 + shell + rotas lazy + áreas admin/lavajato/aluguel + financeiro completo + dashboard com período.
 - Financeiro ponta a ponta (quick wins): endpoints e UI de DRE, receivables, manutenção e custo de estoque.
-- Qualidade inicial: testes unitários em api (documents/reports/storage) e web (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`).
+- Qualidade inicial: testes unitários em api (documents/reports/storage/users/customers/fleet) e web (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`).
 
 ---
 
