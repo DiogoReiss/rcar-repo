@@ -20,7 +20,7 @@ import { InventoryService } from '../src/modules/inventory/inventory.service';
 import { StorageService } from '../src/modules/storage/storage.service';
 
 describe('API happy paths (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication<App> | null = null;
 
   const authService = {
     forgotPassword: jest.fn().mockResolvedValue({ message: 'ok' }),
@@ -140,8 +140,9 @@ describe('API happy paths (e2e)', () => {
       .useValue(storageService)
       .compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    const testApp = moduleFixture.createNestApplication();
+    await testApp.init();
+    app = testApp;
   });
 
   it('health happy path', () => {
@@ -229,6 +230,8 @@ describe('API happy paths (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 });
