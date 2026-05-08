@@ -186,6 +186,20 @@
     </div>
 
     <!-- ─── Charts ────────────────────────────────────────────────── -->
+    <div class="charts-toolbar" role="group" aria-label="Selecionar período dos gráficos">
+      <span class="charts-toolbar-label">Período:</span>
+      @for (option of chartsPeriodOptions; track option.value) {
+        <button
+          type="button"
+          class="charts-period-btn"
+          [class.charts-period-btn--active]="chartsPeriod() === option.value"
+          [attr.aria-pressed]="chartsPeriod() === option.value"
+          (click)="onChartsPeriodChange(option.value)">
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
     @if (chartsLoading()) {
       <div class="charts-grid">
         @for (i of skeletons; track i) {
@@ -202,7 +216,7 @@
               </span>
               <div>
                 <h2 class="chart-title">Serviços por Dia</h2>
-                <p class="chart-period">Últimos 7 dias</p>
+                <p class="chart-period">{{ chartsPeriodText() }}</p>
               </div>
             </div>
           </div>
@@ -253,7 +267,7 @@
               </span>
               <div>
                 <h2 class="chart-title">Uso de Produtos</h2>
-                <p class="chart-period">Esta semana</p>
+                <p class="chart-period">{{ chartsPeriodText() }}</p>
               </div>
             </div>
           </div>

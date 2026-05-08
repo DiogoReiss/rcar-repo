@@ -43,8 +43,9 @@ export class ReportsController {
 
   @Get('charts')
   @ApiOperation({ summary: 'Dados de gráficos do dashboard (serviços semanais, hora de pico, uso de produtos, receita)' })
-  charts() {
-    return this.reportsService.getChartsData();
+  @ApiQuery({ name: 'period', required: false, enum: ['7d', '30d', 'month'], description: 'Período dos gráficos: 7d, 30d ou month' })
+  charts(@Query('period') period?: string) {
+    return this.reportsService.getChartsData(period);
   }
 
   @Get('financial-summary')

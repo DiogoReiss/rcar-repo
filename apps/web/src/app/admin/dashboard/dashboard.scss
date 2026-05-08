@@ -185,6 +185,43 @@
   }
 }
 
+.charts-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin: 0 0 $spacing-md;
+}
+
+.charts-toolbar-label {
+  font-size: 0.78rem;
+  color: $color-neutral-500;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.charts-period-btn {
+  border: 1px solid $color-neutral-300;
+  background: #fff;
+  color: $color-neutral-700;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background-color 0.12s;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary-dark;
+  }
+
+  &--active {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.08);
+    color: $color-primary-dark;
+  }
+}
+
 // ─── Charts ──────────────────────────────────────────────────────────────────
 
 .charts-grid {

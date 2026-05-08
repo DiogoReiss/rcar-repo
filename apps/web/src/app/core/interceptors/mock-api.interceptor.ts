@@ -225,10 +225,21 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ usersCount: MOCK_USERS_LIST.length, vehiclesCount: MOCK_VEHICLES.length, customersCount: MOCK_CUSTOMERS.length, servicesCount: MOCK_WASH_SERVICES.filter(s => s.ativo).length, lowStock: MOCK_PRODUCTS.filter(p => p.quantidadeAtual <= p.estoqueMinimo) });
   }
   if (method === 'GET' && path === '/reports/charts') {
+    const period = params.get('period') ?? '7d';
+    const labels =
+      period === '30d'
+        ? Array.from({ length: 30 }, (_, i) => `${String(i + 1).padStart(2, '0')}/05`)
+        : period === 'month'
+          ? Array.from({ length: 8 }, (_, i) => `${String(i + 1).padStart(2, '0')}/05`)
+          : ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const weeklySeries = labels.map((_, i) => 6 + ((i * 3) % 11));
+    const incomeSeries = labels.map((_, i) => 2200 + i * 130);
+    const outcomeSeries = labels.map((_, i) => 8 + ((i * 2) % 9));
+
     return ok({
-      weeklyServices: { labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'], data: [8,12,9,14,11,18,6] },
+      weeklyServices: { labels, data: weeklySeries },
       rushHour:       { labels: ['07h','08h','09h','10h','11h','12h','13h','14h','15h','16h','17h','18h'], data: [1,4,9,11,8,4,5,12,14,9,6,2] },
-      incomeOutcome:  { labels: ['Jan','Fev','Mar','Abr','Mai'], income: [5400,6200,5800,7100,6900], outcome: [12,18,14,21,17] },
+      incomeOutcome:  { labels, income: incomeSeries, outcome: outcomeSeries },
       productUsage:   { labels: MOCK_PRODUCTS.slice(0,6).map(p => p.nome), data: [24,9,38,11,15,7] },
     });
   }

@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, inject, signal,
-  OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef,
+  OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, DestroyRef,
   afterNextRender, Injector,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -46,6 +46,8 @@ interface ChartsData {
   productUsage: { labels: string[]; data: number[] };
 }
 
+type DashboardChartsPeriod = '7d' | '30d' | 'month';
+
 @Component({
   selector: 'lync-dashboard',
   imports: [RouterLink],
@@ -56,6 +58,7 @@ interface ChartsData {
 export default class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly api = inject(ApiService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
   private charts: Chart[] = [];
 
   /** Used by the template to render skeleton placeholders. */
@@ -74,6 +77,12 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
   readonly customersCount = signal(0);
   readonly servicesCount  = signal(0);
   readonly lowStockProducts = signal<Product[]>([]);
+  readonly chartsPeriod = signal<DashboardChartsPeriod>('7d');
+  readonly chartsPeriodOptions: ReadonlyArray<{ value: DashboardChartsPeriod; label: string }> = [
+    { value: '7d', label: '7 dias' },
+    { value: '30d', label: '30 dias' },
+    { value: 'month', label: 'Mês atual' },
+  ];
 
   // Today's operational summary
   readonly dailySummary   = signal<DailySummary | null>(null);
@@ -89,7 +98,7 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
   constructor() {
     // A16: takeUntilDestroyed keeps both subscriptions tied to component lifecycle
     this.api.get<DashboardKpis>('/reports/dashboard')
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (kpis) => {
           this.usersCount.set(kpis.usersCount);
@@ -102,22 +111,11 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
         error: () => this.loading.set(false),
       });
 
-    this.api.get<ChartsData>('/reports/charts')
-      .pipe(takeUntilDestroyed())
-      .subscribe({
-        next: (data) => {
-          this.chartsData = data;
-          this.chartsLoading.set(false);
-          if (this.viewReady) {
-            afterNextRender(() => this.renderCharts(), { injector: this.injector });
-          }
-        },
-        error: () => this.chartsLoading.set(false),
-      });
+    this.loadChartsData();
 
     // Today's operational summary
     this.api.get<DailySummary>('/reports/daily')
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (d) => { this.dailySummary.set(d); this.dailyLoading.set(false); },
         error: ()  => this.dailyLoading.set(false),
@@ -125,7 +123,7 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
 
     // This month's revenue breakdown (drives the Revenue Sources chart)
     this.api.get<MonthlyStat>('/reports/monthly')
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (m) => {
           this.monthlyStat.set(m);
@@ -152,6 +150,38 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
 
   formatBRL(v: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  }
+
+  onChartsPeriodChange(period: DashboardChartsPeriod) {
+    if (period === this.chartsPeriod()) {
+      return;
+    }
+    this.chartsPeriod.set(period);
+    this.loadChartsData();
+  }
+
+  chartsPeriodText(): string {
+    const period = this.chartsPeriod();
+    if (period === '30d') return 'Últimos 30 dias';
+    if (period === 'month') return 'Mês atual';
+    return 'Últimos 7 dias';
+  }
+
+  private loadChartsData() {
+    this.chartsLoading.set(true);
+    const period = this.chartsPeriod();
+    this.api.get<ChartsData>(`/reports/charts?period=${period}`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.chartsData = data;
+          this.chartsLoading.set(false);
+          if (this.viewReady) {
+            afterNextRender(() => this.renderCharts(), { injector: this.injector });
+          }
+        },
+        error: () => this.chartsLoading.set(false),
+      });
   }
 
   private renderCharts() {
