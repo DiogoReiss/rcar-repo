@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TemplatesService } from '../templates/templates.service.js';
+
+const MAX_TEXT_LENGTH = 4000;
+const PDF_EXTENSION = '.pdf';
 
 @Injectable()
 export class DocumentsService {
@@ -7,13 +10,23 @@ export class DocumentsService {
 
   async generateTemplatePdf(templateId: string, variables: Record<string, unknown>, fileName?: string) {
     const { html } = await this.templatesService.preview(templateId, variables);
+    if (!html?.trim()) {
+      throw new BadRequestException('Não foi possível gerar PDF: template vazio.');
+    }
+
     const text = this.extractTextFromHtml(html);
+    if (!text) {
+      throw new BadRequestException('Não foi possível gerar PDF: conteúdo sem texto renderizável.');
+    }
 
     // Foundation scaffold: lightweight PDF generation until Puppeteer renderer is added.
     const pdfBuffer = this.createSimplePdfBuffer(text);
+    const safeFileName = this.normalizeFileName(fileName);
+
     return {
       buffer: pdfBuffer,
-      fileName: `${(fileName?.trim() || 'documento').replace(/\s+/g, '-').toLowerCase()}.pdf`,
+      fileName: safeFileName,
+      size: pdfBuffer.byteLength,
     };
   }
 
@@ -27,7 +40,20 @@ export class DocumentsService {
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/\s+/g, ' ')
-      .trim();
+      .trim()
+      .slice(0, MAX_TEXT_LENGTH);
+  }
+
+  private normalizeFileName(fileName?: string): string {
+    const baseName = (fileName ?? 'documento')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-_]/g, '')
+      .slice(0, 80);
+
+    const normalized = baseName || `documento-${Date.now()}`;
+    return normalized.endsWith(PDF_EXTENSION) ? normalized : `${normalized}${PDF_EXTENSION}`;
   }
 
   private createSimplePdfBuffer(text: string): Buffer {

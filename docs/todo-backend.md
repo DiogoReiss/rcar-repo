@@ -10,6 +10,7 @@
 
 - Ordem ativa: **5 -> 2 -> 3 -> 4 -> 1**.
 - Kickoff do ponto 2 já entregue nesta etapa: endpoint protegido de geração de PDF com scaffold inicial em `documents`.
+- Kickoff do ponto 3 iniciado: módulo `storage` com geração de URL assinada para upload/download.
 
 ---
 
@@ -162,8 +163,8 @@
 |--------|------|-----------|
 | 🔴 | 10.1 | Instalar `@aws-sdk/client-s3` e `@aws-sdk/s3-request-presigner` |
 | 🔴 | 10.2 | Criar `src/config/storage.config.ts` (region, bucket, endpoint para MinIO local, credentials) |
-| 🔴 | 10.3 | Criar `src/modules/storage/storage.module.ts` |
-| 🔴 | 10.4 | Criar `src/modules/storage/storage.service.ts` (upload buffer/stream, getSignedUrl, delete) |
+| 🟡 | 10.3 | Criar `src/modules/storage/storage.module.ts` *(scaffold criado com controller/service + proteção por role)* |
+| 🟡 | 10.4 | Criar `src/modules/storage/storage.service.ts` (upload buffer/stream, getSignedUrl, delete) *(scaffold com metadata de upload e URL assinada GET/PUT; pendente cliente S3 real)* |
 | 🔴 | 10.5 | Testar upload contra MinIO local |
 
 ---
@@ -245,7 +246,7 @@
 | 🟢 | 14.1 | Criar `src/modules/templates/templates.module.ts` |
 | 🟢 | 14.2 | Criar `src/modules/templates/templates.service.ts` com CRUD + `preview` (interpolação de variáveis) |
 | 🟢 | 14.3 | Criar `src/modules/templates/templates.controller.ts` (GET /, POST, GET /:id, PATCH /:id, POST /:id/preview) |
-| 🟡 | 14.4 | Fundação de geração de PDF: `POST /documents/templates/:id/pdf` com serviço scaffold (Buffer PDF). Pendente evolução para renderização HTML->PDF real via Puppeteer |
+| 🟡 | 14.4 | Fundação de geração de PDF: `POST /documents/templates/:id/pdf` com serviço scaffold (Buffer PDF), normalização de filename e validação de conteúdo renderizado. Pendente evolução para renderização HTML->PDF real via Puppeteer |
 | 🔴 | 14.5 | Criar `src/modules/documents/services/d4sign.service.ts` (sendForSignature, getStatus, handleWebhook) |
 | 🔴 | 14.6 | Endpoint webhook D4Sign: `POST /webhooks/d4sign` |
 | 🔴 | 14.7 | Testes unitários: template interpolation, pdf-generator (mock puppeteer) |
@@ -285,7 +286,7 @@
 | 🟢 | 17.2 | `reports.service.ts` com `getDailySummary`, `getMonthlyStats` |
 | 🟢 | 17.3 | `getStockReport`, `getDashboardKpis`, `getChartsData` (serviços semanais, hora de pico, receita, uso de produtos) |
 | 🟢 | 17.4 | Criar `reports.controller.ts` (GET /reports/daily, /monthly, /stock, /dashboard, /charts) com `@Roles('GESTOR_GERAL')` |
-| 🔴 | 17.5 | Testes unitários |
+| 🟡 | 17.5 | Testes unitários *(cobertura inicial adicionada para período do `getChartsData`)* |
 | 🟢 | 17.6 | `getFinancialSummary(from, to)` — DRE simplificado: receita lavajato + aluguel - custos insumos - custos manutenção = margem bruta |
 | 🟢 | 17.7 | `getMaintenanceCosts(from, to)` — custo de manutenção por veículo e por período |
 | 🟢 | 17.8 | `getRentalReceivables()` — contratos encerrados com saldo pendente (faturado vs. pago) |

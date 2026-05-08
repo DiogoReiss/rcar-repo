@@ -15,7 +15,7 @@
   - Backend módulos presentes: `apps/api/src/modules/{auth,customers,fleet,inventory,lavajato,rental,reports,templates,...}`
   - Frontend áreas presentes: `apps/web/src/app/{admin,lavajato,aluguel,core,shared}`
   - CI ativo com build/test web+api: `.github/workflows/ci.yml`
-  - Lacunas ainda reais: `apps/api/src/modules/storage/` e `apps/api/src/modules/documents/` ausentes; sem serviço `d4sign`/PDF no backend.
+  - Lacunas ainda reais: integração `d4sign` ausente e renderização HTML->PDF real (Puppeteer/engine dedicado) ainda pendente.
 - Quick wins financeiros já entregues (2026-05-08):
   - Backend: `GET /reports/financial-summary`, `/reports/rental/receivables`, `/reports/fleet/maintenance-costs`, `/reports/stock/cost-analysis`
   - Backend: `getDailySummary` e `getMonthlyStats` enriquecidos com custos/métrica de recebíveis
@@ -30,6 +30,7 @@
 - Sequência operacional vigente: **5 -> 2 -> 3 -> 4 -> 1**.
 - **Ponto 5 iniciado**: dashboard com seletor de período (`7d`, `30d`, `mês atual`) ligado ao endpoint de gráficos.
 - **Ponto 2 iniciado**: fundação backend para geração de PDF com endpoint protegido (`documents/templates/:id/pdf`).
+- **Ponto 3 iniciado**: scaffold do módulo `storage` com endpoints de URL assinada para upload/download.
 
 ---
 

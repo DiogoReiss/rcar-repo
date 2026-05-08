@@ -42,14 +42,18 @@ export class DocumentsController {
     description: 'PDF gerado com sucesso',
     schema: { type: 'string', format: 'binary' },
   })
+  @ApiResponse({ status: 400, description: 'Template inválido ou sem conteúdo renderizável' })
+  @ApiResponse({ status: 404, description: 'Template não encontrado' })
   async generateTemplatePdf(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() dto: GenerateTemplatePdfDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { buffer, fileName } = await this.documentsService.generateTemplatePdf(id, dto.variables, dto.fileName);
+    const { buffer, fileName, size } = await this.documentsService.generateTemplatePdf(id, dto.variables, dto.fileName);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', size);
+    res.setHeader('Cache-Control', 'no-store');
 
     return new StreamableFile(buffer);
   }

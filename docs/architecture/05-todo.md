@@ -20,13 +20,14 @@
   - módulos backend existentes em `apps/api/src/modules/`
   - rotas/páginas frontend existentes em `apps/web/src/app/`
   - pipeline CI em `.github/workflows/ci.yml`
-  - lacunas relevantes: ausência de `apps/api/src/modules/storage/`, `apps/api/src/modules/documents/`, `d4sign` e geração de PDF no backend
+  - lacunas relevantes: integração `d4sign`, upload real S3/MinIO e renderização HTML→PDF completa no backend
 
 ### Ordem de execução ativa (2026-05-08)
 
 - Ordem priorizada para execução incremental: **5 -> 2 -> 3 -> 4 -> 1**.
 - Entrega inicial do ponto 5 iniciada: seletor de período no dashboard (`7d/30d/mês`) com suporte de endpoint e mock.
 - Entrega inicial do ponto 2 iniciada: fundação de geração de PDF no backend com endpoint protegido.
+- Entrega inicial do ponto 3 iniciada: módulo `storage` com scaffold de URL assinada para upload/download.
 
 ---
 

@@ -10,6 +10,7 @@
 
 - Ordem ativa: **5 -> 2 -> 3 -> 4 -> 1**.
 - Kickoff do ponto 5 já entregue nesta etapa: seletor de período no dashboard com recarga fim a fim dos gráficos.
+- Cobertura inicial adicionada para o seletor de período do dashboard (`dashboard.unit.spec.ts`).
 
 ---
 
@@ -292,7 +293,7 @@
 | 🟢 | 22.6 | Implementar gráfico de **Uso de Produtos** (doughnut — top 10 produtos mais consumidos na semana) |
 | 🟢 | 22.7 | Cards de gráficos responsivos com grid `auto-fill minmax(420px, 1fr)` |
 | 🟢 | 22.8 | Adicionar seletor de período (7 dias / 30 dias / mês atual) ao dashboard |
-| 🔴 | 22.9 | Testes unitários do componente dashboard |
+| 🟡 | 22.9 | Testes unitários do componente dashboard *(cobertura inicial do seletor de período e propagação de query param)* |
 
 ---
 
