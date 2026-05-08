@@ -33,7 +33,7 @@
 | 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validações e testes iniciais | Fluxo completo de assinatura D4Sign + expansão de geração/consumo no frontend |
 | 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
-| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários iniciais ampliados em `documents/reports/storage/users/customers/fleet`) | Cobertura ampla unit/E2E remanescente, Swagger completo, fechamento de lint/CI e checklist de go-live |
+| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários ampliados em `documents/reports/storage/users/customers/fleet/wash/templates/payments/inventory/rental` + serviços frontend críticos) e E2E happy-path de rotas principais web | Cobertura unit/E2E remanescente em módulos não cobertos, Swagger completo, fechamento de lint/CI e checklist de go-live |
 
 **Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2`, `3` e `1` estão parcialmente implementados, e `4` depende de integração externa.
 
@@ -213,17 +213,17 @@
 
 ### 9.1 Backend
 
-- 🟢 Testes unitários iniciais adicionados (`documents`, `reports`, `storage`, `users`, `customers`, `fleet`).
-- 🟡 Suite unit ampla ainda pendente para módulos restantes (`wash`, `rental`, `payments`, `mail`, `jobs`).
+- 🟢 Testes unitários adicionados para módulos de negócio backend (`documents`, `reports`, `storage`, `users`, `customers`, `fleet`, `wash`, `templates`, `payments`, `inventory`, `rental`).
+- 🟡 Suite unit backend ainda pendente para trilhas restantes (`lavajato`, `mail`, `jobs`, `queue-events` e cenários avançados).
 - 🔴 E2E real com Supertest pendente.
 - 🟡 Swagger configurado, mas cobertura total de `@ApiProperty`/`@ApiResponse` ainda parcial.
 - 🔴 Prettier dedicado no `apps/api` pendente.
 
 ### 9.2 Frontend
 
-- 🟢 Unit tests existentes: `app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`.
-- 🔴 Cobertura de features críticas ainda pendente (CRUDs, lavajato, aluguel, templates).
-- 🟡 Playwright existe com cenários iniciais, mas cobertura E2E ainda parcial.
+- 🟢 Unit tests existentes em serviços/componentes centrais (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`, `users.service`, `clientes.service`, `servicos.service`, `frota.service`, `agendamento.service`, `fila.service`).
+- 🟡 Cobertura unit frontend evoluiu, porém ainda faltam specs de componentes/fluxos finais (aluguel/templates/portal em maior profundidade).
+- 🟡 Playwright com happy-path para autenticação + rotas principais de `admin`, `lavajato`, `aluguel` e `portal`; ainda parcial para fluxos transacionais completos.
 - 🔴 Checklist de lint frontend em `todo-frontend` continua pendente (21.1-21.4) até validação final de pipeline.
 
 ---

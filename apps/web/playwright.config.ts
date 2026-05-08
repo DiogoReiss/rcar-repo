@@ -6,8 +6,14 @@ export default defineConfig({
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
   workers: process.env['CI'] ? 1 : undefined,
-  reporter: 'html',
+  reporter: [['html', { open: 'never' }]],
   outputDir: '.artifacts/playwright/results',
+  webServer: {
+    command: 'pnpm dev:mock',
+    url: 'http://localhost:4200',
+    reuseExistingServer: !process.env['CI'],
+    timeout: 120000,
+  },
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
