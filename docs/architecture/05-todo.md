@@ -194,17 +194,18 @@
 
 ---
 
-## Fase 3 — Relatórios e Experiência
+## Fase 3 — Análise Avançada, UX e Portal
 
 | Status | Tarefa                                              |
 |--------|-----------------------------------------------------|
-| 🔴     | Backend: /api/reports/financial (agregações)         |
 | 🔴     | Backend: /api/reports/fleet-occupation               |
-| 🔴     | Frontend: dashboard com gráficos (Chart.js ou similar)|
-| 🔴     | Frontend: export CSV/PDF de relatórios               |
+| 🔴     | Backend: análise custo-benefício preventiva vs. corretiva |
+| 🔴     | Frontend: export CSV/PDF de relatórios financeiros   |
+| 🔴     | Frontend: dashboard com seletor de período (7d/30d/mês) |
 | 🔴     | Frontend: portal do cliente (meus agendamentos, reservas, histórico)|
 | 🔴     | Audit log: registrar ações críticas                  |
 | 🔴     | UX: loading skeletons, toasts, empty states          |
+| 🔴     | Schema: `custoAquisicao` em Vehicle + depreciation schedule |
 
 ---
 

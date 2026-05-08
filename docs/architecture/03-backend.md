@@ -302,8 +302,16 @@ GET    /api/payments?ref_type=wash|rental&ref_id=uuid  # Pagamentos de uma refer
 ### Reports
 
 ```
-GET    /api/reports/financial?from=&to=&module=     # Relatório financeiro
-GET    /api/reports/fleet-occupation?from=&to=      # Taxa de ocupação
+GET    /api/reports/dashboard                       # KPIs: contagens, low-stock
+GET    /api/reports/daily?date=YYYY-MM-DD           # Resumo do dia (lavajato + aluguel + estoque + custos)
+GET    /api/reports/monthly?year=&month=            # Estatísticas mensais (receita, custos, novos clientes)
+GET    /api/reports/charts                          # Dados para gráficos (7 dias: serviços, hora pico, receita, produtos)
+GET    /api/reports/stock                           # Produtos com qtd atual, mínimo, flag baixo estoque
+GET    /api/reports/financial-summary?from=&to=     # DRE simplificado (receita - custos = margem)
+GET    /api/reports/fleet/maintenance-costs?from=&to= # Custo de manutenção por veículo e período
+GET    /api/reports/rental/receivables              # Contratos com saldo pendente (contas a receber)
+GET    /api/reports/stock/cost-analysis?from=&to=   # COGS: custo de insumos consumidos por período
+GET    /api/reports/fleet-occupation?from=&to=      # Taxa de ocupação da frota
 ```
 
 ---

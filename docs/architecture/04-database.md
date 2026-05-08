@@ -130,6 +130,17 @@ enum VehicleStatus {
   RESERVADO
 }
 
+enum MaintenanceType {
+  PREVENTIVA
+  CORRETIVA
+  SINISTRO
+}
+
+enum MaintenanceStatus {
+  PENDENTE
+  CONCLUIDA
+}
+
 model Vehicle {
   id         String        @id @default(uuid())
   placa      String        @unique
@@ -151,12 +162,15 @@ model Vehicle {
 }
 
 model VehicleMaintenance {
-  id          String   @id @default(uuid())
+  id          String              @id @default(uuid())
   vehicle_id  String
   descricao   String
-  custo       Decimal  @db.Decimal(10, 2)
+  custo       Decimal             @db.Decimal(10, 2)
+  tipo        MaintenanceType     @default(CORRETIVA)   // PREVENTIVA | CORRETIVA | SINISTRO
+  status      MaintenanceStatus   @default(CONCLUIDA)   // PENDENTE | CONCLUIDA
+  fornecedor  String?                                    // Nome da oficina/mecânico
   data        DateTime
-  created_at  DateTime @default(now())
+  created_at  DateTime            @default(now())
 
   vehicle Vehicle @relation(fields: [vehicle_id], references: [id])
 
@@ -214,13 +228,14 @@ model Product {
 }
 
 model StockMovement {
-  id          String            @id @default(uuid())
-  product_id  String
-  tipo        StockMovementType
-  quantidade  Decimal           @db.Decimal(10, 3)
-  motivo      String?
-  user_id     String?           // Quem registrou
-  created_at  DateTime          @default(now())
+  id              String            @id @default(uuid())
+  product_id      String
+  tipo            StockMovementType
+  quantidade      Decimal           @db.Decimal(10, 3)
+  custo_unitario  Decimal?          @db.Decimal(10, 2)  // Custo real desta entrada (tipo ENTRADA)
+  motivo          String?
+  user_id         String?           // Quem registrou
+  created_at      DateTime          @default(now())
 
   product Product @relation(fields: [product_id], references: [id])
 
@@ -382,18 +397,21 @@ enum IncidentType {
   SINISTRO
   MULTA
   AVARIA
+  KM_EXCEDENTE
+  COMBUSTIVEL
   OUTRO
 }
 
 model ContractIncident {
-  id          String       @id @default(uuid())
-  contract_id String
-  tipo        IncidentType
-  descricao   String
-  valor       Decimal?     @db.Decimal(10, 2)
-  fotos       String[]
-  data        DateTime
-  created_at  DateTime     @default(now())
+  id              String       @id @default(uuid())
+  contract_id     String
+  tipo            IncidentType
+  descricao       String
+  valor           Decimal?     @db.Decimal(10, 2)
+  cobrado_cliente Boolean      @default(true)    // Se true, soma ao valorTotalReal
+  fotos           String[]
+  data            DateTime
+  created_at      DateTime     @default(now())
 
   contract RentalContract @relation(fields: [contract_id], references: [id])
 
@@ -490,6 +508,32 @@ model AuditLog {
   @@map("audit_logs")
 }
 ```
+
+---
+
+## Visão Financeira do Schema
+
+> Documentação completa em [`06-financeiro.md`](./06-financeiro.md)
+
+As entidades financeiras do sistema se dividem em **receita** e **custo**:
+
+| Fluxo | Entidades | Campos-chave |
+|-------|-----------|-------------|
+| Receita Lavajato | `WashSchedule` → `Payment` | `WashService.preco`, `Payment.valor` |
+| Receita Aluguel | `RentalContract` → `Payment` | `valor_diaria`, `valor_total_real`, `Payment.valor` |
+| Extras Aluguel | `ContractIncident` | `valor`, `cobrado_cliente` |
+| Custo Manutenção | `VehicleMaintenance` | `custo`, `tipo` |
+| Custo Insumos | `StockMovement` + `Product` | `quantidade × custo_unitario` |
+| Valoração Estoque | `Product` | `quantidade_atual × custo_unitario` |
+
+### Campos adicionados para suporte financeiro
+
+- `VehicleMaintenance.tipo` — classifica preventiva vs. corretiva
+- `VehicleMaintenance.status` — permite manutenções agendadas (PENDENTE)
+- `VehicleMaintenance.fornecedor` — rastreabilidade da oficina
+- `StockMovement.custo_unitario` — custo real por entrada (custo médio ponderado)
+- `ContractIncident.cobrado_cliente` — distingue custo absorvido vs. cobrado
+- `IncidentType.KM_EXCEDENTE` e `COMBUSTIVEL` — novos tipos de incidente
 
 ---
 

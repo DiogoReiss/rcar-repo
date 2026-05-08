@@ -291,6 +291,27 @@
 
 ---
 
+## 24. Feature: Admin — Financeiro
+
+> Referência: [`docs/architecture/06-financeiro.md`](../../docs/architecture/06-financeiro.md)
+
+| Status | Step | Descrição |
+|--------|------|-----------|
+| 🔴 | 24.1 | Criar rota `/admin/financeiro` lazy-loaded e item "Financeiro" no sidebar (seção própria) |
+| 🔴 | 24.2 | Criar `src/app/admin/financeiro/financeiro-dashboard/financeiro-dashboard.ts` — página principal com DRE visual |
+| 🔴 | 24.3 | Criar `financeiro.service.ts` com signals para resumo financeiro, custos, receivables |
+| 🔴 | 24.4 | Cards de receita: Receita Lavajato, Receita Aluguel, Receita Total (com seletor de período) |
+| 🔴 | 24.5 | Cards de custo: Custo Insumos, Custo Manutenção, Total Custos Diretos |
+| 🔴 | 24.6 | Card de margem bruta: Receita Total - Custos Diretos = Margem (valor + percentual) |
+| 🔴 | 24.7 | Tabela de contas a receber: contratos com saldo pendente (faturado, pago, pendente) |
+| 🔴 | 24.8 | Gráfico: distribuição de pagamentos por método (doughnut PIX/cartão/dinheiro) |
+| 🔴 | 24.9 | Tabela de rentabilidade por veículo: placa, receita acumulada, manutenção acumulada, lucro bruto |
+| 🔴 | 24.10 | Card de valoração do estoque: valor total em estoque (Σ qty × custo_unitario) |
+| 🔴 | 24.11 | Export CSV/PDF do relatório financeiro |
+| 🔴 | 24.12 | Testes unitários |
+
+---
+
 ## 23. UX — Qualidade e Consistência (cross-cutting)
 
 | Status | Step | Descrição |

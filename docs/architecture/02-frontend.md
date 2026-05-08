@@ -71,7 +71,10 @@ src/
 │   │   │   └── movimentacoes/
 │   │   ├── frota/
 │   │   ├── clientes/
-│   │   └── templates/
+│   │   ├── templates/
+│   │   └── financeiro/                    # DRE, contas a receber, rentabilidade
+│   │       ├── financeiro-dashboard/
+│   │       └── financeiro.service.ts
 │   │
 │   ├── lavajato/                            # Lazy-loaded feature
 │   │   ├── lavajato.routes.ts
@@ -168,7 +171,8 @@ O menu lateral usa **PrimeIcons** e organiza os itens em **quatro seções**:
 |----------------|----------------------------------------------------|
 | Geral          | Dashboard, Clientes, Frota, Estoque                |
 | Lavajato       | Serviços, Agendamentos, Fila                       |
-| Aluguel        | Reservas, Contratos                                |
+| Aluguel        | Aluguéis (unificado: reservas + contratos)          |
+| Financeiro     | DRE, Contas a Receber, Rentabilidade               |
 | Administração  | Templates, Usuários                                |
 
 - Títulos de seção são ocultados quando o sidebar está colapsado

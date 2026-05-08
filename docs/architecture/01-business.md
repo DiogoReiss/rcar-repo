@@ -116,6 +116,42 @@ Cliente devolve → Vistoria de chegada (checklist + fotos)
 
 ---
 
+## Módulo: RCar Financeiro
+
+> Detalhado em [`06-financeiro.md`](./06-financeiro.md)
+
+### Demonstrativo Financeiro (DRE Simplificado)
+
+O gestor deve visualizar um resumo mensal com:
+
+```
+RECEITA BRUTA
+  (+) Receita Lavajato .......... pagamentos confirmados (wash)
+  (+) Receita Aluguel ........... pagamentos confirmados (rental)
+  (+) Extras de Aluguel ......... incidentes cobrados do cliente
+  ────────────────────────────────────────────────────
+  = RECEITA TOTAL
+
+CUSTOS DIRETOS
+  (-) Insumos Lavajato .......... saídas de estoque × custo unitário
+  (-) Manutenção Frota .......... soma de vehicle_maintenances.custo
+  ────────────────────────────────────────────────────
+  = MARGEM BRUTA
+```
+
+### Regras Financeiras
+
+- **Estoque (COGS):** Ao concluir um serviço de lavagem, o sistema deve registrar automaticamente saídas de estoque para cada insumo vinculado (relação `ServiceProduct`), reduzindo `quantidadeAtual` e alimentando o cálculo de COGS.
+- **Custo médio ponderado:** O `custoUnitario` do produto é recalculado a cada entrada de estoque pela fórmula: `(qtyAnterior × custoAnterior + qtyEntrada × custoEntrada) / (qtyAnterior + qtyEntrada)`.
+- **Valoração do estoque:** O valor total em estoque = `Σ (quantidadeAtual × custoUnitario)`.
+- **Manutenção:** Cada manutenção registra custo, tipo (preventiva/corretiva/sinistro) e fornecedor. O sistema agrega custo por veículo e por período.
+- **Receita de aluguel:** Distingue `valorTotal` (previsto), `valorTotalReal` (com extras na devolução) e receita efetivamente recebida (soma de pagamentos confirmados).
+- **Contas a receber:** Contratos encerrados cuja soma de pagamentos confirmados seja menor que `valorTotalReal` geram alerta de inadimplência.
+- **Incidentes:** Registram `valor` e flag `cobradoCliente`. Tipos cobrados somam ao `valorTotalReal`.
+- **Rentabilidade por veículo:** `(Receita acumulada − Manutenção acumulada) / veículo`.
+
+---
+
 ## Integrações Externas
 
 | Serviço    | Finalidade                                      | Fase       |

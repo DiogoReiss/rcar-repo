@@ -279,6 +279,26 @@
 | 🟢 | 17.3 | `getStockReport`, `getDashboardKpis`, `getChartsData` (serviços semanais, hora de pico, receita, uso de produtos) |
 | 🟢 | 17.4 | Criar `reports.controller.ts` (GET /reports/daily, /monthly, /stock, /dashboard, /charts) com `@Roles('GESTOR_GERAL')` |
 | 🔴 | 17.5 | Testes unitários |
+| 🔴 | 17.6 | `getFinancialSummary(from, to)` — DRE simplificado: receita lavajato + aluguel - custos insumos - custos manutenção = margem bruta |
+| 🔴 | 17.7 | `getMaintenanceCosts(from, to)` — custo de manutenção por veículo e por período |
+| 🔴 | 17.8 | `getRentalReceivables()` — contratos encerrados com saldo pendente (faturado vs. pago) |
+| 🔴 | 17.9 | `getStockCostAnalysis(from, to)` — COGS: custo de insumos consumidos por período |
+| 🔴 | 17.10 | Adicionar `custoInsumos` e `custoManutencao` ao `getDailySummary` e `getMonthlyStats` |
+| 🔴 | 17.11 | Endpoints: `GET /reports/financial-summary`, `/fleet/maintenance-costs`, `/rental/receivables`, `/stock/cost-analysis` |
+
+---
+
+## 17b. Automação Financeira
+
+> Referência: [`docs/architecture/06-financeiro.md`](../../docs/architecture/06-financeiro.md)
+
+| Status | Step | Descrição |
+|--------|------|-----------|
+| 🔴 | 17b.1 | Baixa automática de estoque ao concluir `WashSchedule`/`WashQueue`: criar `StockMovement` (SAIDA) para cada `ServiceProduct` vinculado ao serviço |
+| 🔴 | 17b.2 | Custo médio ponderado: recalcular `Product.custoUnitario` a cada `StockMovement` de ENTRADA com `custoUnitario` informado |
+| 🔴 | 17b.3 | Schema migration: adicionar `tipo`, `status`, `fornecedor` em `VehicleMaintenance` |
+| 🔴 | 17b.4 | Schema migration: adicionar `custoUnitario` em `StockMovement` |
+| 🔴 | 17b.5 | Schema migration: adicionar `cobradoCliente` em `ContractIncident`, novos `IncidentType` (KM_EXCEDENTE, COMBUSTIVEL) |
 
 ---
 
