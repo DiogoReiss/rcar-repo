@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { TokenBlacklistService } from './token-blacklist.service.js';
+import { LoginAttemptsService } from './login-attempts.service.js';
 
 // Minimal mocks
 const mockPrisma = {
@@ -39,6 +40,13 @@ const mockMail = {
   sendPasswordReset: jest.fn().mockResolvedValue(undefined),
 };
 
+const mockLoginAttempts = {
+  isLocked: jest.fn().mockReturnValue(false),
+  getRemainingLockMs: jest.fn().mockReturnValue(0),
+  recordFailure: jest.fn(),
+  clearAttempts: jest.fn(),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
@@ -53,6 +61,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfig },
         { provide: TokenBlacklistService, useValue: mockBlacklist },
         { provide: 'MailService', useValue: mockMail },
+        { provide: LoginAttemptsService, useValue: mockLoginAttempts },
       ],
     })
       .overrideProvider(AuthService)
@@ -64,6 +73,7 @@ describe('AuthService', () => {
             mockConfig,
             mockBlacklist,
             mockMail,
+            mockLoginAttempts,
           ),
       })
       .compile();

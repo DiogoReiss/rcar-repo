@@ -1,13 +1,39 @@
 <section class="page">
   <lync-page-header title="Financeiro">
     <div class="header-actions">
-      <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" aria-label="Data inicial" />
-      <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" aria-label="Data final" />
       <lync-btn label="Atualizar" icon="pi pi-refresh" [loading]="loading()" (clicked)="reload()" />
       <lync-btn label="Exportar CSV" icon="pi pi-file" variant="secondary" (clicked)="exportCsv()" />
       <lync-btn label="Exportar PDF" icon="pi pi-print" variant="secondary" (clicked)="exportPdf()" />
     </div>
   </lync-page-header>
+
+  <article class="card filters-card">
+    <div class="filters-grid">
+      <label>
+        Data inicial
+        <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" aria-label="Data inicial" />
+      </label>
+      <label>
+        Data final
+        <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" aria-label="Data final" />
+      </label>
+      <div class="filter-meta">
+        <span>Período selecionado: <strong>{{ periodLabel() }}</strong></span>
+      </div>
+    </div>
+    <div class="quick-filters">
+      <button type="button" class="quick-filter" (click)="applyPreset('today')">Hoje</button>
+      <button type="button" class="quick-filter" (click)="applyPreset('last7')">Últimos 7 dias</button>
+      <button type="button" class="quick-filter" (click)="applyPreset('last30')">Últimos 30 dias</button>
+      <button type="button" class="quick-filter" (click)="applyPreset('month')">Mês atual</button>
+    </div>
+    @if (hasInvalidRange()) {
+      <p class="error">A data inicial deve ser menor ou igual à data final.</p>
+    }
+    @if (filterError()) {
+      <p class="error">{{ filterError() }}</p>
+    }
+  </article>
 
   @if (loading()) {
     <div class="loading">Carregando indicadores financeiros...</div>
@@ -31,6 +57,25 @@
           <strong>{{ s.margem.bruta | currencyBrl }}</strong>
           <small>{{ s.margem.percentual.toFixed(2) }}%</small>
         </article>
+        @if (receivables(); as r) {
+          <article class="kpi-card kpi-card--pending">
+            <h3>Pendente de Recebimento</h3>
+            <strong>{{ r.totalPendente | currencyBrl }}</strong>
+            <small>Vencidos: {{ r.aging.vencidos | currencyBrl }} · A vencer: {{ r.aging.aVencer | currencyBrl }}</small>
+          </article>
+          <article class="kpi-card">
+            <h3>Risco sobre Receita</h3>
+            <strong>{{ outstandingRate().toFixed(2) }}%</strong>
+            <small>Percentual do pendente sobre a receita do período</small>
+          </article>
+        }
+        @if (paymentMethods(); as pm) {
+          <article class="kpi-card">
+            <h3>Ticket Médio</h3>
+            <strong>{{ averageTicket() | currencyBrl }}</strong>
+            <small>{{ pm.totalQuantidade }} pagamento(s) · Total: {{ pm.totalValor | currencyBrl }}</small>
+          </article>
+        }
         @if (stockCosts(); as st) {
           <article class="kpi-card">
             <h3>Valoração do Estoque</h3>
@@ -115,28 +160,83 @@
       </article>
 
       <article class="card">
-        <h3>Resumo por Método</h3>
-        @if (paymentMethods(); as pm) {
-          <div class="table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr><th>Método</th><th>Quantidade</th><th>Valor</th><th>%</th></tr>
-              </thead>
-              <tbody>
-                @for (m of pm.data; track m.metodo) {
-                  <tr>
-                    <td>{{ m.metodo }}</td>
-                    <td>{{ m.quantidade }}</td>
-                    <td>{{ m.valor | currencyBrl }}</td>
-                    <td>{{ m.percentual.toFixed(2) }}%</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
+        <h3>Aging de Contas a Receber</h3>
+        <div class="chart-wrap">
+          <canvas #receivablesAgingCanvas></canvas>
+        </div>
       </article>
     </div>
+
+    <div class="two-col">
+      <article class="card">
+        <h3>Top Pendências Vencidas</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Contrato</th><th>Cliente</th><th>Vencimento</th><th>Pendente</th></tr>
+            </thead>
+            <tbody>
+              @for (row of overdueTopContracts(); track row.contractId) {
+                <tr>
+                  <td>#{{ row.contractId.slice(0, 8) }}</td>
+                  <td>{{ row.customer?.nome ?? '—' }}</td>
+                  <td>{{ formatDate(row.dueDate) }}</td>
+                  <td class="text-danger"><strong>{{ row.pendente | currencyBrl }}</strong></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="empty">Sem pendências vencidas no período.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Top 5 Veículos Mais Rentáveis</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Placa</th><th>Modelo</th><th>Receita</th><th>Lucro Bruto</th></tr>
+            </thead>
+            <tbody>
+              @for (row of mostProfitableVehicles(); track row.vehicleId) {
+                <tr>
+                  <td><strong>{{ row.placa }}</strong></td>
+                  <td>{{ row.modelo }}</td>
+                  <td>{{ row.receita | currencyBrl }}</td>
+                  <td><strong>{{ row.lucroBruto | currencyBrl }}</strong></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="empty">Sem dados suficientes no período.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+
+    <article class="card">
+      <h3>Resumo por Método</h3>
+      @if (paymentMethods(); as pm) {
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Método</th><th>Quantidade</th><th>Valor</th><th>%</th></tr>
+            </thead>
+            <tbody>
+              @for (m of pm.data; track m.metodo) {
+                <tr>
+                  <td>{{ m.metodo }}</td>
+                  <td>{{ m.quantidade }}</td>
+                  <td>{{ m.valor | currencyBrl }}</td>
+                  <td>{{ m.percentual.toFixed(2) }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
 
     <article class="card">
       <h3>Valoração e Custo de Estoque (COGS)</h3>

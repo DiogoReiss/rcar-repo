@@ -8,12 +8,72 @@
   gap: $spacing-sm;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.filters-card {
+  margin-bottom: $spacing-md;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-sm;
+  align-items: end;
+
+  @media (max-width: 920px) {
+    grid-template-columns: 1fr;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #4b5563;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
 
   input[type='date'] {
     padding: $spacing-sm $spacing-md;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-family: $font-family-base;
+    font-size: 0.875rem;
+  }
+}
+
+.filter-meta {
+  color: #4b5563;
+  font-size: 0.85rem;
+}
+
+.quick-filters {
+  margin-top: $spacing-sm;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.quick-filter {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 999px;
+  padding: 0.32rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+    background: rgba($color-primary, 0.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
   }
 }
 
@@ -39,6 +99,7 @@
 
   &--cost strong { color: #b91c1c; }
   &--margin strong { color: #166534; }
+  &--pending strong { color: #b45309; }
 }
 
 .two-col {
@@ -89,4 +150,13 @@
 .totals { color: #4b5563; margin-bottom: $spacing-sm; }
 .text-danger { color: #b91c1c; }
 .empty { text-align: center; color: #6b7280; }
+
+.error {
+  margin-top: $spacing-sm;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: $spacing-xs $spacing-sm;
+}
 

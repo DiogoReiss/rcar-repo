@@ -52,6 +52,13 @@
   font-size: 0.9rem;
 }
 
+.add-dialog-hint {
+  margin: 0 0 $spacing-sm;
+  color: $color-neutral-500;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .mode-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -87,7 +94,33 @@
   }
 }
 
-.add-dialog-grid { margin-top: $spacing-sm; }
+.add-dialog-grid {
+  margin-top: $spacing-sm;
+  gap: $spacing-sm;
+}
+
+.add-dialog-section {
+  border: 1px solid $color-neutral-200;
+  border-radius: 10px;
+  padding: $spacing-sm;
+  background: #fff;
+
+  h4 {
+    margin: 0 0 $spacing-sm;
+    font-size: 0.8rem;
+    color: $color-neutral-600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.add-dialog-inline-grid {
+  grid-template-columns: 1fr 1fr;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+}
 
 // ─── Board ────────────────────────────────────────────────────────────────────
 .fila-board {
@@ -311,3 +344,31 @@
   justify-content: flex-end;
   gap: $spacing-sm;
 }
+
+.detail-footer--add {
+  align-items: center;
+  justify-content: space-between;
+
+  @media (max-width: 780px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.add-dialog-actions {
+  display: flex;
+  gap: $spacing-sm;
+
+  @media (max-width: 520px) {
+    width: 100%;
+    > * { flex: 1; }
+  }
+}
+
+.add-dialog-state {
+  font-size: 0.78rem;
+  color: $color-neutral-500;
+
+  &--ready { color: $color-success-dark; font-weight: 600; }
+}
+

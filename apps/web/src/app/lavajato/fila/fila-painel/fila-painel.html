@@ -23,6 +23,10 @@
     [resizable]="false"
     [style]="{ width: '560px', maxWidth: '96vw' }"
   >
+    <p class="add-dialog-hint">
+      Registre um cliente avulso ou selecione um cliente cadastrado para adicionar à fila.
+    </p>
+
     <div class="mode-tabs" role="tablist">
       <button
         type="button"
@@ -45,48 +49,67 @@
     </div>
 
     <div class="form-grid add-dialog-grid">
-      @if (addMode() === 'avulso') {
-        <lync-form-field label="Nome do Cliente" [required]="true" [full]="true">
-          <input
-            name="addNome"
-            [ngModel]="addNome()"
-            (ngModelChange)="addNome.set($event)"
-            placeholder="Nome ou apelido"
-          />
-        </lync-form-field>
-      } @else {
-        <lync-form-field label="Cliente" [required]="true" [full]="true">
-          <select name="addCliente" [ngModel]="addClienteId()" (ngModelChange)="addClienteId.set($event)">
-            <option value="">— Selecione —</option>
-            @for (c of customers(); track c.id) {
-              <option [value]="c.id">{{ c.nome }} · {{ c.cpfCnpj }}</option>
-            }
-          </select>
-        </lync-form-field>
-      }
+      <div class="add-dialog-section full">
+        <h4>Dados do Cliente</h4>
+        @if (addMode() === 'avulso') {
+          <lync-form-field label="Nome do Cliente" [required]="true" [full]="true">
+            <input
+              name="addNome"
+              [ngModel]="addNome()"
+              (ngModelChange)="addNome.set($event)"
+              placeholder="Nome ou apelido"
+            />
+          </lync-form-field>
+        } @else {
+          <lync-form-field label="Cliente" [required]="true" [full]="true">
+            <select name="addCliente" [ngModel]="addClienteId()" (ngModelChange)="addClienteId.set($event)">
+              <option value="">— Selecione —</option>
+              @for (c of customers(); track c.id) {
+                <option [value]="c.id">{{ c.nome }} · {{ c.cpfCnpj }}</option>
+              }
+            </select>
+          </lync-form-field>
+        }
+      </div>
 
-      <lync-form-field label="Serviço" [required]="true">
-        <select name="addService" [ngModel]="addServiceId()" (ngModelChange)="addServiceId.set($event)">
-          @for (s of services(); track s.id) {
-            <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }}</option>
-          }
-        </select>
-      </lync-form-field>
+      <div class="add-dialog-section full">
+        <h4>Serviço e Veículo</h4>
+        <div class="form-grid add-dialog-inline-grid">
+          <lync-form-field label="Serviço" [required]="true">
+            <select name="addService" [ngModel]="addServiceId()" (ngModelChange)="addServiceId.set($event)">
+              @for (s of services(); track s.id) {
+                <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }}</option>
+              }
+            </select>
+          </lync-form-field>
 
-      <lync-form-field label="Placa do Veículo">
-        <input
-          name="addPlaca"
-          [ngModel]="addPlaca()"
-          (ngModelChange)="addPlaca.set($event)"
-          placeholder="ABC-1234 (opcional)"
-        />
-      </lync-form-field>
+          <lync-form-field label="Placa do Veículo">
+            <input
+              name="addPlaca"
+              [ngModel]="addPlaca()"
+              (ngModelChange)="addPlaca.set($event)"
+              placeholder="ABC-1234 (opcional)"
+            />
+          </lync-form-field>
+        </div>
+      </div>
     </div>
 
     <ng-template pTemplate="footer">
-      <div class="detail-footer">
-        <lync-btn label="Cancelar" variant="secondary" (clicked)="closeAddDialog()" [disabled]="addSaving()" />
-        <lync-btn label="Entrar na Fila" (clicked)="onSubmitAdd()" [loading]="addSaving()" [disabled]="!canSubmitAdd" />
+      <div class="detail-footer detail-footer--add">
+        <span class="add-dialog-state" [class.add-dialog-state--ready]="canSubmitAdd">
+          @if (canSubmitAdd) {
+            Formulário pronto para adicionar à fila.
+          } @else {
+            Preencha os campos obrigatórios para continuar.
+          }
+        </span>
+        <div class="add-dialog-actions">
+          <lync-btn label="Cancelar" variant="secondary" (clicked)="closeAddDialog()" [disabled]="addSaving()" />
+          <button type="button" class="btn-primary" (click)="onSubmitAdd()" [disabled]="addSaving() || !canSubmitAdd">
+            @if (addSaving()) { Entrando... } @else { Entrar na Fila }
+          </button>
+        </div>
       </div>
     </ng-template>
   </p-dialog>

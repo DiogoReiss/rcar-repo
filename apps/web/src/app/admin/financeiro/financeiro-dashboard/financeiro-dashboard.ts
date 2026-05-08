@@ -7,6 +7,7 @@ import {
   OnInit,
   ViewChild,
   inject,
+  computed,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -28,8 +29,10 @@ Chart.register(...registerables);
 export default class FinanceiroDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly financeiroService = inject(FinanceiroService);
   private paymentChart?: Chart;
+  private receivablesChart?: Chart;
 
   @ViewChild('paymentMethodsCanvas') paymentMethodsCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('receivablesAgingCanvas') receivablesAgingCanvas?: ElementRef<HTMLCanvasElement>;
 
   readonly loading = this.financeiroService.loading;
   readonly error = this.financeiroService.error;
@@ -41,6 +44,46 @@ export default class FinanceiroDashboardComponent implements OnInit, AfterViewIn
 
   readonly from = signal(this.firstDayOfMonth());
   readonly to = signal(this.today());
+  readonly filterError = signal<string | null>(null);
+
+  readonly periodLabel = computed(() => {
+    const start = new Date(this.from());
+    const end = new Date(this.to());
+    const diff = Math.max(1, Math.floor((end.getTime() - start.getTime()) / 86400000) + 1);
+    return `${diff} dia(s)`;
+  });
+
+  readonly hasInvalidRange = computed(() => this.from() > this.to());
+
+  readonly averageTicket = computed(() => {
+    const pm = this.paymentMethods();
+    if (!pm || pm.totalQuantidade <= 0) return 0;
+    return pm.totalValor / pm.totalQuantidade;
+  });
+
+  readonly outstandingRate = computed(() => {
+    const s = this.summary();
+    const r = this.receivables();
+    if (!s || s.receita.total <= 0 || !r) return 0;
+    return (r.totalPendente / s.receita.total) * 100;
+  });
+
+  readonly overdueTopContracts = computed(() => {
+    const r = this.receivables();
+    if (!r) return [];
+    return [...r.data]
+      .filter((item) => item.overdue && item.pendente > 0)
+      .sort((a, b) => b.pendente - a.pendente)
+      .slice(0, 5);
+  });
+
+  readonly mostProfitableVehicles = computed(() => {
+    const m = this.maintenance();
+    if (!m) return [];
+    return [...m.veiculos]
+      .sort((a, b) => b.lucroBruto - a.lucroBruto)
+      .slice(0, 5);
+  });
 
   ngOnInit() {
     this.reload();
@@ -48,15 +91,41 @@ export default class FinanceiroDashboardComponent implements OnInit, AfterViewIn
 
   ngAfterViewInit() {
     this.renderPaymentMethodsChart();
+    this.renderReceivablesAgingChart();
   }
 
   async reload() {
+    if (this.hasInvalidRange()) {
+      this.filterError.set('A data inicial deve ser menor ou igual à data final.');
+      return;
+    }
+    this.filterError.set(null);
     await this.financeiroService.load(this.from(), this.to());
     this.renderPaymentMethodsChart();
+    this.renderReceivablesAgingChart();
   }
 
   ngOnDestroy() {
     this.paymentChart?.destroy();
+    this.receivablesChart?.destroy();
+  }
+
+  applyPreset(preset: 'today' | 'last7' | 'last30' | 'month') {
+    const end = new Date();
+    const start = new Date();
+
+    if (preset === 'today') {
+      // keep both dates as today
+    } else if (preset === 'last7') {
+      start.setDate(end.getDate() - 6);
+    } else if (preset === 'last30') {
+      start.setDate(end.getDate() - 29);
+    } else {
+      start.setDate(1);
+    }
+
+    this.from.set(start.toISOString().slice(0, 10));
+    this.to.set(end.toISOString().slice(0, 10));
   }
 
   exportCsv() {
@@ -129,6 +198,43 @@ export default class FinanceiroDashboardComponent implements OnInit, AfterViewIn
         },
       },
     });
+  }
+
+  private renderReceivablesAgingChart() {
+    const canvas = this.receivablesAgingCanvas?.nativeElement;
+    const receivables = this.receivables();
+    if (!canvas || !receivables) return;
+
+    this.receivablesChart?.destroy();
+    this.receivablesChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: ['Vencidos', 'A vencer'],
+        datasets: [{
+          data: [receivables.aging.vencidos, receivables.aging.aVencer],
+          backgroundColor: ['#ef4444', '#10b981'],
+          borderRadius: 8,
+          maxBarThickness: 70,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            ticks: {
+              callback: (value) => `R$ ${Number(value).toLocaleString('pt-BR')}`,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  formatDate(value?: string | Date | null): string {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString('pt-BR');
   }
 
   private labelMetodo(metodo: string) {
