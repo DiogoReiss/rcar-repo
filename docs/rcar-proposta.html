@@ -36,6 +36,10 @@
   .status-row { display: flex; gap: 16px; margin: 14px 0; flex-wrap: wrap; }
   .status-item { background: #f8fbff; border: 1px solid #dde8f5; border-radius: 6px; padding: 10px 14px; flex: 1; min-width: 160px; font-size: 0.85rem; }
   .status-item strong { display: block; color: #0066cc; font-size: 0.78rem; text-transform: uppercase; margin-bottom: 3px; }
+  .dre-box { background: #f9fdf9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 16px 20px; margin: 14px 0; font-family: monospace; font-size: 0.84rem; line-height: 1.9; }
+  .dre-box .income { color: #2e7d32; }
+  .dre-box .cost { color: #c62828; }
+  .dre-box .result { font-weight: 800; color: #1a1a2e; border-top: 1px solid #aaa; padding-top: 4px; margin-top: 4px; }
   @media print { body { padding: 28px 32px; } }
 </style>
 </head>
@@ -47,34 +51,70 @@
 </div>
 
 <h1>RCar — Gestão inteligente para quem aluga e lava</h1>
-<p class="subtitle">Plataforma web integrada para locadoras de veículos com lavajato · Desenvolvida para a realidade brasileira</p>
+<p class="subtitle">Plataforma web integrada para locadoras de veículos com lavajato · Controle financeiro completo · Desenvolvida para a realidade brasileira</p>
 
 <h2>O Problema</h2>
 <p>Locadoras de veículos de pequeno e médio porte gerenciam seu negócio em <strong>planilhas, cadernos e WhatsApp</strong>. Quando têm lavajato no mesmo espaço, o caos dobra: dois sistemas separados, sem histórico integrado de clientes, sem controle real de frota nem de estoque de produtos.</p>
 <div class="highlight-box">
-  <strong>Resultado:</strong> faturamento perdido, clientes sem retorno e decisões tomadas no escuro — sem dados, sem histórico, sem previsibilidade.
+  <strong>Resultado:</strong> faturamento perdido, custos invisíveis, clientes sem retorno e decisões tomadas no escuro — sem dados, sem histórico, sem previsibilidade financeira.
 </div>
 
 <h2>A Solução</h2>
-<p><strong>RCar</strong> é um sistema de gestão integrado para locadoras com lavajato. Em uma única plataforma web, o gestor controla tudo:</p>
+<p><strong>RCar</strong> é um sistema de gestão integrado para locadoras com lavajato. Em uma única plataforma web, o gestor controla tudo — da operação ao financeiro:</p>
 
 <table>
   <tr><th>Módulo</th><th>O que resolve</th></tr>
-  <tr><td>🚗 <strong>Frota</strong></td><td>Status em tempo real, histórico de manutenções, disponibilidade por período</td></tr>
-  <tr><td>📅 <strong>Agendamentos</strong></td><td>Agenda de lavagem com lembretes automáticos por e-mail</td></tr>
-  <tr><td>🪣 <strong>Fila Presencial</strong></td><td>Painel Kanban com drag-and-drop para atendimento no balcão</td></tr>
-  <tr><td>📄 <strong>Contratos</strong></td><td>Wizard guiado de reserva → contrato → devolução com cálculo automático</td></tr>
-  <tr><td>👥 <strong>Clientes</strong></td><td>Cadastro PF/PJ, histórico completo de aluguéis e lavagens</td></tr>
-  <tr><td>📦 <strong>Estoque</strong></td><td>Controle de produtos com alertas de estoque mínimo</td></tr>
-  <tr><td>📊 <strong>Relatórios</strong></td><td>Dashboard com KPIs diários, receita mensal, taxa de ocupação da frota</td></tr>
+  <tr><td>🚗 <strong>Frota</strong></td><td>Status em tempo real, histórico de manutenções com custo por veículo, disponibilidade por período</td></tr>
+  <tr><td>📅 <strong>Agendamentos</strong></td><td>Agenda de lavagem com calendário visual, slots por duração e lembretes automáticos</td></tr>
+  <tr><td>🪣 <strong>Fila Presencial</strong></td><td>Painel Kanban com drag-and-drop para atendimento no balcão — tempo real via SSE</td></tr>
+  <tr><td>📄 <strong>Contratos</strong></td><td>Wizard guiado de reserva → contrato → devolução com cálculo automático de extras</td></tr>
+  <tr><td>👥 <strong>Clientes</strong></td><td>Cadastro PF/PJ, histórico completo de aluguéis e lavagens, documentação integrada</td></tr>
+  <tr><td>📦 <strong>Estoque</strong></td><td>Controle de insumos com custo médio ponderado, baixa automática por serviço e alertas</td></tr>
+  <tr><td>💰 <strong>Financeiro</strong></td><td>DRE mensal, margem bruta, contas a receber, rentabilidade por veículo, custo de manutenção</td></tr>
+  <tr><td>📊 <strong>Relatórios</strong></td><td>Dashboard com KPIs diários, gráficos de receita vs. custos, hora de pico, uso de produtos</td></tr>
 </table>
+
+<h2>Módulo Financeiro — Visão Executiva</h2>
+<p>O gestor visualiza um <strong>Demonstrativo de Resultado (DRE)</strong> simplificado diretamente no painel:</p>
+<div class="dre-box">
+  <span class="income">(+) Receita Lavajato ............. R$ 8.400</span><br>
+  <span class="income">(+) Receita Aluguel .............. R$ 24.600</span><br>
+  <span class="income">(+) Extras de Aluguel ............ R$ 1.850</span><br>
+  <span style="color:#555">────────────────────────────────────────</span><br>
+  <span class="income"><strong>= RECEITA TOTAL .................. R$ 34.850</strong></span><br><br>
+  <span class="cost">(-) Insumos Lavajato ............. R$ 1.200</span><br>
+  <span class="cost">(-) Manutenção Frota ............. R$ 3.400</span><br>
+  <span style="color:#555">────────────────────────────────────────</span><br>
+  <span class="result">= MARGEM BRUTA ................... R$ 30.250 (86,8%)</span>
+</div>
+<p>Além do DRE, o módulo oferece:</p>
+<table>
+  <tr><th>Recurso</th><th>Benefício</th></tr>
+  <tr><td>📋 Contas a Receber</td><td>Contratos com saldo pendente — aging por vencimento</td></tr>
+  <tr><td>🚙 Rentabilidade por Veículo</td><td>Receita acumulada vs. manutenção = lucro bruto por carro</td></tr>
+  <tr><td>🔧 Custo de Manutenção</td><td>Preventiva vs. corretiva, veículo mais caro, tendência mensal</td></tr>
+  <tr><td>📦 COGS de Estoque</td><td>Custo real dos insumos consumidos por período (custo médio ponderado)</td></tr>
+  <tr><td>💳 Distribuição de Pagamentos</td><td>PIX vs. Cartão vs. Dinheiro — visualização gráfica</td></tr>
+  <tr><td>📤 Export</td><td>Relatórios financeiros exportáveis em CSV e PDF</td></tr>
+</table>
+
+<h2>Fluxo de Estoque (Entrada/Saída)</h2>
+<div class="highlight-box">
+  <strong>Entrada:</strong> Compra registrada → quantidade atualizada → custo médio ponderado recalculado automaticamente<br>
+  <strong>Saída automática:</strong> Ao concluir lavagem, sistema baixa insumos conforme quantidade-por-uso configurada no serviço<br>
+  <strong>Valoração:</strong> Valor total em estoque calculado em tempo real (Σ quantidade × custo unitário)<br>
+  <strong>Alertas:</strong> Produto abaixo do mínimo → notificação no dashboard
+</div>
 
 <h2>Diferenciais Competitivos</h2>
 <p>
-  <span class="badge">✅ Sistema único</span> que une locação + lavajato — concorrentes são silos separados<br>
+  <span class="badge">✅ Sistema único</span> que une locação + lavajato + financeiro — concorrentes são silos separados<br>
+  <span class="badge">✅ DRE automático</span> receita vs. custos diretos com margem bruta por período<br>
+  <span class="badge">✅ COGS de estoque</span> custo real de insumos com baixa automática por serviço<br>
+  <span class="badge">✅ Rentabilidade por veículo</span> saiba quais carros dão lucro e quais dão prejuízo<br>
   <span class="badge">✅ Fila em tempo real</span> com Server-Sent Events — sem F5, sem polling<br>
   <span class="badge">✅ Wizard de reserva</span> em 3 passos — treina atendentes em minutos<br>
-  <span class="badge">✅ Histórico de manutenção</span> por veículo com controle de custo da frota<br>
+  <span class="badge">✅ Contas a receber</span> visualize inadimplência antes que vire problema<br>
   <span class="badge">✅ Segurança nativa</span> JWT + brute-force protection + rate limiting<br>
   <span class="badge">✅ 100% em português</span> CPF/CNPJ nativos, valores em R$, pronto para uso
 </p>
@@ -84,34 +124,34 @@
   <tr><th>Plano</th><th>Módulos inclusos</th><th>Usuários</th><th>Preço Mensal</th></tr>
   <tr><td><strong>Lavajato Starter</strong></td><td>Agendamentos · Fila presencial · Clientes · Estoque básico</td><td>2</td><td><strong>R$ 199</strong></td></tr>
   <tr><td><strong>Aluguel Starter</strong></td><td>Frota (até 10 veículos) · Contratos · Clientes · Relatórios básicos</td><td>2</td><td><strong>R$ 249</strong></td></tr>
-  <tr><td><strong>Pro</strong></td><td>Tudo dos Starters · Frota até 30 veículos · Estoque completo · Relatórios avançados</td><td>5</td><td><strong>R$ 449</strong></td></tr>
-  <tr><td><strong>Empresarial</strong></td><td>Tudo do Pro · Ilimitado · Multi-filial · Suporte prioritário · SLA</td><td>Ilimitado</td><td><strong>R$ 799</strong></td></tr>
-  <tr><td><strong>Implantação</strong></td><td>Setup + migração de dados + treinamento presencial/remoto (pagamento único)</td><td>—</td><td><strong>R$ 1.200–2.500</strong></td></tr>
+  <tr><td><strong>Pro</strong></td><td>Tudo dos Starters · Frota até 30 · Estoque completo · <strong>Financeiro completo</strong> · Relatórios avançados</td><td>5</td><td><strong>R$ 499</strong></td></tr>
+  <tr><td><strong>Empresarial</strong></td><td>Tudo do Pro · Ilimitado · Multi-filial · Suporte prioritário · SLA · Export CSV/PDF</td><td>Ilimitado</td><td><strong>R$ 899</strong></td></tr>
+  <tr><td><strong>Implantação</strong></td><td>Setup + migração de dados + treinamento presencial/remoto (pagamento único)</td><td>—</td><td><strong>R$ 1.500–3.000</strong></td></tr>
 </table>
 <p style="font-size:0.82rem;color:#666;margin-top:8px">✦ Trial gratuito de 14 dias · Sem cartão de crédito · Cancele quando quiser · Planos Starter podem ser combinados com desconto de 15%</p>
 
 <h2>Estágio Atual do Produto</h2>
 <div class="status-row">
-  <div class="status-item"><strong>Frontend</strong>Angular 21 · 100% funcional · Modo demo sem backend</div>
-  <div class="status-item"><strong>Backend</strong>NestJS + PostgreSQL · Auth, frota, lavajato, aluguel, estoque, relatórios</div>
+  <div class="status-item"><strong>Frontend</strong>Angular 21 · 23 features concluídas · Modo demo sem backend</div>
+  <div class="status-item"><strong>Backend</strong>NestJS + PostgreSQL · Auth, frota, lavajato, aluguel, estoque, relatórios, pagamentos</div>
+  <div class="status-item"><strong>Financeiro</strong>Schema pronto · DRE, COGS, contas a receber e manutenção documentados</div>
   <div class="status-item"><strong>Infraestrutura</strong>Docker Compose · Pronto para deploy em cloud</div>
-  <div class="status-item"><strong class="badge-yellow">Pendente</strong>Storage de fotos · Geração de PDF · Testes automatizados</div>
 </div>
 
 <h2>Roadmap — Próximos 90 Dias</h2>
 <div class="timeline">
-  <div class="tl-item"><div class="tl-month">Maio</div>Testes E2E · seed real · deploy em staging</div>
-  <div class="tl-item"><div class="tl-month">Junho</div>PDF de contrato · upload de fotos · domínio próprio</div>
-  <div class="tl-item"><div class="tl-month">Julho</div>Cliente piloto · coleta de feedback · ajustes</div>
-  <div class="tl-item"><div class="tl-month">Agosto</div>Landing page · onboarding self-service · 1ºs clientes pagantes</div>
+  <div class="tl-item"><div class="tl-month">Maio</div>Módulo Financeiro (DRE + receivables) · Baixa automática de estoque</div>
+  <div class="tl-item"><div class="tl-month">Junho</div>Integração Pagar.me · PDF de contrato · Deploy em staging</div>
+  <div class="tl-item"><div class="tl-month">Julho</div>Rentabilidade por veículo · Export CSV/PDF · Cliente piloto</div>
+  <div class="tl-item"><div class="tl-month">Agosto</div>Landing page · Onboarding self-service · 1ºs clientes pagantes</div>
 </div>
 
 <h2>Aquisição / Licenciamento</h2>
 <table>
   <tr><th>Modalidade</th><th>Descrição</th><th>Valor</th></tr>
-  <tr><td><strong>Licença white-label</strong></td><td>Uso por terceiro com marca própria (perpétua, por empresa)</td><td>a partir de R$ 15.000</td></tr>
-  <tr><td><strong>Venda do código-fonte</strong></td><td>Repositório completo com documentação técnica</td><td>a partir de R$ 35.000</td></tr>
-  <tr><td><strong>Desenvolvimento sob medida</strong></td><td>Customização + implantação assistida + treinamento</td><td>Cotação sob consulta</td></tr>
+  <tr><td><strong>Licença white-label</strong></td><td>Uso por terceiro com marca própria (perpétua, por empresa)</td><td>a partir de R$ 18.000</td></tr>
+  <tr><td><strong>Venda do código-fonte</strong></td><td>Repositório completo com documentação técnica + financeira</td><td>a partir de R$ 45.000</td></tr>
+  <tr><td><strong>Desenvolvimento sob medida</strong></td><td>Customização + implantação assistida + treinamento + suporte 90 dias</td><td>Cotação sob consulta</td></tr>
 </table>
 
 <div class="cta">
@@ -125,5 +165,4 @@
 
 </body>
 </html>
-
 
