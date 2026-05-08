@@ -26,7 +26,7 @@ type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
 @Component({
   selector: 'lync-contrato-list',
   imports: [
-    FormsModule, RouterLink,
+    FormsModule,
     ConfirmDialogComponent, EntityDialogComponent, FormFieldComponent,
     PaymentDialogComponent, PageHeaderComponent, RowMenuComponent,
     WizardDialogComponent, AppButtonComponent, CurrencyBrlPipe, DateBrPipe,

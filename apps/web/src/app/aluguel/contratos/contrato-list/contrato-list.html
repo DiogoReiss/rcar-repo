@@ -59,7 +59,7 @@
                 <span class="plate">{{ c.vehicle?.placa }}</span>
                 <span class="text-muted">{{ c.vehicle?.modelo }}</span>
               </td>
-              <td>{{ modalidadeLabels[c.modalidade] ?? c.modalidade }}</td>
+              <td>{{ modalidadeLabels[c.modalidade] }}</td>
               <td>{{ c.dataRetirada | dateBr }}</td>
               <td>{{ c.dataDevolucao | dateBr }}</td>
               <td>{{ (c.valorTotalReal ?? c.valorTotal) | currencyBrl }}</td>

@@ -168,6 +168,22 @@
 
 ## Fase 2 — Financeiro e Pagamentos Online
 
+> Detalhado em [`06-financeiro.md`](./06-financeiro.md)
+
+### 2a. Relatórios financeiros (quick wins)
+
+| Status | Tarefa                                              |
+|--------|-----------------------------------------------------|
+| 🔴     | Backend: `GET /reports/financial-summary` (DRE simplificado: receita - custos = margem) |
+| 🔴     | Backend: custo de insumos e manutenção no `getDailySummary` / `getMonthlyStats` |
+| 🔴     | Backend: baixa automática de estoque ao concluir serviço (`ServiceProduct`) |
+| 🔴     | Backend: `GET /payments` standalone com filtros (data, tipo, status, método) |
+| 🔴     | Frontend: página `/admin/financeiro` com DRE visual + gráficos |
+| 🔴     | Frontend: card "Contas a receber" (contratos sem pagamento total) |
+| 🔴     | Frontend: rentabilidade por veículo (receita - manutenção) |
+
+### 2b. Pagamentos online (Pagar.me)
+
 | Status | Tarefa                                              |
 |--------|-----------------------------------------------------|
 | 🔴     | Criar conta Pagar.me e obter credenciais             |
@@ -175,8 +191,6 @@
 | 🔴     | Backend: webhook de confirmação de pagamento         |
 | 🔴     | Frontend: fluxo de pagamento online (lavajato)       |
 | 🔴     | Frontend: cobrança no fechamento de aluguel          |
-| 🔴     | Admin: relatório financeiro com dados reais          |
-| 🔴     | Admin: dashboard com receita real (não apenas registrada)|
 
 ---
 
