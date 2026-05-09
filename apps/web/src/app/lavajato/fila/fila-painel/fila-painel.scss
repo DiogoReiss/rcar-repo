@@ -65,7 +65,7 @@
   gap: $spacing-xs;
   padding: $spacing-xs;
   border-radius: 10px;
-  background: $color-neutral-100;
+  background: var(--lync-surface-muted);
 
   button {
     border: 1px solid transparent;
@@ -81,7 +81,7 @@
     &:hover { color: $color-neutral-800; }
 
     &.active {
-      background: #fff;
+      background: var(--lync-surface);
       color: $color-primary;
       border-color: rgba($color-primary, 0.2);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -100,15 +100,15 @@
 }
 
 .add-dialog-section {
-  border: 1px solid $color-neutral-200;
+  border: 1px solid var(--lync-border);
   border-radius: 10px;
   padding: $spacing-sm;
-  background: #fff;
+  background: var(--lync-surface);
 
   h4 {
     margin: 0 0 $spacing-sm;
     font-size: 0.8rem;
-    color: $color-neutral-600;
+    color: var(--lync-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -138,7 +138,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  background: $color-neutral-100;
+  background: var(--lync-surface-muted);
   overflow: hidden;
   min-height: 200px;
 
@@ -154,9 +154,9 @@
   padding: $spacing-md $spacing-md $spacing-sm;
   text-align: center;
 
-  &--waiting { background: #fff; border-bottom: 3px solid $color-warning-light; }
-  &--active  { background: #fff; border-bottom: 3px solid $color-accent-light; }
-  &--done    { background: #fff; border-bottom: 3px solid $color-success-light; }
+  &--waiting { background: var(--lync-surface); border-bottom: 3px solid $color-warning-light; }
+  &--active  { background: var(--lync-surface); border-bottom: 3px solid $color-accent-light; }
+  &--done    { background: var(--lync-surface); border-bottom: 3px solid $color-success-light; }
 }
 
 .board-col-count {
@@ -202,7 +202,7 @@
   display: flex;
   align-items: center;
   gap: $spacing-sm;
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: 8px;
   padding: $spacing-sm $spacing-sm;
   box-shadow: 0 1px 3px rgba(0,0,0,0.07);
@@ -250,7 +250,7 @@
 .queue-name {
   font-size: 0.85rem;
   font-weight: 700;
-  color: $color-neutral-900;
+  color: var(--lync-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -319,7 +319,7 @@
 .detail-value {
   font-size: 0.88rem;
   font-weight: 500;
-  color: $color-neutral-900;
+  color: var(--lync-text);
   text-align: right;
 
   &--price {
@@ -333,10 +333,10 @@
   font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  background: $color-neutral-100;
+  background: var(--lync-surface-muted);
   border-radius: 5px;
   padding: 2px 8px;
-  color: $color-neutral-800;
+  color: var(--lync-text);
 }
 
 .detail-footer {

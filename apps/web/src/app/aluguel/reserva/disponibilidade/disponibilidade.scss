@@ -9,17 +9,17 @@
 .empty-state {
   text-align: center;
   padding: $spacing-xl;
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: 12px;
-  border: 2px dashed $color-neutral-200;
-  color: $color-neutral-400;
+  border: 2px dashed var(--lync-border);
+  color: var(--lync-text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: $spacing-md;
 }
 
-.text-muted { color: $color-neutral-400; font-size: 0.8125rem; }
+.text-muted { color: var(--lync-text-muted); font-size: 0.8125rem; }
 
 // ─── Wizard step sections ─────────────────────────────────────────────────────
 .step-section { padding: $spacing-xs 0; }
@@ -27,7 +27,7 @@
 .step-hint {
   margin: $spacing-md 0 0;
   padding: $spacing-sm $spacing-md;
-  background: #eff6ff;
+  background: var(--lync-tag-bg);
   border-radius: 8px;
   font-size: 0.875rem;
   color: #1d4ed8;
@@ -40,7 +40,7 @@
   margin: $spacing-md 0 0;
   padding: $spacing-md;
   text-align: center;
-  background: #fff7ed;
+  background: color-mix(in srgb, var(--lync-surface) 82%, $color-warning-light 18%);
   border-radius: 8px;
   color: #c2410c;
   font-size: 0.875rem;
@@ -57,20 +57,20 @@
   width: 100%;
   text-align: left;
   padding: $spacing-md;
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: 10px;
   border: 2px solid $color-neutral-200;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover  { border-color: $color-primary; box-shadow: 0 2px 8px rgba($color-primary, 0.1); }
-  &.selected { border-color: $color-primary; background: #eff6ff; }
+  &.selected { border-color: $color-primary; background: var(--lync-tag-bg); }
   &:focus-visible { outline: 3px solid $color-primary; outline-offset: 2px; }
 }
 
 .vehicle-plate { font-size: 1.05rem; font-weight: 800; letter-spacing: 2px; }
 .vehicle-model { font-size: 0.875rem; font-weight: 600; margin-top: 2px; }
-.vehicle-meta  { font-size: 0.78rem; color: $color-neutral-400; margin-top: 2px; }
+.vehicle-meta  { font-size: 0.78rem; color: var(--lync-text-muted); margin-top: 2px; }
 
 // ─── Vehicle summary bar (step 3) ─────────────────────────────────────────────
 .vehicle-summary-bar {
@@ -78,12 +78,12 @@
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-sm $spacing-md;
-  background: #eff6ff;
+  background: var(--lync-tag-bg);
   border-radius: 8px;
   margin-bottom: $spacing-md;
   font-size: 0.875rem;
   color: $color-primary;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--lync-tag-border);
 
   i { font-size: 1rem; }
 }
@@ -97,6 +97,25 @@
   color: #dc2626;
   font-size: 0.875rem;
   margin-bottom: $spacing-md;
+}
+
+:host-context(body[data-theme='dark']) {
+  .vehicle-plate,
+  .vehicle-model,
+  .vehicle-summary-bar,
+  .checkbox-label {
+    color: var(--lync-text);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .vehicle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-card {
+    padding: $spacing-sm;
+  }
 }
 
 .checkbox-label {

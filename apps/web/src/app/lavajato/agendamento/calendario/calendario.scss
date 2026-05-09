@@ -50,13 +50,13 @@
 }
 
 .sidebar-day-label {
-  background: #fff;
-  border: 1px solid $color-neutral-200;
+  background: var(--lync-surface);
+  border: 1px solid var(--lync-border);
   border-radius: 10px;
   padding: $spacing-sm $spacing-md;
   font-size: 0.82rem;
   font-weight: 600;
-  color: $color-neutral-700;
+  color: var(--lync-text);
   text-align: center;
   text-transform: capitalize;
 }
@@ -67,11 +67,11 @@
 .kpi-row { display: flex; gap: $spacing-md; margin-bottom: $spacing-md; flex-wrap: wrap; }
 .kpi-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-width: 100px; padding: $spacing-md; border-radius: 10px; background: #fff;
-  border: 1px solid $color-neutral-200; gap: 2px;
+  min-width: 100px; padding: $spacing-md; border-radius: 10px; background: var(--lync-surface);
+  border: 1px solid var(--lync-border); gap: 2px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  .kpi-value { font-size: 1.5rem; font-weight: 800; color: $color-neutral-900; line-height: 1; }
-  .kpi-label { font-size: 0.7rem; color: $color-neutral-500; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+  .kpi-value { font-size: 1.5rem; font-weight: 800; color: var(--lync-text); line-height: 1; }
+  .kpi-label { font-size: 0.7rem; color: var(--lync-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
   &--pending { border-top: 3px solid $color-warning;  .kpi-value { color: $color-warning-dark; } }
   &--active  { border-top: 3px solid $color-info;     .kpi-value { color: $color-info-dark; } }
   &--done    { border-top: 3px solid $color-success;  .kpi-value { color: $color-success-dark; } }
@@ -81,7 +81,7 @@
 .schedule-list { display: flex; flex-direction: column; gap: $spacing-sm; }
 .schedule-card {
   display: flex; gap: $spacing-md; align-items: flex-start;
-  background: #fff; border-radius: 10px; padding: $spacing-md;
+  background: var(--lync-surface); border-radius: 10px; padding: $spacing-md;
   box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-left: 4px solid $color-neutral-200;
   transition: box-shadow 0.15s, transform 0.1s;
   &:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateX(2px); }
@@ -93,15 +93,15 @@
 .schedule-time { font-size: 1.15rem; font-weight: 800; color: $color-primary; min-width: 52px; letter-spacing: -0.01em; }
 .schedule-info {
   flex: 1; display: flex; flex-direction: column; gap: 2px;
-  strong { font-size: 0.93rem; color: $color-neutral-900; }
-  span   { font-size: 0.82rem; color: $color-neutral-600; }
-  small  { color: $color-neutral-400; font-size: 0.77rem; }
-  .schedule-phone { color: $color-neutral-500; }
+  strong { font-size: 0.93rem; color: var(--lync-text); }
+  span   { font-size: 0.82rem; color: var(--lync-text-muted); }
+  small  { color: var(--lync-text-muted); font-size: 0.77rem; }
+  .schedule-phone { color: var(--lync-text-muted); }
 }
 .schedule-right   { display: flex; flex-direction: column; align-items: flex-end; gap: $spacing-xs; }
 .schedule-actions { display: flex; gap: $spacing-xs; flex-wrap: wrap; justify-content: flex-end; }
 .btn-success      { background: $color-success; color: #fff; border-color: $color-success; &:hover { background: $color-success-dark; } }
-.badge--operador  { background: #dbeafe; color: #1e40af; }
+.badge--operador  { background: var(--lync-tag-bg); color: $color-accent-dark; border: 1px solid var(--lync-tag-border); }
 
 // ─── Week view ────────────────────────────────────────────────────────────────
 .week-grid {
@@ -110,7 +110,7 @@
 }
 .week-col {
   display: flex; flex-direction: column; min-width: 110px;
-  border-radius: 10px; overflow: hidden; border: 1px solid $color-neutral-200; background: #fff;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--lync-border); background: var(--lync-surface);
   &--today { border-color: $color-primary; box-shadow: 0 0 0 2px rgba($color-primary, 0.18);
     .week-col-header { background: $color-primary; color: #fff;
       .week-day-name, .week-day-date { color: rgba(#fff, 0.9); }
@@ -120,12 +120,12 @@
 }
 .week-col-header {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: $spacing-sm; background: $color-neutral-50; border-bottom: 1px solid $color-neutral-200;
-  cursor: pointer; border: none; width: 100%; text-align: center; transition: background 0.12s;
+  padding: $spacing-sm; background: var(--lync-surface-muted); border-bottom: 1px solid var(--lync-border);
+  cursor: pointer; border-top: none; border-left: none; border-right: none; width: 100%; text-align: center; transition: background 0.12s;
   &:hover { background: rgba($color-primary, 0.06); }
 }
-.week-day-name  { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: $color-neutral-500; }
-.week-day-date  { font-size: 0.82rem; font-weight: 700; color: $color-neutral-800; }
+.week-day-name  { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--lync-text-muted); }
+.week-day-date  { font-size: 0.82rem; font-weight: 700; color: var(--lync-text); }
 .week-day-badge {
   display: inline-flex; align-items: center; justify-content: center;
   background: $color-primary; color: #fff; border-radius: 999px;
@@ -134,28 +134,28 @@
 .week-slots { display: flex; flex-direction: column; gap: 3px; padding: 5px; flex: 1; }
 .week-slot {
   display: flex; flex-direction: column; gap: 1px;
-  padding: 4px 6px; border-radius: 5px; border-left: 3px solid $color-neutral-300; background: $color-neutral-50;
-  &--agendado       { border-left-color: $color-warning;  background: #fffbeb; }
-  &--em_atendimento { border-left-color: $color-info;     background: #eff6ff; }
-  &--concluido      { border-left-color: $color-success;  background: #f0fdf4; opacity: 0.75; }
+  padding: 4px 6px; border-radius: 5px; border-left: 3px solid $color-neutral-300; background: var(--lync-surface-muted);
+  &--agendado       { border-left-color: $color-warning;  background: color-mix(in srgb, var(--lync-surface) 80%, $color-warning-light 20%); }
+  &--em_atendimento { border-left-color: $color-info;     background: color-mix(in srgb, var(--lync-surface) 80%, $color-accent-light 20%); }
+  &--concluido      { border-left-color: $color-success;  background: color-mix(in srgb, var(--lync-surface) 80%, $color-success-light 20%); opacity: 0.75; }
   &--cancelado      { border-left-color: $color-neutral-300; opacity: 0.5; }
 }
 .week-slot-time { font-size: 0.63rem; font-weight: 700; color: $color-primary; }
-.week-slot-name { font-size: 0.72rem; font-weight: 600; color: $color-neutral-900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.week-slot-svc  { font-size: 0.65rem; color: $color-neutral-500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.week-empty     { text-align: center; color: $color-neutral-400; font-size: 0.72rem; padding: $spacing-md $spacing-xs; }
+.week-slot-name { font-size: 0.72rem; font-weight: 600; color: var(--lync-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.week-slot-svc  { font-size: 0.65rem; color: var(--lync-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.week-empty     { text-align: center; color: var(--lync-text-muted); font-size: 0.72rem; padding: $spacing-md $spacing-xs; }
 
 // ─── Empty / loading state ────────────────────────────────────────────────────
 .empty-state {
   display: flex; align-items: center; justify-content: center; gap: $spacing-sm;
-  color: $color-neutral-400; padding: $spacing-xl; background: #fff;
+  color: var(--lync-text-muted); padding: $spacing-xl; background: var(--lync-surface);
   border-radius: 10px; font-size: 0.88rem;
 }
 
 // ─── Dialog form ─────────────────────────────────────────────────────────────
 .form-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: $spacing-md;
-  input, select { width: 100%; padding: $spacing-sm; border: 1px solid $color-neutral-300; border-radius: 6px; font-size: $font-size-base; background: #fff; &:focus { outline: none; border-color: $color-primary; } }
+  input, select { width: 100%; padding: $spacing-sm; border: 1px solid var(--lync-border); border-radius: 6px; font-size: $font-size-base; background: var(--lync-input-bg); color: var(--lync-input-text); &:focus { outline: none; border-color: $color-primary; } }
   lync-form-field[ng-reflect-full='true'] { grid-column: 1 / -1; }
 }
 
@@ -192,9 +192,9 @@
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1.5px solid $color-neutral-300;
-  background: #fff;
-  color: $color-neutral-700;
+  border: 1.5px solid var(--lync-border);
+  background: var(--lync-surface);
+  color: var(--lync-text);
   transition: all 0.12s;
   min-width: 56px;
   text-align: center;
@@ -202,7 +202,7 @@
   &--available {
     border-color: $color-success;
     color: $color-success-dark;
-    background: #f0fdf4;
+    background: color-mix(in srgb, var(--lync-surface) 82%, $color-success-light 18%);
     &:hover { background: $color-success; color: #fff; border-color: $color-success; }
   }
 
@@ -216,7 +216,7 @@
   &--taken {
     border-color: $color-neutral-200;
     color: $color-neutral-300;
-    background: $color-neutral-50;
+    background: var(--lync-surface-muted);
     cursor: not-allowed;
     text-decoration: line-through;
   }

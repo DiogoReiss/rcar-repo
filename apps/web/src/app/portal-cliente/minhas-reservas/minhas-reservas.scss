@@ -10,7 +10,7 @@
 
 .portal-empty {
   display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
-  padding: $spacing-xl; background: #fff; border-radius: 10px;
+  padding: $spacing-xl; background: var(--lync-surface); border: 1px solid var(--lync-border); border-radius: 10px;
   margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
   i { font-size: 2rem; }
   p { font-size: 0.9rem; margin: 0; }
@@ -22,8 +22,8 @@
 }
 
 .reserva-card {
-  background: #fff; border-radius: 12px; padding: $spacing-lg;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid $color-neutral-200;
+  background: var(--lync-surface); border-radius: 12px; padding: $spacing-lg;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid var(--lync-border);
   display: flex; flex-direction: column; gap: $spacing-md;
 }
 
@@ -34,18 +34,18 @@
 .reserva-vehicle {
   display: flex; align-items: center; gap: $spacing-sm;
   i { color: $color-primary; font-size: 1.1rem; }
-  strong { font-size: 1rem; color: $color-neutral-900; }
+  strong { font-size: 1rem; color: var(--lync-text); }
 }
 
 .reserva-plate {
   font-family: monospace; font-size: 0.78rem; font-weight: 700;
-  background: $color-neutral-100; border-radius: 4px; padding: 1px 6px;
-  color: $color-neutral-700; letter-spacing: 0.06em;
+  background: var(--lync-surface-muted); border-radius: 4px; padding: 1px 6px;
+  color: var(--lync-text-muted); letter-spacing: 0.06em;
 }
 
 .reserva-dates {
   display: flex; align-items: center; gap: $spacing-md;
-  background: $color-neutral-50; border-radius: 8px; padding: $spacing-sm $spacing-md;
+  background: var(--lync-surface-muted); border-radius: 8px; padding: $spacing-sm $spacing-md;
 }
 
 .reserva-date-item {
@@ -53,17 +53,17 @@
 }
 
 .reserva-date-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: $color-neutral-400; }
-.reserva-date-value { font-size: 0.9rem; font-weight: 700; color: $color-neutral-900; }
+.reserva-date-value { font-size: 0.9rem; font-weight: 700; color: var(--lync-text); }
 .reserva-arrow      { color: $color-neutral-400; font-size: 0.8rem; }
 
 .reserva-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: $spacing-sm; border-top: 1px solid $color-neutral-100;
+  padding-top: $spacing-sm; border-top: 1px solid color-mix(in srgb, var(--lync-border) 50%, transparent 50%);
 }
 
 .reserva-meta { display: flex; align-items: center; gap: $spacing-sm; font-size: 0.8rem; color: $color-neutral-500; text-transform: capitalize; }
 
-.reserva-total { font-size: 0.85rem; color: $color-neutral-600; strong { color: $color-success-dark; font-size: 1rem; } }
+.reserva-total { font-size: 0.85rem; color: var(--lync-text-muted); strong { color: $color-success-dark; font-size: 1rem; } }
 
 .portal-empty-action {
   background: none; border: none; color: $color-primary; font-weight: 600;
@@ -79,8 +79,8 @@
 
 .vehicle-preview {
   display: flex; align-items: center; gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md; background: $color-neutral-50;
-  border-radius: 8px; font-size: 0.85rem; color: $color-neutral-700;
+  padding: $spacing-sm $spacing-md; background: var(--lync-surface-muted);
+  border: 1px solid var(--lync-border); border-radius: 8px; font-size: 0.85rem; color: var(--lync-text);
   i { color: $color-primary; }
 }
 

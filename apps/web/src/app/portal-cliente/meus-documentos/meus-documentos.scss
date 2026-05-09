@@ -10,7 +10,7 @@
 
 .portal-empty {
   display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
-  padding: $spacing-xl; background: #fff; border-radius: 10px;
+  padding: $spacing-xl; background: var(--lync-surface); border: 1px solid var(--lync-border); border-radius: 10px;
   margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
   i { font-size: 2rem; }
   p { font-size: 0.9rem; margin: 0; }
@@ -22,8 +22,8 @@
 }
 
 .doc-card {
-  background: #fff; border-radius: 12px; padding: $spacing-lg;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid $color-neutral-200;
+  background: var(--lync-surface); border-radius: 12px; padding: $spacing-lg;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid var(--lync-border);
   display: flex; align-items: center; gap: $spacing-md;
 }
 
@@ -36,9 +36,9 @@
 
 .doc-body {
   flex: 1; display: flex; flex-direction: column; gap: 2px;
-  strong.doc-title { font-size: 0.95rem; color: $color-neutral-900; }
-  span.doc-sub     { font-size: 0.8rem; color: $color-neutral-600; }
-  span.doc-date    { font-size: 0.78rem; color: $color-neutral-400; }
+  strong.doc-title { font-size: 0.95rem; color: var(--lync-text); }
+  span.doc-sub     { font-size: 0.8rem; color: var(--lync-text-muted); }
+  span.doc-date    { font-size: 0.78rem; color: var(--lync-text-muted); }
 }
 
 .doc-side {
@@ -51,5 +51,41 @@
   font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
   &:hover { opacity: 0.9; }
   i { font-size: 0.75rem; }
+}
+
+:host-context(body[data-theme='dark']) {
+  .portal-loading,
+  .portal-empty {
+    color: var(--lync-text-muted);
+  }
+
+  .doc-icon {
+    background: var(--lync-tag-bg);
+    border: 1px solid var(--lync-tag-border);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .portal-empty,
+  .docs-list {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .doc-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: $spacing-md;
+  }
+
+  .doc-side {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .doc-btn {
+    justify-content: center;
+  }
 }
 
