@@ -103,3 +103,8 @@
 - Improved mock-mode support for templates with in-memory CRUD persistence and `/templates/:id/preview` interpolation.
 - Added focused Playwright coverage in `apps/web/e2e/templates.spec.ts` for variable insertion + preview rendering flow.
 
+### 2026-05-09 templates seed follow-up
+
+- Expanded API seed (`apps/api/prisma/seed.ts`) to populate default templates for all current `TemplateType` values.
+- Seed now applies templates idempotently by `nome + tipo`, updating content/variables when template already exists.
+

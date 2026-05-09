@@ -603,15 +603,33 @@ async function main() {
     await prisma.vehicle.create({ data: v });
   }
 
-  // 4. Templates padrão
-  await prisma.template.create({
-    data: {
+  // 4. Templates padrão (idempotente por nome + tipo)
+  const templatesPadrao = [
+    {
       nome: 'Contrato de Locação Padrão',
       tipo: 'CONTRATO_LOCACAO',
-      conteudo_html: '<h1>CONTRATO DE LOCAÇÃO DE VEÍCULO</h1><p>Locatário: {{cliente.nome}}...</p>',
-      variaveis: ['cliente.nome', 'cliente.cpf_cnpj', 'veiculo.placa', 'veiculo.modelo', 'contrato.dt_retirada', 'contrato.dt_devolucao_prev', 'contrato.valor_total_prev'],
+      variaveis: ['nomeCliente', 'cpfCnpj', 'emailCliente', 'telefoneCliente', 'veiculo', 'placa', 'categoria', 'dataRetirada', 'dataDevolucao', 'valorDiaria', 'valorTotal'],
+    },
+    {
+      nome: 'Recibo de Locação',
+      tipo: 'RECIBO_LOCACAO',
+      variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'valor', 'formaPagamento', 'data'],
+    },
+    {
+      nome: 'Recibo de Lavagem',
+      tipo: 'RECIBO_LAVAGEM',
+      variaveis: ['nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
+    },
+  ];
+
+  for (const tpl of templatesPadrao) {
+    const existente = await prisma.template.findFirst({ where: { nome: tpl.nome, tipo: tpl.tipo } });
+    if (existente) {
+      await prisma.template.update({ where: { id: existente.id }, data: { variaveis: tpl.variaveis, ativo: true } });
+    } else {
+      await prisma.template.create({ data: { ...tpl, conteudo_html: '<h1>...</h1>' } });
     }
-  });
+  }
 
   // 5. Produtos de estoque do lavajato
   const produtos = [

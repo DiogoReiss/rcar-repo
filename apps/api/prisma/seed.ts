@@ -8,6 +8,63 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+const defaultTemplates = [
+  {
+    nome: 'Contrato de Locação Padrão',
+    tipo: 'CONTRATO_LOCACAO' as const,
+    conteudoHtml: `<h1>CONTRATO DE LOCAÇÃO DE VEÍCULO</h1>
+<p><strong>Locatário:</strong> {{nomeCliente}}</p>
+<p><strong>CPF/CNPJ:</strong> {{cpfCnpj}}</p>
+<p><strong>E-mail:</strong> {{emailCliente}} | <strong>Telefone:</strong> {{telefoneCliente}}</p>
+<hr/>
+<p><strong>Veículo:</strong> {{veiculo}} ({{placa}})</p>
+<p><strong>Período:</strong> {{dataRetirada}} até {{dataDevolucao}}</p>
+<p><strong>Categoria:</strong> {{categoria}}</p>
+<p><strong>Valor da diária:</strong> R$ {{valorDiaria}}</p>
+<p><strong>Valor total estimado:</strong> R$ {{valorTotal}}</p>
+<hr/>
+<p>Declaro estar de acordo com os termos de uso do veículo e responsabilidades previstas.</p>
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`,
+    variaveis: [
+      'nomeCliente',
+      'cpfCnpj',
+      'emailCliente',
+      'telefoneCliente',
+      'veiculo',
+      'placa',
+      'categoria',
+      'dataRetirada',
+      'dataDevolucao',
+      'valorDiaria',
+      'valorTotal',
+    ],
+  },
+  {
+    nome: 'Recibo de Locação',
+    tipo: 'RECIBO_LOCACAO' as const,
+    conteudoHtml: `<h2>RECIBO DE LOCAÇÃO</h2>
+<p>Recebemos de <strong>{{nomeCliente}}</strong> ({{cpfCnpj}}) o valor de <strong>R$ {{valor}}</strong>.</p>
+<p><strong>Referente ao veículo:</strong> {{veiculo}} ({{placa}})</p>
+<p><strong>Forma de pagamento:</strong> {{formaPagamento}}</p>
+<p><strong>Data:</strong> {{data}}</p>
+<p style="margin-top:40px">_____________________________________<br/>RCar Locações</p>`,
+    variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'valor', 'formaPagamento', 'data'],
+  },
+  {
+    nome: 'Recibo de Lavagem',
+    tipo: 'RECIBO_LAVAGEM' as const,
+    conteudoHtml: `<h2>RECIBO DE LAVAGEM</h2>
+<p><strong>Cliente:</strong> {{nomeCliente}}</p>
+<p><strong>Telefone:</strong> {{telefoneCliente}}</p>
+<p><strong>Serviço:</strong> {{servico}}</p>
+<p><strong>Placa:</strong> {{placa}}</p>
+<p><strong>Data:</strong> {{data}}</p>
+<p><strong>Total:</strong> R$ {{valor}}</p>
+<p style="margin-top:40px">Obrigado por escolher a RCar.</p>`,
+    variaveis: ['nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
+  },
+];
+
 async function main() {
   console.log('🌱 Seeding database...');
 
@@ -78,26 +135,33 @@ async function main() {
   }
   console.log(`  ✓ Vehicles: ${await prisma.vehicle.count()} total`);
 
-  // 5. Template
-  const existingTemplates = await prisma.template.count();
-  if (existingTemplates === 0) {
-    await prisma.template.create({
-      data: {
-        nome: 'Contrato de Locação Padrão',
-        tipo: 'CONTRATO_LOCACAO',
-        conteudoHtml: `<h1>CONTRATO DE LOCAÇÃO DE VEÍCULO</h1>
-<p><strong>Locatário:</strong> {{cliente.nome}}</p>
-<p><strong>CPF/CNPJ:</strong> {{cliente.cpfCnpj}}</p>
-<p><strong>Veículo:</strong> {{veiculo.modelo}} - {{veiculo.placa}}</p>
-<p><strong>Período:</strong> {{contrato.dataRetirada}} a {{contrato.dataDevolucao}}</p>
-<p><strong>Valor Total:</strong> R$ {{contrato.valorTotal}}</p>`,
-        variaveis: [
-          'cliente.nome', 'cliente.cpfCnpj',
-          'veiculo.placa', 'veiculo.modelo',
-          'contrato.dataRetirada', 'contrato.dataDevolucao', 'contrato.valorTotal',
-        ],
-      },
+  // 5. Templates padrão (idempotente por nome + tipo)
+  for (const tpl of defaultTemplates) {
+    const existing = await prisma.template.findFirst({
+      where: { nome: tpl.nome, tipo: tpl.tipo },
+      select: { id: true },
     });
+
+    if (existing) {
+      await prisma.template.update({
+        where: { id: existing.id },
+        data: {
+          conteudoHtml: tpl.conteudoHtml,
+          variaveis: tpl.variaveis,
+          ativo: true,
+        },
+      });
+    } else {
+      await prisma.template.create({
+        data: {
+          nome: tpl.nome,
+          tipo: tpl.tipo,
+          conteudoHtml: tpl.conteudoHtml,
+          variaveis: tpl.variaveis,
+          ativo: true,
+        },
+      });
+    }
   }
   console.log(`  ✓ Templates: ${await prisma.template.count()} total`);
 
