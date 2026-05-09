@@ -252,7 +252,9 @@ describe('API happy paths (e2e)', () => {
   });
 
   it('returns not found for unknown endpoint', () => {
-    return request(app.getHttpServer()).get('/non-existent-endpoint').expect(404);
+    return request(app.getHttpServer())
+      .get('/non-existent-endpoint')
+      .expect(404);
   });
 
   afterAll(async () => {

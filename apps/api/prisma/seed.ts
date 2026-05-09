@@ -8,12 +8,28 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+function templateShell(title: string, body: string): string {
+  return `<section style="font-family:Arial,Helvetica,sans-serif;color:#1f2937;line-height:1.5;font-size:13px;">
+  <header style="border-bottom:2px solid #0d9488;padding-bottom:12px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+    <div>
+      <h1 style="margin:0 0 4px;color:#0f172a;font-size:20px;">{{empresaNome}}</h1>
+      <p style="margin:0;color:#64748b;font-size:12px;">Gestão de Locação e Lavajato</p>
+    </div>
+    <div style="text-align:right;min-width:180px;">
+      <p style="margin:0;font-size:12px;color:#334155;"><strong>Data:</strong> {{dataAtual}}</p>
+      <p style="margin:0;font-size:12px;color:#334155;"><strong>Hora:</strong> {{horaAtual}}</p>
+    </div>
+  </header>
+  <h2 style="margin:0 0 14px;color:#0f172a;font-size:18px;">${title}</h2>
+  ${body}
+</section>`;
+}
+
 const defaultTemplates = [
   {
     nome: 'Contrato de Locação Padrão',
     tipo: 'CONTRATO_LOCACAO' as const,
-    conteudoHtml: `<h1>CONTRATO DE LOCAÇÃO DE VEÍCULO</h1>
-<p><strong>Locatário:</strong> {{nomeCliente}}</p>
+    conteudoHtml: templateShell('Contrato de Locação de Veículo', `<p><strong>Locatário:</strong> {{nomeCliente}}</p>
 <p><strong>CPF/CNPJ:</strong> {{cpfCnpj}}</p>
 <p><strong>E-mail:</strong> {{emailCliente}} | <strong>Telefone:</strong> {{telefoneCliente}}</p>
 <hr/>
@@ -24,8 +40,11 @@ const defaultTemplates = [
 <p><strong>Valor total estimado:</strong> R$ {{valorTotal}}</p>
 <hr/>
 <p>Declaro estar de acordo com os termos de uso do veículo e responsabilidades previstas.</p>
-<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`,
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`),
     variaveis: [
+      'empresaNome',
+      'dataAtual',
+      'horaAtual',
       'nomeCliente',
       'cpfCnpj',
       'emailCliente',
@@ -42,57 +61,57 @@ const defaultTemplates = [
   {
     nome: 'Recibo de Locação',
     tipo: 'RECIBO_LOCACAO' as const,
-    conteudoHtml: `<h2>RECIBO DE LOCAÇÃO</h2>
+    conteudoHtml: templateShell('Recibo de Locação', `
 <p>Recebemos de <strong>{{nomeCliente}}</strong> ({{cpfCnpj}}) o valor de <strong>R$ {{valor}}</strong>.</p>
 <p><strong>Referente ao veículo:</strong> {{veiculo}} ({{placa}})</p>
 <p><strong>Forma de pagamento:</strong> {{formaPagamento}}</p>
 <p><strong>Data:</strong> {{data}}</p>
-<p style="margin-top:40px">_____________________________________<br/>RCar Locações</p>`,
-    variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'valor', 'formaPagamento', 'data'],
+<p style="margin-top:40px">_____________________________________<br/>RCar Locações</p>`),
+    variaveis: ['empresaNome', 'dataAtual', 'horaAtual', 'nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'valor', 'formaPagamento', 'data'],
   },
   {
     nome: 'Recibo de Lavagem',
     tipo: 'RECIBO_LAVAGEM' as const,
-    conteudoHtml: `<h2>RECIBO DE LAVAGEM</h2>
+    conteudoHtml: templateShell('Recibo de Lavagem', `
 <p><strong>Cliente:</strong> {{nomeCliente}}</p>
 <p><strong>Telefone:</strong> {{telefoneCliente}}</p>
 <p><strong>Serviço:</strong> {{servico}}</p>
 <p><strong>Placa:</strong> {{placa}}</p>
 <p><strong>Data:</strong> {{data}}</p>
 <p><strong>Total:</strong> R$ {{valor}}</p>
-<p style="margin-top:40px">Obrigado por escolher a RCar.</p>`,
-    variaveis: ['nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
+<p style="margin-top:40px">Obrigado por escolher a RCar.</p>`),
+    variaveis: ['empresaNome', 'dataAtual', 'horaAtual', 'nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
   },
   {
     nome: 'Termo de Vistoria - Saída',
     tipo: 'VISTORIA' as const,
-    conteudoHtml: `<h2>TERMO DE VISTORIA - SAÍDA</h2>
+    conteudoHtml: templateShell('Termo de Vistoria - Saída', `
 <p><strong>Cliente:</strong> {{nomeCliente}}</p>
 <p><strong>Veículo:</strong> {{veiculo}} ({{placa}})</p>
 <p><strong>KM:</strong> {{km}}</p>
 <p><strong>Data:</strong> {{data}}</p>
 <p><strong>Tipo:</strong> {{tipo}}</p>
 <p style="margin-top:40px">Declaro que recebi o veículo nas condições acima.</p>
-<p style="margin-top:48px">_____________________________________<br/>Assinatura do Cliente</p>`,
-    variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Cliente</p>`),
+    variaveis: ['empresaNome', 'dataAtual', 'horaAtual', 'nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
   },
   {
     nome: 'Termo de Vistoria - Chegada',
     tipo: 'VISTORIA' as const,
-    conteudoHtml: `<h2>TERMO DE VISTORIA - DEVOLUÇÃO</h2>
+    conteudoHtml: templateShell('Termo de Vistoria - Devolução', `
 <p><strong>Cliente:</strong> {{nomeCliente}}</p>
 <p><strong>Veículo:</strong> {{veiculo}} ({{placa}})</p>
 <p><strong>KM Devolução:</strong> {{km}}</p>
 <p><strong>Data:</strong> {{data}}</p>
 <p><strong>Tipo:</strong> {{tipo}}</p>
 <p style="margin-top:40px">Condição geral registrada na devolução do veículo.</p>
-<p style="margin-top:48px">_____________________________________<br/>Assinatura do Responsável</p>`,
-    variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Responsável</p>`),
+    variaveis: ['empresaNome', 'dataAtual', 'horaAtual', 'nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
   },
   {
     nome: 'Termo de Responsabilidade do Locatário',
     tipo: 'TERMO_RESPONSABILIDADE' as const,
-    conteudoHtml: `<h2>TERMO DE RESPONSABILIDADE</h2>
+    conteudoHtml: templateShell('Termo de Responsabilidade do Locatário', `
 <p>Eu, <strong>{{nomeCliente}}</strong>, inscrito(a) em {{cpfCnpj}}, declaro estar ciente das regras de uso do veículo <strong>{{veiculo}}</strong> de placa <strong>{{placa}}</strong>.</p>
 <p><strong>Início da locação:</strong> {{dataRetirada}}</p>
 <p><strong>Previsão de devolução:</strong> {{dataDevolucao}}</p>
@@ -102,8 +121,8 @@ const defaultTemplates = [
   <li>Responsabilidade por danos causados por uso indevido.</li>
   <li>Devolução no prazo e condições acordadas.</li>
 </ul>
-<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`,
-    variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'dataRetirada', 'dataDevolucao', 'valorTotal'],
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`),
+    variaveis: ['empresaNome', 'dataAtual', 'horaAtual', 'nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'dataRetirada', 'dataDevolucao', 'valorTotal'],
   },
 ];
 

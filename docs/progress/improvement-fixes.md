@@ -108,4 +108,6 @@
 - Expanded API seed (`apps/api/prisma/seed.ts`) to populate default templates for all current `TemplateType` values.
 - Seed now applies templates idempotently by `nome + tipo`, updating content/variables when template already exists.
 - Extended Prisma `TemplateType` with `VISTORIA` and `TERMO_RESPONSABILIDADE` + migration `20260509121500_extend_template_type_enum`.
+- Improved default template design with a shared visual header and placeholders `empresaNome`, `dataAtual`, `horaAtual`.
+- CI stabilization: fixed API lint typing warnings (`roles.guard.ts`, `auth.service.spec.ts`) and adjusted web component style error budget to unblock production build.
 

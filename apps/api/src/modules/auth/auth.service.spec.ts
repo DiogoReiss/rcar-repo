@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service.js';
 import { TokenBlacklistService } from './token-blacklist.service.js';
 import { LoginAttemptsService } from './login-attempts.service.js';
@@ -89,7 +90,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should throw UnauthorizedException for inactive user', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      const mockRes: any = { cookie: jest.fn() };
+      const mockRes = { cookie: jest.fn() } as Pick<Response, 'cookie'>;
       await expect(
         service.login({ email: 'x@x.com', senha: 'pass' }, mockRes),
       ).rejects.toThrow(UnauthorizedException);

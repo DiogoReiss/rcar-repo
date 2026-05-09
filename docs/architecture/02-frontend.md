@@ -170,6 +170,7 @@ export const routes: Routes = [
   - variáveis são escolhidas por **dropdown de catálogo da aplicação** (por tipo de template), sem campo livre
 - Fluxo de edição:
   - define variáveis por seletor (`dropdown + adicionar`) com chips removíveis
+  - templates padrão usam um cabeçalho visual com `empresaNome`, `dataAtual` e `horaAtual`
   - edita conteúdo em **rich editor** (toolbar de formatação: negrito, itálico, sublinhado e lista)
   - aplica blocos (`H1`, `H2`, `Parágrafo`) e inserção de link por painel no editor
   - usa **Playground de variáveis** com chips arrastáveis (`{{variavel}}`)

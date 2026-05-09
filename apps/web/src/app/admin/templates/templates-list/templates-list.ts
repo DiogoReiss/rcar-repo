@@ -89,6 +89,9 @@ export default class TemplatesListComponent {
 
   readonly variableCatalog: Record<string, VariableOption[]> = {
     CONTRATO_LOCACAO: [
+      { value: 'empresaNome', label: 'Empresa - nome' },
+      { value: 'dataAtual', label: 'Sistema - data atual' },
+      { value: 'horaAtual', label: 'Sistema - hora atual' },
       { value: 'nomeCliente', label: 'Cliente - nome' },
       { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
       { value: 'emailCliente', label: 'Cliente - e-mail' },
@@ -102,6 +105,9 @@ export default class TemplatesListComponent {
       { value: 'valorTotal', label: 'Locação - valor total' },
     ],
     RECIBO_LOCACAO: [
+      { value: 'empresaNome', label: 'Empresa - nome' },
+      { value: 'dataAtual', label: 'Sistema - data atual' },
+      { value: 'horaAtual', label: 'Sistema - hora atual' },
       { value: 'nomeCliente', label: 'Cliente - nome' },
       { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
       { value: 'veiculo', label: 'Veículo - modelo' },
@@ -111,6 +117,9 @@ export default class TemplatesListComponent {
       { value: 'formaPagamento', label: 'Recibo - forma de pagamento' },
     ],
     RECIBO_LAVAGEM: [
+      { value: 'empresaNome', label: 'Empresa - nome' },
+      { value: 'dataAtual', label: 'Sistema - data atual' },
+      { value: 'horaAtual', label: 'Sistema - hora atual' },
       { value: 'nomeCliente', label: 'Cliente - nome' },
       { value: 'telefoneCliente', label: 'Cliente - telefone' },
       { value: 'servico', label: 'Lavagem - serviço' },
@@ -119,6 +128,9 @@ export default class TemplatesListComponent {
       { value: 'valor', label: 'Lavagem - valor' },
     ],
     VISTORIA: [
+      { value: 'empresaNome', label: 'Empresa - nome' },
+      { value: 'dataAtual', label: 'Sistema - data atual' },
+      { value: 'horaAtual', label: 'Sistema - hora atual' },
       { value: 'nomeCliente', label: 'Cliente - nome' },
       { value: 'veiculo', label: 'Veículo - modelo' },
       { value: 'placa', label: 'Veículo - placa' },
@@ -127,6 +139,9 @@ export default class TemplatesListComponent {
       { value: 'tipo', label: 'Vistoria - tipo' },
     ],
     TERMO_RESPONSABILIDADE: [
+      { value: 'empresaNome', label: 'Empresa - nome' },
+      { value: 'dataAtual', label: 'Sistema - data atual' },
+      { value: 'horaAtual', label: 'Sistema - hora atual' },
       { value: 'nomeCliente', label: 'Cliente - nome' },
       { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
       { value: 'veiculo', label: 'Veículo - modelo' },
