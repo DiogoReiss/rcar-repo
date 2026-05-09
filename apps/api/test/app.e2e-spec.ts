@@ -21,7 +21,10 @@ import { StorageService } from '../src/modules/storage/storage.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('API happy paths (e2e)', () => {
-  let app: INestApplication<App> | null = null;
+  let app!: INestApplication<App>;
+
+  const jwtAuthGuard = { canActivate: jest.fn().mockReturnValue(true) };
+  const rolesGuard = { canActivate: jest.fn().mockReturnValue(true) };
 
   const authService = {
     forgotPassword: jest.fn().mockResolvedValue({ message: 'ok' }),
@@ -114,9 +117,9 @@ describe('API happy paths (e2e)', () => {
       imports: [AppModule],
     })
       .overrideGuard(JwtAuthGuard)
-      .useValue({ canActivate: () => true })
+      .useValue(jwtAuthGuard)
       .overrideGuard(RolesGuard)
-      .useValue({ canActivate: () => true })
+      .useValue(rolesGuard)
       .overrideProvider(AuthService)
       .useValue(authService)
       .overrideProvider(UsersService)
@@ -236,9 +239,23 @@ describe('API happy paths (e2e)', () => {
       .expect(200);
   });
 
+  it('rejects protected route when JWT guard denies access', () => {
+    jwtAuthGuard.canActivate.mockReturnValueOnce(false);
+    return request(app.getHttpServer()).get('/users').expect(403);
+  });
+
+  it('rejects route when role guard denies access', () => {
+    rolesGuard.canActivate.mockReturnValueOnce(false);
+    return request(app.getHttpServer())
+      .get('/storage/signed-url?objectKey=customers%2Ffile.jpg')
+      .expect(403);
+  });
+
+  it('returns not found for unknown endpoint', () => {
+    return request(app.getHttpServer()).get('/non-existent-endpoint').expect(404);
+  });
+
   afterAll(async () => {
-    if (app) {
-      await app.close();
-    }
+    await app.close();
   });
 });

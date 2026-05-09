@@ -19,9 +19,26 @@ test.describe('Login flow', () => {
 });
 
 test.describe('Auth guard', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/auth/login');
+  });
+
   test('unauthenticated user is redirected to login from admin', async ({ page }) => {
     await page.goto('/admin');
     await expect(page).toHaveURL(/\/auth\/login/, { timeout: 5000 });
+  });
+
+  test('unauthenticated user is redirected to login from portal route', async ({ page }) => {
+    await page.goto('/portal/historico');
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 5000 });
+  });
+
+  test('blocks submit while required fields are empty', async ({ page }) => {
+    const submitButton = page.getByRole('button', { name: /entrar/i });
+    await expect(submitButton).toBeDisabled();
+
+    await page.getByLabel(/e-mail/i).fill('admin@rcar.dev');
+    await expect(submitButton).toBeDisabled();
   });
 });
 
