@@ -14,6 +14,12 @@ import FormFieldComponent from '@shared/components/form-field/form-field';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 
 const STATUS_ORDER = ['AGUARDANDO', 'EM_ATENDIMENTO', 'CONCLUIDO'] as const;
+type TemplateType = 'RECIBO_LAVAGEM';
+
+interface TemplateRef {
+  id: string;
+  tipo: string;
+}
 
 @Component({
   selector: 'lync-fila-painel',
@@ -58,11 +64,13 @@ export default class FilaPainelComponent implements OnDestroy {
   // Payment dialog
   readonly payingId   = signal<string | null>(null);
   readonly payLoading = signal(false);
+  readonly pdfLoadingId = signal<string | null>(null);
 
   // Drag state
   private draggedId     = '';
   private draggedStatus = '';
   readonly dragOverCol  = signal<string | null>(null);
+  private readonly templateIdByType = new Map<TemplateType, string>();
 
   readonly aguardando    = () => this.queue().filter(q => q.status === 'AGUARDANDO');
   readonly emAtendimento = () => this.queue().filter(q => q.status === 'EM_ATENDIMENTO');
@@ -155,6 +163,76 @@ export default class FilaPainelComponent implements OnDestroy {
   openPayFromDetail() {
     const item = this.detailItem();
     if (item) { this.payingId.set(item.id); this.closeDetail(); }
+  }
+
+  get detailCanGeneratePdf(): boolean {
+    const item = this.detailItem();
+    return !!item && (item.status === 'EM_ATENDIMENTO' || item.status === 'CONCLUIDO');
+  }
+
+  private async resolveTemplateId(tipo: TemplateType): Promise<string | null> {
+    const cached = this.templateIdByType.get(tipo);
+    if (cached) return cached;
+
+    const templates = await firstValueFrom(this.api.get<TemplateRef[]>('/templates'));
+    const match = templates.find((template) => template.tipo === tipo);
+    if (!match) return null;
+    this.templateIdByType.set(tipo, match.id);
+    return match.id;
+  }
+
+  private triggerPdfDownload(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async onGenerateReceiptPdf() {
+    const item = this.detailItem();
+    if (!item) return;
+
+    this.pdfLoadingId.set(item.id);
+    try {
+      const templateId = await this.resolveTemplateId('RECIBO_LAVAGEM');
+      if (!templateId) {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Template não encontrado',
+          detail: 'Cadastre um template RECIBO_LAVAGEM para gerar o recibo.',
+          life: 4000,
+        });
+        return;
+      }
+
+      const payload = {
+        variables: {
+          atendimentoId: item.id,
+          cliente: item.customer?.nome ?? item.nomeAvulso ?? 'Cliente',
+          servico: item.service?.nome ?? 'Serviço',
+          placa: item.veiculoPlaca ?? '—',
+          status: this.statusLabel[item.status] ?? item.status,
+          valor: item.service?.preco ? `R$ ${Number(item.service.preco).toFixed(2)}` : '—',
+          dataEntrada: this.formatEntryTime(item.createdAt),
+        },
+        fileName: `recibo-lavajato-${item.id.slice(0, 8)}`,
+      };
+
+      const blob = await firstValueFrom(this.api.postBlob(`/documents/templates/${templateId}/pdf`, payload));
+      this.triggerPdfDownload(blob, `${payload.fileName}.pdf`);
+      this.toast.add({ severity: 'success', summary: 'Recibo PDF gerado', life: 3000 });
+    } catch (e: any) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Erro ao gerar recibo',
+        detail: e?.error?.message ?? 'Não foi possível gerar o PDF.',
+        life: 4000,
+      });
+    } finally {
+      this.pdfLoadingId.set(null);
+    }
   }
 
   // ─── Queue actions ────────────────────────────────────────────────

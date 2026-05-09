@@ -21,3 +21,19 @@
   .item-status { font-size: 0.75rem; font-weight: 600; }
 }
 
+.photo-list {
+  margin-top: $spacing-sm;
+
+  .checklist-item {
+    align-items: center;
+    gap: $spacing-sm;
+    cursor: default;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+

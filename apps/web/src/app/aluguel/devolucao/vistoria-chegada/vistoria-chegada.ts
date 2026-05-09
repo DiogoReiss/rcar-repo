@@ -5,10 +5,11 @@ import { ApiService } from '@core/services/api.service';
 import { firstValueFrom } from 'rxjs';
 import { RentalContract } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
+import FileUploadComponent from '@shared/components/file-upload/file-upload';
 
 @Component({
   selector: 'lync-vistoria-chegada',
-  imports: [FormsModule, RouterLink, PageHeaderComponent],
+  imports: [FormsModule, RouterLink, PageHeaderComponent, FileUploadComponent],
   templateUrl: './vistoria-chegada.html',
   styleUrl: './vistoria-chegada.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +32,7 @@ export default class VistoriaChegadaComponent implements OnInit {
   // Checklist items
   readonly checklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
   readonly checklist = signal<Record<string, boolean>>({});
+  readonly vistoriaFotos = signal<string[]>([]);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -53,13 +55,28 @@ export default class VistoriaChegadaComponent implements OnInit {
     this.checklist.update(c => ({ ...c, [item]: !c[item] }));
   }
 
+  onVistoriaFotoUploaded(objectKey: string | null) {
+    if (!objectKey) return;
+    this.vistoriaFotos.update((current) => {
+      if (current.includes(objectKey)) return current;
+      return [...current, objectKey];
+    });
+  }
+
+  removeVistoriaFoto(objectKey: string) {
+    this.vistoriaFotos.update((current) => current.filter((item) => item !== objectKey));
+  }
+
   async onSubmit() {
     this.saving.set(true); this.error.set(null);
     try {
       await firstValueFrom(this.api.patch(`/rental/contracts/${this.contract()!.id}/close`, {
         kmDevolucao: this.kmDevolucao(),
         combustivelChegada: this.combustivelChegada(),
-        checklist: this.checklist(),
+        checklist: {
+          ...this.checklist(),
+          fotos: this.vistoriaFotos(),
+        },
         observacoes: this.obs() || undefined,
       }));
       this.success.set(true);

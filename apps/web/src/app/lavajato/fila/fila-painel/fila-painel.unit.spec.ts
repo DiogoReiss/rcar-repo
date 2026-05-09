@@ -95,5 +95,17 @@ describe('FilaPainelComponent', () => {
     expect(component.addDialogVisible()).toBe(false);
     expect(toastMock.add).toHaveBeenCalled();
   });
+
+  it('detailCanGeneratePdf should be true only for EM_ATENDIMENTO/CONCLUIDO', () => {
+    component.detailItem.set({ id: 'q1', status: 'AGUARDANDO' } as any);
+    expect(component.detailCanGeneratePdf).toBe(false);
+
+    component.detailItem.set({ id: 'q1', status: 'EM_ATENDIMENTO' } as any);
+    expect(component.detailCanGeneratePdf).toBe(true);
+
+    component.detailItem.set({ id: 'q1', status: 'CONCLUIDO' } as any);
+    expect(component.detailCanGeneratePdf).toBe(true);
+  });
 });
+
 

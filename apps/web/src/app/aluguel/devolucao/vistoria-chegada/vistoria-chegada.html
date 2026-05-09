@@ -53,6 +53,26 @@
           <label for="obs">Observações</label>
           <textarea id="obs" [ngModel]="obs()" (ngModelChange)="obs.set($event)" name="obs"></textarea>
         </div>
+
+        <div class="form-field full">
+          <label>Anexos da Vistoria</label>
+          <lync-file-upload
+            folder="rental/inspections"
+            accept="image/*"
+            (valueChange)="onVistoriaFotoUploaded($event)"
+          />
+
+          @if (vistoriaFotos().length) {
+            <div class="checklist-grid photo-list">
+              @for (foto of vistoriaFotos(); track foto) {
+                <div class="checklist-item ok">
+                  <span>{{ foto }}</span>
+                  <button type="button" class="btn-secondary" (click)="removeVistoriaFoto(foto)">Remover</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
         <div class="form-actions full">
           <button type="submit" class="btn-primary" [disabled]="saving()">
             {{ saving() ? 'Registrando...' : 'Confirmar Devolução' }}

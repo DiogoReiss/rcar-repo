@@ -301,6 +301,15 @@
       <ng-template #footer>
         <div class="detail-footer">
           <lync-btn label="Fechar" variant="secondary" (clicked)="closeDetail()" />
+          @if (detailCanGeneratePdf) {
+            <lync-btn
+              [label]="pdfLoadingId() === q.id ? 'Gerando PDF…' : 'Recibo PDF'"
+              icon="pi pi-file-pdf"
+              variant="secondary"
+              [disabled]="pdfLoadingId() === q.id"
+              (clicked)="onGenerateReceiptPdf()"
+            />
+          }
           @if (detailCanPay) {
             <lync-btn label="Pagar" variant="secondary" icon="pi pi-credit-card" (clicked)="openPayFromDetail()" />
           }
