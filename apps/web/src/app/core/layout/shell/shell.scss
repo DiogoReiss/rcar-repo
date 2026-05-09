@@ -34,6 +34,6 @@
   padding: $spacing-lg;
   background:
     linear-gradient(180deg, rgba($color-primary-light, 0.08), rgba($color-neutral-50, 0.9) 35%),
-    #f3f6fb;
+    var(--lync-bg-soft, #f3f6fb);
 }
 

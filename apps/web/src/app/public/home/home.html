@@ -24,6 +24,33 @@
           </div>
         } @else {
           <div class="flow-form">
+            <h3 class="section-label">Contato</h3>
+            <label for="contactNameWash">Nome</label>
+            <input
+              id="contactNameWash"
+              [ngModel]="contactName()"
+              (ngModelChange)="contactName.set($event)"
+              placeholder="Seu nome"
+            />
+
+            <label for="contactPhoneWash">Telefone / WhatsApp</label>
+            <input
+              id="contactPhoneWash"
+              [ngModel]="contactPhone()"
+              (ngModelChange)="contactPhone.set($event)"
+              placeholder="(11) 99999-9999"
+            />
+
+            <label for="contactEmailWash">E-mail (opcional)</label>
+            <input
+              id="contactEmailWash"
+              type="email"
+              [ngModel]="contactEmail()"
+              (ngModelChange)="contactEmail.set($event)"
+              placeholder="voce@email.com"
+            />
+
+            <h3 class="section-label">Agendamento</h3>
             <label for="washPlate">Placa do veículo</label>
             <input
               id="washPlate"
@@ -63,6 +90,33 @@
 
         @if (rentStep() === 1) {
           <div class="flow-form">
+            <h3 class="section-label">Contato</h3>
+            <label for="contactNameRent">Nome</label>
+            <input
+              id="contactNameRent"
+              [ngModel]="contactName()"
+              (ngModelChange)="contactName.set($event)"
+              placeholder="Seu nome"
+            />
+
+            <label for="contactPhoneRent">Telefone / WhatsApp</label>
+            <input
+              id="contactPhoneRent"
+              [ngModel]="contactPhone()"
+              (ngModelChange)="contactPhone.set($event)"
+              placeholder="(11) 99999-9999"
+            />
+
+            <label for="contactEmailRent">E-mail (opcional)</label>
+            <input
+              id="contactEmailRent"
+              type="email"
+              [ngModel]="contactEmail()"
+              (ngModelChange)="contactEmail.set($event)"
+              placeholder="voce@email.com"
+            />
+
+            <h3 class="section-label">Preferências da locação</h3>
             <div class="inline-fields">
               <div>
                 <label for="rentDateFrom">Retirada</label>
@@ -89,6 +143,7 @@
         } @else {
           <div class="success-box">
             <p>Preferência registrada: {{ rentCategory() }} de {{ rentDateFrom() }} até {{ rentDateTo() }}.</p>
+            <p>Contato: {{ contactName() }} · {{ contactPhone() }}</p>
             <p>Agora entre ou crie sua conta para finalizar a locação.</p>
           </div>
 

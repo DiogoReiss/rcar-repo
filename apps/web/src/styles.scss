@@ -2,6 +2,42 @@
 @use 'styles/variables' as *;
 @use 'styles/dialogs';
 
+:root {
+  --lync-bg: #{$color-neutral-50};
+  --lync-bg-soft: #f7f9fc;
+  --lync-surface: #ffffff;
+  --lync-surface-elevated: #ffffff;
+  --lync-border: rgba(#{$color-primary}, 0.16);
+  --lync-text: #{$color-neutral-900};
+  --lync-text-muted: #{$color-neutral-600};
+  --lync-heading: #{$color-neutral-900};
+  --lync-link: #{$color-primary};
+  --lync-link-hover: #{$color-primary-dark};
+  --lync-input-bg: #ffffff;
+  --lync-input-border: #{$color-neutral-300};
+  --lync-input-text: #{$color-neutral-900};
+  --lync-scroll-track: rgba(#{$color-neutral-300}, 0.35);
+  --lync-scroll-thumb: rgba(#{$color-primary}, 0.35);
+}
+
+body[data-theme='dark'] {
+  --lync-bg: #0f141d;
+  --lync-bg-soft: #121a26;
+  --lync-surface: #1a2434;
+  --lync-surface-elevated: #202c3f;
+  --lync-border: rgba(#{$color-primary-light}, 0.42);
+  --lync-text: #e5ecf8;
+  --lync-text-muted: #b6c2d8;
+  --lync-heading: #f1f6ff;
+  --lync-link: #ffd097;
+  --lync-link-hover: #ffe1b8;
+  --lync-input-bg: #121a26;
+  --lync-input-border: #324357;
+  --lync-input-text: #e5ecf8;
+  --lync-scroll-track: rgba(#{$color-neutral-900}, 0.45);
+  --lync-scroll-thumb: rgba(#{$color-primary-light}, 0.6);
+}
+
 *,
 *::before,
 *::after {
@@ -16,11 +52,11 @@ body {
   font-family: $font-family-base;
   font-size: $font-size-base;
   line-height: 1.45;
-  color: $color-neutral-900;
+  color: var(--lync-text);
   background:
     radial-gradient(circle at 0% 0%, rgba($color-primary, 0.08), transparent 30%),
     radial-gradient(circle at 100% 0%, rgba($color-primary-light, 0.08), transparent 26%),
-    $color-neutral-50;
+    var(--lync-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,16 +64,16 @@ body {
 h1,
 h2,
 h3 {
-  color: $color-neutral-900;
+  color: var(--lync-heading);
   letter-spacing: -0.01em;
 }
 
 a {
-  color: $color-primary;
+  color: var(--lync-link);
   text-decoration: none;
 
   &:hover {
-    color: $color-primary-dark;
+    color: var(--lync-link-hover);
     text-decoration: underline;
   }
 }
@@ -67,8 +103,8 @@ textarea {
   border-radius: 8px;
   font-size: $font-size-base;
   font-family: $font-family-base;
-  background: #fff;
-  color: $color-neutral-900;
+  background: var(--lync-input-bg);
+  color: var(--lync-input-text);
   width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s;
 
@@ -79,8 +115,8 @@ textarea {
   }
 
   &:disabled {
-    background: $color-neutral-100;
-    color: $color-neutral-500;
+    background: color-mix(in srgb, var(--lync-input-bg) 85%, #000 15%);
+    color: var(--lync-text-muted);
     cursor: not-allowed;
   }
 
@@ -91,8 +127,8 @@ textarea { min-height: 80px; resize: vertical; }
 
 // Shared app surfaces used across pages/components.
 .surface-card {
-  background: #fff;
-  border: 1px solid rgba($color-primary, 0.12);
+  background: var(--lync-surface);
+  border: 1px solid var(--lync-border);
   border-radius: $radius-md;
   box-shadow: $shadow-sm;
 }
@@ -107,7 +143,7 @@ textarea { min-height: 80px; resize: vertical; }
   @extend .surface-card;
   text-align: center;
   padding: $spacing-xl;
-  color: $color-neutral-600;
+  color: var(--lync-text-muted);
 }
 
 // ─── PrimeNG context menu danger item ────────────────────────────────────────
@@ -130,11 +166,11 @@ textarea { min-height: 80px; resize: vertical; }
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba($color-primary, 0.35);
+  background: var(--lync-scroll-thumb);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba($color-neutral-300, 0.35);
+  background: var(--lync-scroll-track);
 }
 

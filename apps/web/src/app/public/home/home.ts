@@ -10,6 +10,10 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class HomeComponent {
+  readonly contactName = signal('');
+  readonly contactPhone = signal('');
+  readonly contactEmail = signal('');
+
   readonly washPlate = signal('');
   readonly washService = signal('LAVAGEM_COMPLETA');
   readonly washDate = signal('');
@@ -22,11 +26,18 @@ export default class HomeComponent {
   readonly rentStep = signal<1 | 2>(1);
 
   readonly canSubmitWash = computed(() =>
-    !!this.washPlate().trim() && !!this.washDate() && !!this.washTime(),
+    !!this.contactName().trim()
+    && !!this.contactPhone().trim()
+    && !!this.washPlate().trim()
+    && !!this.washDate()
+    && !!this.washTime(),
   );
 
   readonly canContinueRent = computed(() =>
-    !!this.rentDateFrom() && !!this.rentDateTo(),
+    !!this.contactName().trim()
+    && !!this.contactPhone().trim()
+    && !!this.rentDateFrom()
+    && !!this.rentDateTo(),
   );
 
   submitWash() {

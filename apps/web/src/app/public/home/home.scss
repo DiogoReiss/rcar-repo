@@ -9,6 +9,45 @@
     linear-gradient(180deg, #f6f9ff 0%, #edf3ff 60%, #f8fbff 100%);
 }
 
+:host-context(body[data-theme='dark']) {
+  background:
+    radial-gradient(circle at 12% 0%, rgba($color-primary-light, 0.18), transparent 34%),
+    linear-gradient(180deg, #0f141d 0%, #121a26 100%);
+
+  .home-header,
+  .flow-card {
+    background: #1a2434;
+    border-color: rgba($color-primary-light, 0.35);
+  }
+
+  .subtitle,
+  .flow-description,
+  .footer-hint {
+    color: #bcc7dd;
+  }
+
+  .brand,
+  h1,
+  .flow-card h2,
+  .section-label,
+  .flow-form label {
+    color: #f1f6ff;
+  }
+
+  .flow-form input,
+  .flow-form select {
+    background: #121a26;
+    color: #e5ecf8;
+    border-color: #324357;
+  }
+
+  .cta--secondary {
+    background: #1f2b3e;
+    border-color: #425775;
+    color: #f1f6ff;
+  }
+}
+
 .home-page {
   min-height: 100vh;
   display: flex;
@@ -108,6 +147,14 @@ h1 {
 .flow-form {
   display: grid;
   gap: $spacing-sm;
+
+  .section-label {
+    margin: $spacing-xs 0 0;
+    font-size: 0.8rem;
+    color: $color-primary-dark;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
 
   label {
     font-size: 0.82rem;
