@@ -372,3 +372,77 @@
   &--ready { color: $color-success-dark; font-weight: 600; }
 }
 
+:host-context(body[data-theme='dark']) {
+  .sse-status,
+  .add-dialog-hint,
+  .queue-service,
+  .detail-label,
+  .add-dialog-state,
+  .board-empty,
+  .queue-drag {
+    color: var(--lync-text-muted);
+  }
+
+  .mode-tabs,
+  .board-col,
+  .add-dialog-section,
+  .queue-card,
+  .detail-plate {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+  }
+
+  .mode-tabs button {
+    color: var(--lync-text-muted);
+
+    &.active {
+      background: color-mix(in srgb, var(--lync-surface) 70%, $color-primary-light 30%);
+      color: var(--lync-text);
+    }
+  }
+
+  .board-col-header {
+    background: color-mix(in srgb, var(--lync-surface) 78%, $color-primary-light 22%);
+  }
+
+  .queue-name,
+  .detail-value,
+  .detail-plate,
+  .board-col-title,
+  .board-col-count {
+    color: var(--lync-text);
+  }
+
+  .queue-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24);
+  }
+
+  .detail-row {
+    border-bottom-color: color-mix(in srgb, var(--lync-border) 55%, transparent 45%);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .fila-board {
+    padding: $spacing-md 0;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .add-dialog-actions {
+    width: 100%;
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+    }
+  }
+
+  .queue-card {
+    padding: $spacing-sm;
+  }
+}
+

@@ -160,3 +160,59 @@
   padding: $spacing-xs $spacing-sm;
 }
 
+:host-context(body[data-theme='dark']) {
+  .filters-grid label,
+  .filter-meta,
+  .kpi-card h3,
+  .kpi-card small,
+  .totals,
+  .empty,
+  .text-muted {
+    color: var(--lync-text-muted);
+  }
+
+  .quick-filter,
+  .kpi-card,
+  .card,
+  .charts-period-btn,
+  .filters-grid input[type='date'] {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+    color: var(--lync-text);
+  }
+
+  .kpi-card strong,
+  .card h3 {
+    color: var(--lync-text);
+  }
+
+  .quick-filter {
+    &:hover {
+      background: color-mix(in srgb, var(--lync-surface) 72%, $color-primary-light 28%);
+    }
+  }
+
+  .charts-period-btn--active {
+    background: color-mix(in srgb, var(--lync-surface) 70%, $color-primary-light 30%);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .header-actions {
+    width: 100%;
+
+    > * {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wrap {
+    min-height: 220px;
+  }
+}
+

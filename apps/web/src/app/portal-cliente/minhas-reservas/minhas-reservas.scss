@@ -90,3 +90,58 @@
   input[type="checkbox"] { width: 16px; height: 16px; accent-color: $color-primary; cursor: pointer; }
 }
 
+:host-context(body[data-theme='dark']) {
+  .portal-loading,
+  .portal-empty,
+  .reserva-meta,
+  .reserva-total,
+  .reserva-date-label,
+  .reserva-arrow,
+  .seguro-toggle {
+    color: var(--lync-text-muted);
+  }
+
+  .portal-empty,
+  .reserva-card,
+  .reserva-dates,
+  .vehicle-preview {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+  }
+
+  .reserva-vehicle strong,
+  .reserva-date-value,
+  .reserva-total strong {
+    color: var(--lync-text);
+  }
+
+  .reserva-plate {
+    background: color-mix(in srgb, var(--lync-surface) 85%, #000 15%);
+    color: var(--lync-text-muted);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .portal-empty,
+  .reservas-list {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .reserva-card {
+    padding: $spacing-md;
+  }
+
+  .reserva-header,
+  .reserva-footer,
+  .reserva-dates {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .date-row {
+    grid-template-columns: 1fr;
+  }
+}
+

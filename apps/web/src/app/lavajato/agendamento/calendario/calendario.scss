@@ -244,3 +244,71 @@
   &--available::before { background: #f0fdf4; border-color: $color-success; }
   &--taken::before     { background: $color-neutral-50; border-color: $color-neutral-200; }
 }
+
+:host-context(body[data-theme='dark']) {
+  .sidebar-day-label,
+  .kpi-card,
+  .schedule-card,
+  .week-col,
+  .empty-state,
+  .slot-btn,
+  .form-grid input,
+  .form-grid select {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+    color: var(--lync-text);
+  }
+
+  .schedule-info strong,
+  .week-slot-name,
+  .week-day-date,
+  .kpi-card .kpi-value {
+    color: var(--lync-text);
+  }
+
+  .schedule-info span,
+  .schedule-info small,
+  .week-slot-svc,
+  .week-empty,
+  .slot-label,
+  .slot-legend__item,
+  .filter-meta,
+  .charts-toolbar-label {
+    color: var(--lync-text-muted);
+  }
+
+  .week-col-header {
+    background: color-mix(in srgb, var(--lync-surface) 75%, $color-primary-light 25%);
+    border-bottom-color: var(--lync-border);
+  }
+
+  .week-slot {
+    background: color-mix(in srgb, var(--lync-surface) 85%, #000 15%);
+  }
+
+  .slot-btn--taken {
+    color: var(--lync-text-muted);
+    text-decoration-color: var(--lync-text-muted);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .cal-layout {
+    padding: $spacing-sm;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .week-grid {
+    grid-template-columns: repeat(7, minmax(150px, 1fr));
+  }
+
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

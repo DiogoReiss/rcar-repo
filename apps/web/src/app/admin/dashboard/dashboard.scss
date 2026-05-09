@@ -444,3 +444,68 @@
   @extend %skeleton;
 }
 
+:host-context(body[data-theme='dark']) {
+  .dash-title,
+  .kpi-value,
+  .chart-title,
+  .today-stat-value,
+  .alert-text strong {
+    color: var(--lync-text);
+  }
+
+  .dash-subtitle,
+  .kpi-label,
+  .chart-period,
+  .today-stat-label,
+  .today-label,
+  .alert-text span,
+  .charts-toolbar-label,
+  .chart-total {
+    color: var(--lync-text-muted);
+  }
+
+  .kpi-card,
+  .quick-action,
+  .chart-card,
+  .today-stat,
+  .chart-total,
+  .charts-period-btn {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+    color: var(--lync-text);
+  }
+
+  .charts-period-btn--active {
+    background: color-mix(in srgb, var(--lync-surface) 70%, $color-primary-light 30%);
+  }
+
+  .alert-banner {
+    background: color-mix(in srgb, var(--lync-surface) 76%, $color-warning-light 24%);
+    border-color: color-mix(in srgb, var(--lync-border) 60%, $color-warning-light 40%);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .dashboard {
+    padding: $spacing-md;
+  }
+
+  .kpi-grid,
+  .charts-grid,
+  .today-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions,
+  .dash-header-actions {
+    width: 100%;
+
+    .quick-action,
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
