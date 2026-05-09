@@ -105,6 +105,15 @@
   gap: $spacing-sm;
 }
 
+.login-link {
+  text-decoration: none;
+  color: $color-primary;
+  border: 1px solid $color-primary;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 600;
+}
+
 .header-divider {
   width: 1px;
   height: 28px;

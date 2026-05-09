@@ -4,6 +4,11 @@ import { authGuard } from '@core/auth/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./public/home/home'),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('@core/auth/auth.routes').then((m) => m.authRoutes),
   },

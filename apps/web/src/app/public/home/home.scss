@@ -1,0 +1,92 @@
+@use 'variables' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+}
+
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md $spacing-xl;
+  border-bottom: 1px solid $color-neutral-200;
+  background: #fff;
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: $color-primary-dark;
+}
+
+.login-btn {
+  text-decoration: none;
+  font-weight: 600;
+  padding: $spacing-xs $spacing-md;
+  border-radius: 8px;
+  border: 1px solid $color-primary;
+  color: $color-primary;
+}
+
+.home-content {
+  width: min(720px, 92vw);
+  margin: 0 auto;
+  padding: 72px 0;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  color: $color-primary;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+}
+
+h1 {
+  margin: $spacing-sm 0;
+  color: $color-neutral-900;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0 auto $spacing-lg;
+  color: $color-neutral-600;
+  max-width: 560px;
+}
+
+.cta-row {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.cta {
+  text-decoration: none;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: 10px;
+  font-weight: 700;
+
+  &--primary {
+    background: $color-primary;
+    color: #fff;
+  }
+
+  &--secondary {
+    border: 1px solid $color-neutral-300;
+    color: $color-neutral-800;
+    background: #fff;
+  }
+}
+

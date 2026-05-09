@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '@env/environment';
 
@@ -14,6 +14,7 @@ import { environment } from '@env/environment';
 export default class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router      = inject(Router);
+  private readonly route       = inject(ActivatedRoute);
 
   readonly email   = signal('');
   readonly senha   = signal('');
@@ -39,8 +40,13 @@ export default class LoginComponent {
     this.authService.login({ email: this.email(), senha: this.senha() }).subscribe({
       next: () => {
         this.loading.set(false);
+        const next = this.route.snapshot.queryParamMap.get('next');
+        if (next?.startsWith('/')) {
+          this.router.navigateByUrl(next);
+          return;
+        }
         const role = this.authService.currentUser()?.role;
-        this.router.navigate([role === 'CLIENTE' ? '/portal' : '/admin']);
+        this.router.navigate([role === 'CLIENTE' ? '/portal/minhas-reservas' : '/admin']);
       },
       error: (err) => {
         this.loading.set(false);

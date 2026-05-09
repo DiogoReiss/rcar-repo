@@ -107,6 +107,17 @@
         <option value="1/4">1/4</option>
       </select>
     </lync-form-field>
+    <lync-form-field label="Checklist de Entrega" [full]="true">
+      <div class="checklist-grid">
+        @for (item of entregaChecklistItems; track item) {
+          <label class="checklist-item" [class.ok]="entregaChecklist()[item]" [class.nok]="!entregaChecklist()[item]">
+            <input type="checkbox" [ngModel]="entregaChecklist()[item]" (ngModelChange)="toggleEntregaChecklist(item)" [name]="'entrega-' + item" />
+            {{ item }}
+            <span class="item-status">{{ entregaChecklist()[item] ? '✓ OK' : '✗ Avaria' }}</span>
+          </label>
+        }
+      </div>
+    </lync-form-field>
   </div>
 </lync-entity-dialog>
 

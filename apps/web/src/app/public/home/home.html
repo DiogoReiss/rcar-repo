@@ -1,0 +1,30 @@
+<section class="home-page">
+  <header class="home-header">
+    <a class="brand" routerLink="/" aria-label="Página inicial RCar">RCar</a>
+    <a class="login-btn" routerLink="/auth/login">Entrar</a>
+  </header>
+
+  <main class="home-content" role="main">
+    <p class="eyebrow">Portal do cliente</p>
+    <h1>Comece sua jornada escolhendo como deseja usar o carro</h1>
+    <p class="subtitle">Faça sua reserva ou inicie um aluguel com poucos passos.</p>
+
+    <div class="cta-row">
+      <a
+        class="cta cta--primary"
+        [routerLink]="['/auth/login']"
+        [queryParams]="{ next: '/portal/minhas-reservas', intent: 'reserva' }"
+      >
+        Reservar veículo
+      </a>
+      <a
+        class="cta cta--secondary"
+        [routerLink]="['/auth/login']"
+        [queryParams]="{ next: '/aluguel/contratos', intent: 'aluguel' }"
+      >
+        Alugar agora
+      </a>
+    </div>
+  </main>
+</section>
+

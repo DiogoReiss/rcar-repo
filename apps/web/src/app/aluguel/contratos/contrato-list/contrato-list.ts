@@ -81,6 +81,8 @@ export default class ContratoListComponent implements OnInit {
   readonly aberturaLoading  = signal(false);
   readonly kmRetirada       = signal(0);
   readonly combustivelSaida = signal('CHEIO');
+  readonly entregaChecklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
+  readonly entregaChecklist = signal<Record<string, boolean>>({});
 
   // ── Payment dialog ────────────────────────────────────────────────────────
   readonly payingId   = signal<string | null>(null);
@@ -194,7 +196,7 @@ export default class ContratoListComponent implements OnInit {
     }
     if (c.status === 'RESERVADO') {
       items.push(
-        { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
+        { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => this.openAbertura(c.id) },
         { label: 'Cancelar',       icon: 'pi pi-times-circle', danger: true, command: () => this.cancelTarget.set(c.id) },
       );
     }
@@ -348,6 +350,19 @@ export default class ContratoListComponent implements OnInit {
   }
 
   // ── Abertura ──────────────────────────────────────────────────────────────
+  openAbertura(id: string) {
+    this.aberturaTarget.set(id);
+    this.kmRetirada.set(0);
+    this.combustivelSaida.set('CHEIO');
+    const initial: Record<string, boolean> = {};
+    this.entregaChecklistItems.forEach((item) => { initial[item] = true; });
+    this.entregaChecklist.set(initial);
+  }
+
+  toggleEntregaChecklist(item: string) {
+    this.entregaChecklist.update((current) => ({ ...current, [item]: !current[item] }));
+  }
+
   async onAbertura() {
     const id = this.aberturaTarget();
     if (!id) return;
@@ -356,7 +371,7 @@ export default class ContratoListComponent implements OnInit {
       await firstValueFrom(this.api.patch(`/rental/contracts/${id}/open`, {
         kmRetirada: this.kmRetirada(),
         combustivelSaida: this.combustivelSaida(),
-        checklist: {},
+        checklist: this.entregaChecklist(),
       }));
       this.toast.add({ severity: 'success', summary: 'Contrato aberto', life: 3000 });
       this.aberturaTarget.set(null);
