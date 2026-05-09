@@ -186,7 +186,18 @@ let mockMaintenances: Record<string, unknown>[] = [
 ];
 
 // ─── Templates ─────────────────────────────────────────────────────────────────────────────────
-const MOCK_TEMPLATES = [
+type MockTemplate = {
+  id: string;
+  nome: string;
+  tipo: string;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  variaveis: string[];
+  conteudoHtml: string;
+};
+
+let mockTemplates: MockTemplate[] = [
   { id: 't1', nome: 'Contrato de Locação', tipo: 'CONTRATO_LOCACAO' as const, ativo: true, createdAt: '2025-01-01T00:00:00Z', variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'dataRetirada', 'dataDevolucao', 'valorTotal'], conteudoHtml: '<h2>Contrato de Locação</h2><p><strong>Locatário:</strong> {{nomeCliente}} — {{cpfCnpj}}</p><p><strong>Veículo:</strong> {{veiculo}} — {{placa}}</p><p><strong>Período:</strong> {{dataRetirada}} a {{dataDevolucao}}</p><p><strong>Total:</strong> R$ {{valorTotal}}</p>' },
   { id: 't2', nome: 'Recibo de Lavagem',   tipo: 'RECIBO_LAVAGEM'   as const, ativo: true, createdAt: '2025-01-01T00:00:00Z', variaveis: ['nomeCliente', 'servico', 'placa', 'valor', 'data'], conteudoHtml: '<h2>Recibo de Lavagem</h2><p><strong>Cliente:</strong> {{nomeCliente}}</p><p><strong>Serviço:</strong> {{servico}}</p><p><strong>Placa:</strong> {{placa}}</p><p><strong>Data:</strong> {{data}}</p><p style="font-size:18px"><strong>Total: R$ {{valor}}</strong></p>' },
   { id: 't3', nome: 'Termo de Vistoria',   tipo: 'VISTORIA'         as const, ativo: true, createdAt: '2025-06-01T00:00:00Z', variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'], conteudoHtml: '<h2>Termo de Vistoria — {{tipo}}</h2><p><strong>Data:</strong> {{data}} | <strong>Veículo:</strong> {{veiculo}} {{placa}} | <strong>KM:</strong> {{km}}</p><p><strong>Cliente:</strong> {{nomeCliente}}</p>' },
@@ -199,6 +210,16 @@ function paginated<T>(data: T[], page = 1, perPage = 20) {
   return { data: data.slice(start, start + perPage), total: data.length, page, perPage, totalPages: Math.ceil(data.length / perPage) };
 }
 function ok<T>(body: T) { return of(new HttpResponse({ status: 200, body })); }
+
+function renderTemplateHtml(content: string, vars: Record<string, unknown>): string {
+  return content.replace(/{{\s*([\w.]+)\s*}}/g, (_, key: string) => {
+    const value = vars[key];
+    if (value === null || value === undefined) {
+      return `{{${key}}}`;
+    }
+    return String(value);
+  });
+}
 
 // ─── Interceptor ─────────────────────────────────────────────────────────────────────────────
 export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
@@ -594,11 +615,62 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   if (method === 'GET' && path.startsWith('/rental/available')) return ok(MOCK_VEHICLES.filter(v => v.status === 'DISPONIVEL'));
 
   // ── Templates ─────────────────────────────────────────────────────────────────────────────────
-  if (method === 'GET'    && path.startsWith('/templates')) return ok(MOCK_TEMPLATES);
-  if (method === 'POST'   && path.startsWith('/templates')) return ok({ ...(req.body as object), id: `t-${Date.now()}`, ativo: true, createdAt: new Date().toISOString() });
-  if (method === 'PUT'    && path.match(/\/templates\/.+/)) return ok({ ...MOCK_TEMPLATES[0], ...(req.body as object) });
-  if (method === 'PATCH'  && path.match(/\/templates\/.+/)) return ok({ ...MOCK_TEMPLATES[0], ...(req.body as object) });
-  if (method === 'DELETE' && path.match(/\/templates\/.+/)) return ok({});
+  const templatePath = path.replace(/^\/api/, '');
+
+  if (method === 'GET' && templatePath.match(/^\/templates\/?$/)) return ok(mockTemplates);
+  if (method === 'GET' && templatePath.match(/\/templates\/[^/]+\/?$/)) {
+    const id = templatePath.split('/templates/')[1];
+    return ok(mockTemplates.find((item) => item.id === id.replace('/', '')) ?? null);
+  }
+  if (method === 'POST' && req.url.includes('/templates/') && req.url.includes('/preview')) {
+    const match = req.url.match(/\/templates\/([^/]+)\/preview/);
+    const id = (match?.[1] ?? '').trim();
+    const template = mockTemplates.find((item) => item.id === id.replace('/', ''));
+    const vars = ((req.body ?? {}) as Record<string, unknown>);
+    const content = template?.conteudoHtml ?? '';
+    return ok({ html: renderTemplateHtml(content, vars) });
+  }
+  if (method === 'POST' && templatePath.match(/^\/templates\/?$/)) {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const created = {
+      id: `t-${Date.now()}`,
+      nome: String(body['nome'] ?? 'Novo template'),
+      tipo: String(body['tipo'] ?? 'RECIBO_LAVAGEM'),
+      conteudoHtml: String(body['conteudoHtml'] ?? '<p>{{nomeCliente}}</p>'),
+      variaveis: Array.isArray(body['variaveis']) ? body['variaveis'] : ['nomeCliente'],
+      ativo: true,
+      createdAt: new Date().toISOString(),
+    };
+    mockTemplates = [created, ...mockTemplates];
+    return ok(created);
+  }
+  if (method === 'PUT' && templatePath.match(/\/templates\/[^/]+\/?$/)) {
+    const id = templatePath.split('/templates/')[1];
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const index = mockTemplates.findIndex((item) => item.id === id.replace('/', ''));
+    if (index < 0) {
+      return ok(null);
+    }
+    const updated = { ...mockTemplates[index], ...body, updatedAt: new Date().toISOString() };
+    mockTemplates[index] = updated;
+    return ok(updated);
+  }
+  if (method === 'PATCH' && templatePath.match(/\/templates\/[^/]+\/?$/)) {
+    const id = templatePath.split('/templates/')[1];
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const index = mockTemplates.findIndex((item) => item.id === id.replace('/', ''));
+    if (index < 0) {
+      return ok(null);
+    }
+    const updated = { ...mockTemplates[index], ...body, updatedAt: new Date().toISOString() };
+    mockTemplates[index] = updated;
+    return ok(updated);
+  }
+  if (method === 'DELETE' && templatePath.match(/\/templates\/[^/]+\/?$/)) {
+    const id = templatePath.split('/templates/')[1];
+    mockTemplates = mockTemplates.filter((item) => item.id !== id.replace('/', ''));
+    return ok({});
+  }
 
   // ── Health ────────────────────────────────────────────────────────────────────────────
   if (method === 'GET' && path.startsWith('/health')) return ok({ status: 'ok', timestamp: new Date().toISOString() });

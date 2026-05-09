@@ -31,21 +31,53 @@
           <button class="btn-secondary" (click)="editing.set(null)">← Voltar</button>
         </div>
 
-
         <div class="form-field">
           <label>Nome</label>
           <input [ngModel]="editName()" (ngModelChange)="editName.set($event)" name="nome" />
         </div>
-        <div class="form-field" style="margin-top:0.75rem">
+
+        <div class="form-field spacing-top">
           <label>Variáveis disponíveis (separadas por vírgula)</label>
           <input [ngModel]="editVars()" (ngModelChange)="editVars.set($event)" name="vars" placeholder="clienteNome, valorTotal, data" />
         </div>
-        <div class="form-field" style="margin-top:0.75rem">
-          <label>HTML do Template (suporta Handlebars {{ '{{variavel}}' }})</label>
-          <textarea class="html-editor" [ngModel]="editHtml()" (ngModelChange)="editHtml.set($event)" name="html"></textarea>
+
+        <div class="playground">
+          <div class="playground-title">Playground de variáveis</div>
+          <p class="playground-hint">Arraste para o editor ou clique para inserir no cursor.</p>
+          <div class="vars-palette">
+            @for (variable of variableList(); track variable) {
+              <button
+                type="button"
+                class="palette-chip"
+                draggable="true"
+                (dragstart)="onVariableDragStart($event, variable)"
+                (click)="insertVariable(variable)"
+              >
+                {{ '{{' + variable + '}}' }}
+              </button>
+            }
+            @if (!variableList().length) {
+              <span class="palette-empty">Defina variáveis para habilitar o arrastar e soltar.</span>
+            }
+          </div>
         </div>
 
-        <div class="form-actions" style="margin-top:1rem">
+        <div class="form-field spacing-top">
+          <label>HTML do Template (suporta Handlebars {{ '{{variavel}}' }})</label>
+          <textarea
+            #htmlEditor
+            class="html-editor"
+            [class.html-editor--dragging]="draggingOverEditor()"
+            [ngModel]="editHtml()"
+            (ngModelChange)="editHtml.set($event)"
+            (dragover)="onEditorDragOver($event)"
+            (dragleave)="onEditorDragLeave()"
+            (drop)="onEditorDrop($event)"
+            name="html"
+          ></textarea>
+        </div>
+
+        <div class="form-actions spacing-top-lg">
           <button class="btn-primary" (click)="onSave()" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar' }}</button>
         </div>
       </div>
@@ -53,7 +85,7 @@
       <div class="preview-panel">
         <div class="preview-header">
           <h2>Preview</h2>
-          <div style="display:flex;gap:0.5rem;align-items:center">
+          <div class="preview-controls">
             <input [ngModel]="previewVars()" (ngModelChange)="previewVars.set($event)" name="pvars"
               placeholder='{"clienteNome":"João"}' class="preview-vars-input" />
             <button class="btn-secondary" (click)="onPreview()" [disabled]="previewing()">

@@ -93,3 +93,9 @@
 - Hardened auth Playwright selectors in `apps/web/e2e/auth.spec.ts` to reduce flakiness around login-page link detection.
 - Verified full web E2E suite after changes: `pnpm --filter web test:e2e` → 17 passed.
 
+### 2026-05-09 templates editor follow-up
+
+- Reworked `/admin/templates` editor with a playful variable playground (drag-and-drop chips + click-to-insert at cursor).
+- Improved mock-mode support for templates with in-memory CRUD persistence and `/templates/:id/preview` interpolation.
+- Added focused Playwright coverage in `apps/web/e2e/templates.spec.ts` for variable insertion + preview rendering flow.
+

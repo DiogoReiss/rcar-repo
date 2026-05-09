@@ -161,6 +161,19 @@ export const routes: Routes = [
   - rentabilidade por veículo completa (receita - manutenção)
   - card de valoração total do estoque e export CSV/PDF
 
+### Admin — Templates (playful editor)
+
+- Rota: `/admin/templates`
+- Página: `src/app/admin/templates/templates-list/`
+- Fluxo de edição:
+  - define variáveis do template no campo CSV (`clienteNome, valorTotal, ...`)
+  - usa **Playground de variáveis** com chips arrastáveis (`{{variavel}}`)
+  - pode inserir por drag-and-drop no editor HTML ou por clique no chip (inserção no cursor)
+  - renderiza preview com JSON customizável no painel lateral
+- Mock mode (`pnpm --filter web dev:mock`) oferece ciclo completo para testes locais:
+  - listagem, edição e persistência em memória
+  - preview em `/templates/:id/preview` com interpolação das variáveis informadas
+
 ---
 
 ## Layout Shell
