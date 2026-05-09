@@ -7,19 +7,19 @@
 
 .contract-summary {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: $spacing-md;
-  background: #fff; border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: var(--lync-surface); border: 1px solid var(--lync-border); border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.summary-item { display: flex; flex-direction: column; gap: 4px; span { font-size: 0.75rem; color: #64748b; } strong { font-size: 0.95rem; } }
+.summary-item { display: flex; flex-direction: column; gap: 4px; span { font-size: 0.75rem; color: var(--lync-text-muted); } strong { font-size: 0.95rem; color: var(--lync-text); } }
 
 .checklist-title { font-size: 0.9rem; font-weight: 700; margin: 0 0 $spacing-sm; }
 .checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: $spacing-sm; }
 .checklist-item {
   display: flex; align-items: center; justify-content: space-between; gap: $spacing-xs;
-  padding: $spacing-sm; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer;
+  padding: $spacing-sm; border-radius: 8px; border: 1px solid var(--lync-border); cursor: pointer;
   font-size: 0.875rem; font-weight: 500;
   input { width: 16px; height: 16px; margin: 0; }
-  &.ok  { background: #f0fdf4; border-color: $color-success; }
-  &.nok { background: #fef2f2; border-color: $color-danger; }
+  &.ok  { background: var(--lync-tag-bg); border-color: $color-success; }
+  &.nok { background: color-mix(in srgb, var(--lync-surface) 75%, $color-danger-light 25%); border-color: $color-danger; }
   .item-status { font-size: 0.75rem; font-weight: 600; }
 }
 
@@ -42,5 +42,34 @@
 .attachment-actions {
   display: flex;
   gap: $spacing-xs;
+}
+
+:host-context(body[data-theme='dark']) {
+  .checklist-title,
+  .item-status {
+    color: var(--lync-text);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .contract-summary {
+    grid-template-columns: 1fr;
+    padding: $spacing-md;
+  }
+
+  .checklist-grid,
+  .photo-list {
+    grid-template-columns: 1fr;
+  }
+
+  .attachment-actions {
+    width: 100%;
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }
 

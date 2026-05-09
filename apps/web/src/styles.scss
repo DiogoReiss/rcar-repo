@@ -7,6 +7,7 @@
   --lync-bg-soft: #f7f9fc;
   --lync-surface: #ffffff;
   --lync-surface-elevated: #ffffff;
+  --lync-surface-muted: #f7f9fc;
   --lync-border: rgba(#{$color-primary}, 0.16);
   --lync-text: #{$color-neutral-900};
   --lync-text-muted: #{$color-neutral-600};
@@ -18,6 +19,8 @@
   --lync-input-text: #{$color-neutral-900};
   --lync-scroll-track: rgba(#{$color-neutral-300}, 0.35);
   --lync-scroll-thumb: rgba(#{$color-primary}, 0.35);
+  --lync-tag-bg: rgba(#{$color-primary-light}, 0.14);
+  --lync-tag-border: rgba(#{$color-primary}, 0.22);
   --lync-table-head: rgba(#{$color-primary-light}, 0.14);
   --lync-table-hover: rgba(#{$color-primary-light}, 0.1);
 }
@@ -27,6 +30,7 @@ body[data-theme='dark'] {
   --lync-bg-soft: #121a26;
   --lync-surface: #1a2434;
   --lync-surface-elevated: #202c3f;
+  --lync-surface-muted: #202c3f;
   --lync-border: rgba(#{$color-primary-light}, 0.42);
   --lync-text: #e5ecf8;
   --lync-text-muted: #b6c2d8;
@@ -38,6 +42,8 @@ body[data-theme='dark'] {
   --lync-input-text: #e5ecf8;
   --lync-scroll-track: rgba(#{$color-neutral-900}, 0.45);
   --lync-scroll-thumb: rgba(#{$color-primary-light}, 0.6);
+  --lync-tag-bg: rgba(#{$color-primary-light}, 0.22);
+  --lync-tag-border: rgba(#{$color-primary-light}, 0.4);
   --lync-table-head: rgba(#{$color-primary-light}, 0.22);
   --lync-table-hover: rgba(#{$color-primary-light}, 0.2);
 }

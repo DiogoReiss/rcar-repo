@@ -3,9 +3,9 @@
 .form-container {
   max-width: 540px;
   margin: $spacing-lg auto;
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: 12px;
-  border: 1px solid $color-neutral-200;
+  border: 1px solid var(--lync-border);
   padding: $spacing-xl;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -13,7 +13,7 @@
 .mode-tabs {
   display: flex;
   gap: 0;
-  border: 1px solid $color-neutral-300;
+  border: 1px solid var(--lync-border);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: $spacing-lg;
@@ -21,7 +21,7 @@
   button {
     flex: 1;
     padding: $spacing-sm $spacing-md;
-    background: $color-neutral-50;
+    background: var(--lync-surface-muted);
     border: none;
     font-size: 0.875rem;
     font-weight: 500;
@@ -29,7 +29,7 @@
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
 
-    &:first-child { border-right: 1px solid $color-neutral-300; }
+    &:first-child { border-right: 1px solid var(--lync-border); }
 
     &.active {
       background: $color-primary;
@@ -37,7 +37,7 @@
     }
 
     &:not(.active):hover {
-      background: $color-neutral-100;
+      background: color-mix(in srgb, var(--lync-surface) 75%, $color-primary-light 25%);
     }
   }
 }
@@ -55,7 +55,8 @@
     border-radius: 8px;
     font-size: $font-size-base;
     font-family: $font-family-base;
-    background: #fff;
+    background: var(--lync-input-bg);
+    color: var(--lync-input-text);
     transition: border-color 0.15s;
 
     &:focus {
@@ -63,6 +64,13 @@
       border-color: $color-primary;
       box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
     }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .form-container {
+    margin: $spacing-md 0;
+    padding: $spacing-md;
   }
 }
 

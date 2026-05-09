@@ -2,11 +2,17 @@
 @use 'variables' as *;
 
 :host { display: block; }
-.date-picker { padding: $spacing-sm $spacing-md; border: 1px solid #d1d5db; border-radius: 8px; font-family: $font-family-base; }
+.date-picker { padding: $spacing-sm $spacing-md; border: 1px solid var(--lync-border); border-radius: 8px; font-family: $font-family-base; background: var(--lync-input-bg); color: var(--lync-input-text); }
 
 .kpi-row { display: flex; gap: $spacing-md; margin-bottom: $spacing-lg; flex-wrap: wrap; }
-.kpi-card { background: #fff; border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08); min-width: 140px; .kpi-value { font-size: 1.8rem; font-weight: 700; color: $color-primary; } .kpi-label { font-size: 0.8rem; color: #64748b; } }
+.kpi-card { background: var(--lync-surface); border: 1px solid var(--lync-border); border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08); min-width: 140px; .kpi-value { font-size: 1.8rem; font-weight: 700; color: $color-primary; } .kpi-label { font-size: 0.8rem; color: var(--lync-text-muted); } }
 
 .section-title { font-size: 1rem; font-weight: 600; margin: 0 0 $spacing-sm; }
-.empty-state { text-align: center; color: #94a3b8; padding: $spacing-xl; background: #fff; border-radius: 10px; }
+.empty-state { text-align: center; color: var(--lync-text-muted); padding: $spacing-xl; background: var(--lync-surface); border: 1px solid var(--lync-border); border-radius: 10px; }
+
+@media (max-width: $breakpoint-md) {
+  .kpi-card {
+	width: 100%;
+  }
+}
 

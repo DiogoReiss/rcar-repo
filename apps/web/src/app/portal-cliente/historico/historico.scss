@@ -10,7 +10,7 @@
 
 .portal-empty {
   display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
-  padding: $spacing-xl; background: #fff; border-radius: 10px;
+  padding: $spacing-xl; background: var(--lync-surface); border-radius: 10px;
   margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
   i { font-size: 2rem; }
   p { font-size: 0.9rem; margin: 0; }
@@ -22,7 +22,7 @@
 }
 
 .hist-card {
-  background: #fff; border-radius: 10px; padding: $spacing-md;
+  background: var(--lync-surface); border-radius: 10px; padding: $spacing-md;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid $color-neutral-200;
   display: flex; align-items: center; gap: $spacing-md;
 
@@ -40,7 +40,7 @@
 
 .hist-body {
   flex: 1; display: flex; flex-direction: column; gap: 1px;
-  strong { font-size: 0.9rem; color: $color-neutral-900; }
+  strong { font-size: 0.9rem; color: var(--lync-text); }
   span   { font-size: 0.78rem; color: $color-neutral-500; }
 }
 
@@ -50,6 +50,42 @@
 
 .hist-tag {
   font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: $color-neutral-400;
+  letter-spacing: 0.05em; color: var(--lync-text-muted);
+  background: var(--lync-tag-bg);
+  border: 1px solid var(--lync-tag-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+:host-context(body[data-theme='dark']) {
+  .portal-loading,
+  .portal-empty,
+  .hist-body span,
+  .hist-side {
+    color: var(--lync-text-muted);
+  }
+
+  .hist-card {
+    border-left-color: var(--lync-border);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .portal-empty,
+  .hist-list {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .hist-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hist-side {
+    width: 100%;
+    align-items: flex-start;
+  }
 }
 

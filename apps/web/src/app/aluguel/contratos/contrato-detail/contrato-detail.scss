@@ -8,12 +8,12 @@
 }
 
 .detail-card {
-  background: #fff;
-  border: 1px solid $color-neutral-200;
+  background: var(--lync-surface);
+  border: 1px solid var(--lync-border);
   border-radius: 10px;
   padding: $spacing-lg;
 
-  h2 { font-size: 1rem; font-weight: 600; margin: 0 0 $spacing-md; color: $color-neutral-800; }
+  h2 { font-size: 1rem; font-weight: 600; margin: 0 0 $spacing-md; color: var(--lync-text); }
 }
 
 .info-list {
@@ -22,8 +22,8 @@
   gap: $spacing-xs $spacing-md;
   margin: 0;
 
-  dt { font-size: 0.8125rem; color: $color-neutral-500; font-weight: 500; }
-  dd { font-size: 0.9375rem; color: $color-neutral-800; margin: 0; }
+  dt { font-size: 0.8125rem; color: var(--lync-text-muted); font-weight: 500; }
+  dd { font-size: 0.9375rem; color: var(--lync-text); margin: 0; }
 }
 
 .total-real { font-weight: 700; color: $color-success-dark; }
@@ -36,4 +36,21 @@
 
 .loading-state, .error-state { padding: $spacing-xl; text-align: center; color: $color-neutral-500; }
 .error-state { color: $color-danger; }
+
+@media (max-width: $breakpoint-md) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    padding: $spacing-md;
+  }
+
+  .actions {
+    padding: 0 $spacing-md $spacing-md;
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
 
