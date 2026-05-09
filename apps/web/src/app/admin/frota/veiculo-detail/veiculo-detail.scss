@@ -8,8 +8,8 @@
 }
 
 .detail-card {
-  background: #fff;
-  border: 1px solid $color-neutral-200;
+  background: var(--lync-surface);
+  border: 1px solid var(--lync-border);
   border-radius: 10px;
   padding: $spacing-lg;
 
@@ -17,7 +17,7 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0 0 $spacing-md;
-    color: $color-neutral-800;
+    color: var(--lync-text);
   }
 }
 
@@ -27,8 +27,8 @@
   gap: $spacing-xs $spacing-md;
   margin: 0;
 
-  dt { font-size: 0.8125rem; color: $color-neutral-500; font-weight: 500; }
-  dd { font-size: 0.9375rem; color: $color-neutral-800; margin: 0; }
+  dt { font-size: 0.8125rem; color: var(--lync-text-muted); font-weight: 500; }
+  dd { font-size: 0.9375rem; color: var(--lync-text); margin: 0; }
 }
 
 .history-list {
@@ -42,9 +42,9 @@
 
 .history-item {
   padding: $spacing-sm $spacing-md;
-  background: $color-neutral-50;
+  background: var(--lync-surface-muted);
   border-radius: 6px;
-  border: 1px solid $color-neutral-200;
+  border: 1px solid var(--lync-border);
 }
 
 .history-main {
@@ -56,17 +56,17 @@
 
 .history-sub {
   font-size: 0.8125rem;
-  color: $color-neutral-500;
+  color: var(--lync-text-muted);
   margin-top: 2px;
 }
 
 .history-value {
   font-weight: 600;
-  color: $color-neutral-700;
+  color: var(--lync-text);
 }
 
 .empty-state {
-  color: $color-neutral-400;
+  color: var(--lync-text-muted);
   font-size: 0.875rem;
   padding: $spacing-md 0;
   text-align: center;
@@ -76,8 +76,15 @@
 .error-state {
   padding: $spacing-xl;
   text-align: center;
-  color: $color-neutral-500;
+  color: var(--lync-text-muted);
 }
 
 .error-state { color: $color-danger; }
+
+@media (max-width: $breakpoint-md) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    padding: $spacing-md;
+  }
+}
 

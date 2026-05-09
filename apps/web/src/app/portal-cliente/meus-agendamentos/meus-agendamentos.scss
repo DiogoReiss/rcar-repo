@@ -5,7 +5,7 @@
 
 .portal-loading {
   display: flex; align-items: center; gap: $spacing-sm;
-  color: $color-neutral-400; padding: $spacing-xl; font-size: 0.9rem;
+  color: var(--lync-text-muted); padding: $spacing-xl; font-size: 0.9rem;
 }
 
 .portal-section { margin: 0 $spacing-lg $spacing-xl; }
@@ -13,7 +13,7 @@
 .portal-section-title {
   display: flex; align-items: center; gap: $spacing-sm;
   font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; color: $color-neutral-500; margin: 0 0 $spacing-md;
+  letter-spacing: 0.07em; color: var(--lync-text-muted); margin: 0 0 $spacing-md;
 
   i { color: $color-primary; }
 }
@@ -33,7 +33,7 @@
 .portal-card {
   display: flex; align-items: center; gap: $spacing-md;
   background: var(--lync-surface); border-radius: 10px; padding: $spacing-md;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid $color-neutral-200;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid var(--lync-border);
 
   &--agendado       { border-left-color: $color-warning; }
   &--em_atendimento { border-left-color: $color-info; }
@@ -43,7 +43,7 @@
 
 .portal-card-date {
   display: flex; align-items: center; gap: 5px;
-  font-size: 0.8rem; color: $color-neutral-500; white-space: nowrap;
+  font-size: 0.8rem; color: var(--lync-text-muted); white-space: nowrap;
   i { color: $color-primary; }
 }
 
@@ -56,7 +56,7 @@
 .portal-empty {
   display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
   padding: $spacing-xl; background: var(--lync-surface); border-radius: 10px; text-align: center;
-  color: $color-neutral-400;
+  color: var(--lync-text-muted);
   i { font-size: 2rem; }
   p { font-size: 0.9rem; margin: 0; }
 }
@@ -69,7 +69,7 @@
 
 .book-form {
   display: flex; flex-direction: column; gap: $spacing-md;
-  select, input { width: 100%; padding: $spacing-sm; border: 1px solid $color-neutral-300; border-radius: 6px; font-size: $font-size-base; background: var(--lync-input-bg); &:focus { outline: none; border-color: $color-primary; } }
+  select, input { width: 100%; padding: $spacing-sm; border: 1px solid var(--lync-border); border-radius: 6px; font-size: $font-size-base; background: var(--lync-input-bg); color: var(--lync-input-text); &:focus { outline: none; border-color: $color-primary; } }
 }
 
 :host-context(body[data-theme='dark']) {

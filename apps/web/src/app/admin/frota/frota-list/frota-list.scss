@@ -22,8 +22,8 @@
 }
 
 .vd-card {
-  background: $color-neutral-50;
-  border: 1px solid $color-neutral-200;
+  background: var(--lync-surface-muted);
+  border: 1px solid var(--lync-border);
   border-radius: 8px;
   padding: $spacing-md;
 }
@@ -44,16 +44,16 @@
   margin: 0;
 
   dt { font-size: 0.8rem; color: $color-neutral-500; font-weight: 500; white-space: nowrap; }
-  dd { font-size: 0.875rem; color: $color-neutral-800; margin: 0; }
+  dd { font-size: 0.875rem; color: var(--lync-text); margin: 0; }
 }
 
 .vd-history { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 
 .vd-history-item {
   padding: $spacing-xs $spacing-sm;
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: 6px;
-  border: 1px solid $color-neutral-200;
+  border: 1px solid var(--lync-border);
 }
 
 .vd-history-main {
@@ -78,7 +78,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.85rem;
-    color: $color-neutral-700;
+    color: var(--lync-text-muted);
   }
 }
 
@@ -92,5 +92,16 @@
   font-weight: 500;
   cursor: pointer;
   input { width: 16px; height: 16px; }
+}
+
+@media (max-width: $breakpoint-md) {
+  .vd-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .file-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 

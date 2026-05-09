@@ -5,13 +5,13 @@
 
 .portal-loading {
   display: flex; align-items: center; gap: $spacing-sm;
-  color: $color-neutral-400; padding: $spacing-xl; font-size: 0.9rem;
+  color: var(--lync-text-muted); padding: $spacing-xl; font-size: 0.9rem;
 }
 
 .portal-empty {
   display: flex; flex-direction: column; align-items: center; gap: $spacing-sm;
   padding: $spacing-xl; background: var(--lync-surface); border-radius: 10px;
-  margin: 0 $spacing-lg; text-align: center; color: $color-neutral-400;
+  margin: 0 $spacing-lg; text-align: center; color: var(--lync-text-muted);
   i { font-size: 2rem; }
   p { font-size: 0.9rem; margin: 0; }
 }
@@ -41,7 +41,7 @@
 .hist-body {
   flex: 1; display: flex; flex-direction: column; gap: 1px;
   strong { font-size: 0.9rem; color: var(--lync-text); }
-  span   { font-size: 0.78rem; color: $color-neutral-500; }
+  span   { font-size: 0.78rem; color: var(--lync-text-muted); }
 }
 
 .hist-side {
