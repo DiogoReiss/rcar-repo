@@ -80,6 +80,20 @@
         [value]="fFoto()"
         (valueChange)="fFoto.set($event)"
       />
+
+      @if (fFoto()) {
+        <div class="file-actions-row">
+          <span>{{ fFoto() }}</span>
+          <button
+            type="button"
+            class="btn-secondary"
+            [disabled]="openingObjectKey() === fFoto()"
+            (click)="openStoredFile(fFoto()!, 'veiculo-' + fPlaca())"
+          >
+            {{ openingObjectKey() === fFoto() ? 'Abrindo…' : 'Abrir arquivo' }}
+          </button>
+        </div>
+      }
     </lync-form-field>
   </div>
 </lync-entity-dialog>
@@ -113,6 +127,31 @@
             <dt>Status</dt>
             <dd><span class="badge" [class]="statusClass(v.status)">{{ statusLabel(v.status) }}</span></dd>
           </dl>
+        </section>
+
+        <section class="vd-card">
+          <h3 class="vd-section-title">Arquivos</h3>
+          @if (!v.fotos.length) {
+            <p class="vd-empty">Nenhum arquivo enviado.</p>
+          } @else {
+            <ul class="vd-history">
+              @for (foto of v.fotos; track foto) {
+                <li class="vd-history-item">
+                  <div class="file-actions-row">
+                    <span>{{ foto }}</span>
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      [disabled]="openingObjectKey() === foto"
+                      (click)="openStoredFile(foto, 'veiculo-' + v.placa)"
+                    >
+                      {{ openingObjectKey() === foto ? 'Abrindo…' : 'Abrir' }}
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
         </section>
 
         <section class="vd-card">

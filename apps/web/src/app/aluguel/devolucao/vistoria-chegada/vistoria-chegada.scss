@@ -3,6 +3,8 @@
 
 :host { display: block; }
 
+.form-card-spaced { margin-top: 1.5rem; }
+
 .contract-summary {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: $spacing-md;
   background: #fff; border-radius: 10px; padding: $spacing-lg; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
@@ -35,5 +37,10 @@
       white-space: nowrap;
     }
   }
+}
+
+.attachment-actions {
+  display: flex;
+  gap: $spacing-xs;
 }
 

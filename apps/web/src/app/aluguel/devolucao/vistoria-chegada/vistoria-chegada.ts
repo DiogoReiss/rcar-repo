@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@ang
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { StorageService } from '@core/services/storage.service';
 import { firstValueFrom } from 'rxjs';
 import { RentalContract } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
@@ -16,6 +17,7 @@ import FileUploadComponent from '@shared/components/file-upload/file-upload';
 })
 export default class VistoriaChegadaComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly storage = inject(StorageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -33,6 +35,7 @@ export default class VistoriaChegadaComponent implements OnInit {
   readonly checklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
   readonly checklist = signal<Record<string, boolean>>({});
   readonly vistoriaFotos = signal<string[]>([]);
+  readonly openingObjectKey = signal<string | null>(null);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
@@ -65,6 +68,18 @@ export default class VistoriaChegadaComponent implements OnInit {
 
   removeVistoriaFoto(objectKey: string) {
     this.vistoriaFotos.update((current) => current.filter((item) => item !== objectKey));
+  }
+
+  async openVistoriaFoto(objectKey: string) {
+    this.openingObjectKey.set(objectKey);
+    try {
+      const url = await this.storage.getDownloadUrl(objectKey, `vistoria-${this.contract()?.id ?? 'arquivo'}`);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      this.error.set('Não foi possível abrir o arquivo anexado.');
+    } finally {
+      this.openingObjectKey.set(null);
+    }
   }
 
   async onSubmit() {

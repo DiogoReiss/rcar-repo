@@ -67,6 +67,21 @@
 
 .vd-empty { color: $color-neutral-400; font-size: 0.875rem; text-align: center; margin: $spacing-md 0; }
 
+.file-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    color: $color-neutral-700;
+  }
+}
+
 .vd-footer { display: flex; justify-content: flex-end; gap: $spacing-sm; }
 
 .maint-checkbox {

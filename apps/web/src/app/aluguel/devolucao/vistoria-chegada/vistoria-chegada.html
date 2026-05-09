@@ -19,7 +19,7 @@
 
     @if (error()) { <div class="error">{{ error() }}</div> }
 
-    <div class="form-card" style="margin-top:1.5rem">
+    <div class="form-card form-card-spaced">
       <form (ngSubmit)="onSubmit()" class="form-grid">
         <div class="form-field">
           <label for="kmDev">KM na Devolução</label>
@@ -67,7 +67,17 @@
               @for (foto of vistoriaFotos(); track foto) {
                 <div class="checklist-item ok">
                   <span>{{ foto }}</span>
-                  <button type="button" class="btn-secondary" (click)="removeVistoriaFoto(foto)">Remover</button>
+                  <div class="attachment-actions">
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      [disabled]="openingObjectKey() === foto"
+                      (click)="openVistoriaFoto(foto)"
+                    >
+                      {{ openingObjectKey() === foto ? 'Abrindo…' : 'Abrir' }}
+                    </button>
+                    <button type="button" class="btn-secondary" (click)="removeVistoriaFoto(foto)">Remover</button>
+                  </div>
                 </div>
               }
             </div>

@@ -6,6 +6,7 @@ import { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { DialogModule } from 'primeng/dialog';
 import { FrotaService } from '../frota.service';
 import { ApiService } from '@core/services/api.service';
+import { StorageService } from '@core/services/storage.service';
 import { Vehicle, VehicleMaintenance } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
@@ -45,6 +46,7 @@ interface VehicleDetail extends Vehicle {
 export default class FrotaListComponent {
   private readonly frotaService = inject(FrotaService);
   private readonly api          = inject(ApiService);
+  private readonly storage      = inject(StorageService);
   private readonly toast        = inject(MessageService);
 
   readonly veiculos = this.frotaService.veiculos;
@@ -77,6 +79,7 @@ export default class FrotaListComponent {
   readonly fStatus    = signal('DISPONIVEL');
   readonly fKm        = signal(0);
   readonly fFoto      = signal<string | null>(null);
+  readonly openingObjectKey = signal<string | null>(null);
 
   readonly categorias = ['ECONOMICO', 'INTERMEDIARIO', 'SUV', 'EXECUTIVO', 'UTILITARIO'];
   readonly statuses   = ['DISPONIVEL', 'ALUGADO', 'MANUTENCAO', 'INATIVO'];
@@ -205,5 +208,22 @@ export default class FrotaListComponent {
       }
       this.closeDialog();
     } finally { this.saving.set(false); }
+  }
+
+  async openStoredFile(objectKey: string, downloadName?: string) {
+    this.openingObjectKey.set(objectKey);
+    try {
+      const url = await this.storage.getDownloadUrl(objectKey, downloadName);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Erro ao abrir arquivo',
+        detail: 'Não foi possível gerar o link do arquivo.',
+        life: 4000,
+      });
+    } finally {
+      this.openingObjectKey.set(null);
+    }
   }
 }
