@@ -36,6 +36,11 @@ describe('FinanceiroService', () => {
     await service.load('2026-05-01', '2026-05-31');
 
     expect(apiMock.get).toHaveBeenCalledTimes(5);
+    expect(apiMock.get).toHaveBeenNthCalledWith(1, '/reports/financial-summary?from=2026-05-01&to=2026-05-31');
+    expect(apiMock.get).toHaveBeenNthCalledWith(2, '/reports/rental/receivables?from=2026-05-01&to=2026-05-31');
+    expect(apiMock.get).toHaveBeenNthCalledWith(3, '/reports/fleet/maintenance-costs?from=2026-05-01&to=2026-05-31');
+    expect(apiMock.get).toHaveBeenNthCalledWith(4, '/reports/stock/cost-analysis?from=2026-05-01&to=2026-05-31');
+    expect(apiMock.get).toHaveBeenNthCalledWith(5, '/payments/method-summary?from=2026-05-01&to=2026-05-31');
     expect(service.summary()).toBeTruthy();
     expect(service.receivables()).toBeTruthy();
     expect(service.maintenance()).toBeTruthy();

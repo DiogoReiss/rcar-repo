@@ -11,6 +11,7 @@ import PageHeaderComponent from '@shared/components/page-header/page-header';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import FileUploadComponent from '@shared/components/file-upload/file-upload';
 import RowMenuComponent from '@shared/components/row-menu/row-menu';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 import DateBrPipe from '@shared/pipes/date-br.pipe';
@@ -36,7 +37,7 @@ interface VehicleDetail extends Vehicle {
 
 @Component({
   selector: 'lync-frota-list',
-  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, RowMenuComponent, DialogModule, CurrencyBrlPipe, DateBrPipe],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent, FileUploadComponent, RowMenuComponent, DialogModule, CurrencyBrlPipe, DateBrPipe],
   templateUrl: './frota-list.html',
   styleUrl: './frota-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +76,7 @@ export default class FrotaListComponent {
   readonly fCategoria = signal('ECONOMICO');
   readonly fStatus    = signal('DISPONIVEL');
   readonly fKm        = signal(0);
+  readonly fFoto      = signal<string | null>(null);
 
   readonly categorias = ['ECONOMICO', 'INTERMEDIARIO', 'SUV', 'EXECUTIVO', 'UTILITARIO'];
   readonly statuses   = ['DISPONIVEL', 'ALUGADO', 'MANUTENCAO', 'INATIVO'];
@@ -101,7 +103,7 @@ export default class FrotaListComponent {
     this.fPlaca.set(''); this.fModelo.set('');
     this.fAno.set(new Date().getFullYear()); this.fCor.set('');
     this.fCategoria.set('ECONOMICO'); this.fStatus.set('DISPONIVEL');
-    this.fKm.set(0); this.dialogVisible.set(true);
+    this.fKm.set(0); this.fFoto.set(null); this.dialogVisible.set(true);
   }
 
   openEdit(v: Vehicle) {
@@ -109,7 +111,7 @@ export default class FrotaListComponent {
     this.fPlaca.set(v.placa); this.fModelo.set(v.modelo);
     this.fAno.set(v.ano); this.fCor.set(v.cor);
     this.fCategoria.set(v.categoria); this.fStatus.set(v.status);
-    this.fKm.set(v.kmAtual); this.dialogVisible.set(true);
+    this.fKm.set(v.kmAtual); this.fFoto.set(v.fotos?.[0] ?? null); this.dialogVisible.set(true);
   }
 
   closeDialog() { this.dialogVisible.set(false); }
@@ -191,7 +193,7 @@ export default class FrotaListComponent {
     const data = {
       placa: this.fPlaca(), modelo: this.fModelo(), ano: this.fAno(),
       cor: this.fCor(), categoria: this.fCategoria() as Vehicle['categoria'],
-      status: this.fStatus() as Vehicle['status'], kmAtual: this.fKm(), fotos: [],
+      status: this.fStatus() as Vehicle['status'], kmAtual: this.fKm(), fotos: this.fFoto() ? [this.fFoto()!] : [],
     };
     try {
       if (this.isEdit()) {

@@ -22,6 +22,12 @@ import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 import DateBrPipe from '@shared/pipes/date-br.pipe';
 
 type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
+type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LOCACAO';
+
+interface TemplateRef {
+  id: string;
+  tipo: string;
+}
 
 @Component({
   selector: 'lync-contrato-list',
@@ -79,6 +85,7 @@ export default class ContratoListComponent implements OnInit {
   // ── Payment dialog ────────────────────────────────────────────────────────
   readonly payingId   = signal<string | null>(null);
   readonly payLoading = signal(false);
+  readonly pdfLoadingId = signal<string | null>(null);
 
   // ── Detail dialog ─────────────────────────────────────────────────────────
   readonly detailId      = signal<string | null>(null);
@@ -148,6 +155,8 @@ export default class ContratoListComponent implements OnInit {
     ENCERRADO: 'badge--inactive', CANCELADO: 'badge--danger',
   };
 
+  private readonly templateIdByType = new Map<TemplateType, string>();
+
   ngOnInit() {
     this.load();
     this.loadCustomers();
@@ -176,6 +185,13 @@ export default class ContratoListComponent implements OnInit {
   getRowMenuItems(c: RentalContract): RowMenuItem[] {
     const items: RowMenuItem[] = [];
     items.push({ label: 'Ver detalhes', icon: 'pi pi-eye', command: () => this.openDetail(c.id) });
+    if (c.status === 'ENCERRADO' || c.status === 'ATIVO') {
+      items.push({
+        label: c.status === 'ENCERRADO' ? 'Gerar Recibo PDF' : 'Gerar Contrato PDF',
+        icon: 'pi pi-file-pdf',
+        command: () => this.onGenerateContractPdf(c),
+      });
+    }
     if (c.status === 'RESERVADO') {
       items.push(
         { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => { this.aberturaTarget.set(c.id); this.kmRetirada.set(0); this.combustivelSaida.set('CHEIO'); } },
@@ -189,6 +205,70 @@ export default class ContratoListComponent implements OnInit {
       );
     }
     return items;
+  }
+
+  private async resolveTemplateId(tipo: TemplateType): Promise<string | null> {
+    const cached = this.templateIdByType.get(tipo);
+    if (cached) return cached;
+
+    const templates = await firstValueFrom(this.api.get<TemplateRef[]>('/templates'));
+    const match = templates.find((template) => template.tipo === tipo);
+    if (!match) return null;
+    this.templateIdByType.set(tipo, match.id);
+    return match.id;
+  }
+
+  private triggerPdfDownload(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async onGenerateContractPdf(contract: RentalContract) {
+    const templateType: TemplateType = contract.status === 'ENCERRADO' ? 'RECIBO_LOCACAO' : 'CONTRATO_LOCACAO';
+    this.pdfLoadingId.set(contract.id);
+    try {
+      const templateId = await this.resolveTemplateId(templateType);
+      if (!templateId) {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Template não encontrado',
+          detail: 'Cadastre o template correspondente para gerar o PDF.',
+          life: 4000,
+        });
+        return;
+      }
+
+      const payload = {
+        variables: {
+          contratoId: contract.id,
+          status: this.statusLabel[contract.status] ?? contract.status,
+          nomeCliente: contract.customer?.nome ?? 'Cliente',
+          placaVeiculo: contract.vehicle?.placa ?? '—',
+          modeloVeiculo: contract.vehicle?.modelo ?? '—',
+          dataRetirada: this.formatDate(contract.dataRetirada),
+          dataDevolucao: this.formatDate(contract.dataDevolucao),
+          valorTotal: this.formatPrice(contract.valorTotalReal ?? contract.valorTotal),
+        },
+        fileName: `${templateType === 'RECIBO_LOCACAO' ? 'recibo' : 'contrato'}-${contract.id.slice(0, 8)}`,
+      };
+
+      const blob = await firstValueFrom(this.api.postBlob(`/documents/templates/${templateId}/pdf`, payload));
+      this.triggerPdfDownload(blob, `${payload.fileName}.pdf`);
+      this.toast.add({ severity: 'success', summary: 'PDF gerado', life: 2500 });
+    } catch (e: any) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Erro ao gerar PDF',
+        detail: e?.error?.message ?? 'Não foi possível gerar o documento.',
+        life: 4000,
+      });
+    } finally {
+      this.pdfLoadingId.set(null);
+    }
   }
 
   async openDetail(id: string) {

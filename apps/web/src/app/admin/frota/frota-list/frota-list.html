@@ -73,6 +73,14 @@
     <lync-form-field label="KM Atual">
       <input type="number" [ngModel]="fKm()" (ngModelChange)="fKm.set(+$event)" name="km" min="0" />
     </lync-form-field>
+    <lync-form-field label="Foto do Veículo" [full]="true">
+      <lync-file-upload
+        folder="fleet/vehicles"
+        accept="image/*"
+        [value]="fFoto()"
+        (valueChange)="fFoto.set($event)"
+      />
+    </lync-form-field>
   </div>
 </lync-entity-dialog>
 

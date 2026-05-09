@@ -9,7 +9,7 @@
 
 ---
 
-## Objetivo deste arquivo (2026-05-08)
+## Objetivo deste arquivo (2026-05-09)
 
 - Este arquivo passa a ser a **fonte consolidada** dos TODOs de implementação.
 - Conteúdo incorporado sem perda de escopo a partir de:
@@ -29,11 +29,11 @@
 
 | Ponto | Situação | O que já está pronto | O que falta para fechar |
 |---|---|---|---|
-| 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend e cobertura inicial | Cobertura de testes mais ampla, UX de carregamento/empty states e estabilização final da trilha |
+| 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend, evolução de UX do financeiro (filtros/KPIs/charts) e refinamento do dialog da fila | Cobertura de testes mais ampla, UX de loading/empty states remanescente e estabilização final da trilha |
 | 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validações e testes iniciais | Fluxo completo de assinatura D4Sign + expansão de geração/consumo no frontend |
 | 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
-| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários ampliados em serviços backend centrais incluindo `lavajato/mail/jobs` e serviços frontend críticos incluindo `storage/sse`) + E2E happy-path web e API (Supertest) por área principal | Cobertura unit/E2E remanescente em cenários avançados/negativos, Swagger completo, fechamento de lint/CI e checklist de go-live |
+| 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários ampliados em serviços backend centrais incluindo `lavajato/mail/jobs` e serviços frontend críticos incluindo `storage/sse`) + E2E happy-path web e API (Supertest) por área principal com estabilização de teardown | Cobertura unit/E2E remanescente em cenários avançados/negativos, Swagger completo, fechamento de lint/CI e checklist de go-live |
 
 **Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2`, `3` e `1` estão parcialmente implementados, e `4` depende de integração externa.
 
@@ -73,7 +73,7 @@
 - 🟢 Common module concluído (decorators, guards, logging interceptor, filters, paginação DTO).
 - 🟡 Aplicação de guards permanece por controller (intencional), não global.
 - 🟢 Auth module concluído (login/refresh/logout/forgot/reset + strategies + DTOs + spec do service).
-- 🔴 E2E real de auth ainda pendente (há stub em `test/app.e2e-spec.ts`).
+- 🟡 E2E de auth em happy-path já coberto no `test/app.e2e-spec.ts` com stubs; cenário real ponta a ponta (sem stubs) ainda pendente.
 
 ### 1.2 Frontend (setup + testes base + core + shell + rotas + shared)
 
@@ -135,6 +135,7 @@
 - 🟢 Backend queue CRUD + SSE em tempo real concluídos.
 - 🔴 Unit tests pendentes.
 - 🟢 Frontend painel kanban, fluxo de avanço, dialog de detalhes e SSE concluídos.
+- 🟢 Dialog "Entrar na fila" refinado (estrutura/feedback de ação) e compatibilidade de footer PrimeNG v21 aplicada (`#footer`).
 - 🔴 Unit tests pendentes.
 
 ### 3.3 Pagamentos
@@ -195,6 +196,7 @@
 - 🟢 Backend automações financeiras entregues (baixa de estoque, custo médio ponderado, migrações correlatas).
 - 🟢 Frontend `/admin/financeiro` entregue com cards, gráficos, receivables, rentabilidade, valoração e export CSV/PDF.
 - 🟢 Dashboard com seletor de período (`7d/30d/mês`) entregue no endpoint + frontend + cobertura inicial.
+- 🟢 UX do dashboard financeiro evoluída com presets de período, KPIs adicionais e novos blocos analíticos (aging/top pendências/top rentabilidade).
 - 🟡 Cobertura de testes do dashboard ainda parcial.
 
 ---
@@ -215,7 +217,7 @@
 
 - 🟢 Testes unitários adicionados para módulos de negócio backend (`documents`, `reports`, `storage`, `users`, `customers`, `fleet`, `wash`, `templates`, `payments`, `inventory`, `rental`, `lavajato`, `mail`, `jobs`, `queue-events`).
 - 🟡 Suite unit backend ainda pendente em profundidade de cenários avançados e integrações (não apenas happy path).
-- 🟡 E2E com Supertest implementado para happy-path das principais features (auth, users, customers, fleet, wash/lavajato, rental, templates/documents, reports, payments, inventory, storage); pendentes cenários negativos e integrações profundas.
+- 🟡 E2E com Supertest implementado para happy-path das principais features (auth, users, customers, fleet, wash/lavajato, rental, templates/documents, reports, payments, inventory, storage), com correção de robustez no teardown (`app.close` defensivo); pendentes cenários negativos e integrações profundas.
 - 🟡 Swagger configurado, mas cobertura total de `@ApiProperty`/`@ApiResponse` ainda parcial.
 - 🔴 Prettier dedicado no `apps/api` pendente.
 
