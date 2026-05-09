@@ -1,12 +1,46 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'lync-home',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class HomeComponent {}
+export default class HomeComponent {
+  readonly washPlate = signal('');
+  readonly washService = signal('LAVAGEM_COMPLETA');
+  readonly washDate = signal('');
+  readonly washTime = signal('');
+  readonly washSubmitted = signal(false);
+
+  readonly rentDateFrom = signal('');
+  readonly rentDateTo = signal('');
+  readonly rentCategory = signal('ECONOMICO');
+  readonly rentStep = signal<1 | 2>(1);
+
+  readonly canSubmitWash = computed(() =>
+    !!this.washPlate().trim() && !!this.washDate() && !!this.washTime(),
+  );
+
+  readonly canContinueRent = computed(() =>
+    !!this.rentDateFrom() && !!this.rentDateTo(),
+  );
+
+  submitWash() {
+    if (!this.canSubmitWash()) return;
+    this.washSubmitted.set(true);
+  }
+
+  continueRent() {
+    if (!this.canContinueRent()) return;
+    this.rentStep.set(2);
+  }
+
+  editRentSearch() {
+    this.rentStep.set(1);
+  }
+}
 

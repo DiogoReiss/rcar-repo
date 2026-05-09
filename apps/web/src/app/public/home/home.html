@@ -5,25 +5,109 @@
   </header>
 
   <main class="home-content" role="main">
-    <p class="eyebrow">Portal do cliente</p>
-    <h1>Comece sua jornada escolhendo como deseja usar o carro</h1>
-    <p class="subtitle">Faça sua reserva ou inicie um aluguel com poucos passos.</p>
+    <section class="hero">
+      <p class="eyebrow">Bem-vindo ao RCar</p>
+      <h1>Agende sua lavagem ou comece sua locação sem login</h1>
+      <p class="subtitle">
+        Para locação, você só precisa entrar ou criar conta na etapa final.
+      </p>
+    </section>
 
-    <div class="cta-row">
-      <a
-        class="cta cta--primary"
-        [routerLink]="['/auth/login']"
-        [queryParams]="{ next: '/portal/minhas-reservas', intent: 'reserva' }"
-      >
-        Reservar veículo
-      </a>
-      <a
-        class="cta cta--secondary"
-        [routerLink]="['/auth/login']"
-        [queryParams]="{ next: '/aluguel/contratos', intent: 'aluguel' }"
-      >
-        Alugar agora
-      </a>
+    <section class="actions-grid" aria-label="Primeiras ações do cliente">
+      <article class="flow-card">
+        <h2>Agendar lavagem</h2>
+        <p class="flow-description">Escolha os dados do serviço e envie sua solicitação agora.</p>
+
+        @if (washSubmitted()) {
+          <div class="success-box" role="status">
+            Agendamento enviado com sucesso! Nossa equipe vai confirmar com você.
+          </div>
+        } @else {
+          <div class="flow-form">
+            <label for="washPlate">Placa do veículo</label>
+            <input
+              id="washPlate"
+              [ngModel]="washPlate()"
+              (ngModelChange)="washPlate.set($event)"
+              placeholder="ABC1D23"
+            />
+
+            <label for="washService">Tipo de lavagem</label>
+            <select id="washService" [ngModel]="washService()" (ngModelChange)="washService.set($event)">
+              <option value="LAVAGEM_RAPIDA">Lavagem rápida</option>
+              <option value="LAVAGEM_COMPLETA">Lavagem completa</option>
+              <option value="HIGIENIZACAO_INTERNA">Higienização interna</option>
+            </select>
+
+            <div class="inline-fields">
+              <div>
+                <label for="washDate">Data</label>
+                <input id="washDate" type="date" [ngModel]="washDate()" (ngModelChange)="washDate.set($event)" />
+              </div>
+              <div>
+                <label for="washTime">Hora</label>
+                <input id="washTime" type="time" [ngModel]="washTime()" (ngModelChange)="washTime.set($event)" />
+              </div>
+            </div>
+
+            <button type="button" class="cta cta--primary" [disabled]="!canSubmitWash()" (click)="submitWash()">
+              Confirmar agendamento
+            </button>
+          </div>
+        }
+      </article>
+
+      <article class="flow-card">
+        <h2>Iniciar locação</h2>
+        <p class="flow-description">Monte sua locação primeiro e finalize com login ou criação de conta.</p>
+
+        @if (rentStep() === 1) {
+          <div class="flow-form">
+            <div class="inline-fields">
+              <div>
+                <label for="rentDateFrom">Retirada</label>
+                <input id="rentDateFrom" type="date" [ngModel]="rentDateFrom()" (ngModelChange)="rentDateFrom.set($event)" />
+              </div>
+              <div>
+                <label for="rentDateTo">Devolução</label>
+                <input id="rentDateTo" type="date" [ngModel]="rentDateTo()" (ngModelChange)="rentDateTo.set($event)" />
+              </div>
+            </div>
+
+            <label for="rentCategory">Categoria desejada</label>
+            <select id="rentCategory" [ngModel]="rentCategory()" (ngModelChange)="rentCategory.set($event)">
+              <option value="ECONOMICO">Econômico</option>
+              <option value="INTERMEDIARIO">Intermediário</option>
+              <option value="SUV">SUV</option>
+              <option value="EXECUTIVO">Executivo</option>
+            </select>
+
+            <button type="button" class="cta cta--secondary" [disabled]="!canContinueRent()" (click)="continueRent()">
+              Continuar sem login
+            </button>
+          </div>
+        } @else {
+          <div class="success-box">
+            <p>Preferência registrada: {{ rentCategory() }} de {{ rentDateFrom() }} até {{ rentDateTo() }}.</p>
+            <p>Agora entre ou crie sua conta para finalizar a locação.</p>
+          </div>
+
+          <div class="cta-row">
+            <a
+              class="cta cta--primary"
+              [routerLink]="['/auth/login']"
+              [queryParams]="{ next: '/portal/minhas-reservas', intent: 'aluguel-finalizar' }"
+            >
+              Entrar para finalizar
+            </a>
+            <button type="button" class="cta cta--secondary" (click)="editRentSearch()">Editar dados</button>
+          </div>
+        }
+      </article>
+    </section>
+
+    <div class="footer-hint">
+      Já tem conta? <a routerLink="/auth/login">Acesse aqui</a>.
     </div>
   </main>
 </section>

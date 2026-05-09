@@ -3,7 +3,10 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+  background:
+    radial-gradient(circle at 10% 0%, rgba($color-primary, 0.15), transparent 36%),
+    radial-gradient(circle at 90% 10%, rgba($color-primary-light, 0.2), transparent 32%),
+    linear-gradient(180deg, #f6f9ff 0%, #edf3ff 60%, #f8fbff 100%);
 }
 
 .home-page {
@@ -38,10 +41,14 @@
 }
 
 .home-content {
-  width: min(720px, 92vw);
+  width: min(1080px, 92vw);
   margin: 0 auto;
-  padding: 72px 0;
+  padding: 56px 0 72px;
+}
+
+.hero {
   text-align: center;
+  margin-bottom: $spacing-xl;
 }
 
 .eyebrow {
@@ -55,7 +62,7 @@
 
 h1 {
   margin: $spacing-sm 0;
-  color: $color-neutral-900;
+  color: $color-primary-dark;
   line-height: 1.2;
 }
 
@@ -72,11 +79,74 @@ h1 {
   flex-wrap: wrap;
 }
 
+.actions-grid {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.flow-card {
+  background: #fff;
+  border: 1px solid rgba($color-primary, 0.14);
+  border-radius: 16px;
+  padding: $spacing-lg;
+  box-shadow: 0 12px 28px rgba($color-primary-dark, 0.08);
+
+  h2 {
+    margin: 0 0 $spacing-xs;
+    color: $color-primary-dark;
+    font-size: 1.15rem;
+  }
+}
+
+.flow-description {
+  margin: 0 0 $spacing-md;
+  color: $color-neutral-600;
+  font-size: 0.92rem;
+}
+
+.flow-form {
+  display: grid;
+  gap: $spacing-sm;
+
+  label {
+    font-size: 0.82rem;
+    color: $color-neutral-600;
+    font-weight: 600;
+  }
+
+  input,
+  select {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid $color-neutral-300;
+    padding: 10px 12px;
+    background: #fff;
+  }
+}
+
+.inline-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-sm;
+}
+
+.success-box {
+  border: 1px solid rgba($color-primary, 0.2);
+  background: rgba($color-primary-light, 0.14);
+  color: $color-primary-dark;
+  border-radius: 12px;
+  padding: $spacing-md;
+  font-size: 0.92rem;
+}
+
 .cta {
   text-decoration: none;
   padding: $spacing-sm $spacing-lg;
   border-radius: 10px;
   font-weight: 700;
+  border: 0;
+  cursor: pointer;
 
   &--primary {
     background: $color-primary;
@@ -87,6 +157,23 @@ h1 {
     border: 1px solid $color-neutral-300;
     color: $color-neutral-800;
     background: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.footer-hint {
+  margin-top: $spacing-lg;
+  text-align: center;
+  color: $color-neutral-600;
+
+  a {
+    color: $color-primary;
+    font-weight: 600;
+    text-decoration: none;
   }
 }
 
