@@ -84,6 +84,7 @@
 - 🟢 Shell/layout e acessibilidade base concluídos.
 - 🟢 Roteamento lazy por áreas concluído.
 - 🟢 Biblioteca shared concluída (`confirm-dialog`, `entity-dialog`, `form-field`, `lync-btn`, `row-menu`, pipes, directives, wizard).
+- 🔴 Primeira interação do cliente (onboarding) pendente: ao entrar no app, destacar CTA principal de `reservar`/`alugar` para perfil cliente e mover ação de login para o header.
 
 ---
 
@@ -160,6 +161,7 @@
 - 🔴 `reserva-form`, `reserva-confirmacao`, `ReservaService` ainda pendentes no checklist original.
 - 🟢 `contrato-list` e `contrato-detail` implementados.
 - 🔴 `contrato-abertura`, `vistoria-saida`, `ContratoService` ainda pendentes no checklist original.
+- 🔴 Checklist operacional de entrega do veículo ao cliente (estado do carro no handoff) pendente na trilha de `vistoria-saida`.
 - 🟢 `vistoria-chegada` implementada.
 - 🔴 `fechamento`, integração total de pagamento na devolução e testes ainda pendentes.
 - 🟢 fluxo wizard de reserva (`lync-wizard-dialog`) já adotado.
