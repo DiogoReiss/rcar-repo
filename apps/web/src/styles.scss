@@ -144,9 +144,13 @@ textarea { min-height: 80px; resize: vertical; }
 }
 
 // Common surfaces in feature views.
+.page-header {
+  color: var(--lync-text);
+  border-color: var(--lync-border);
+}
+
 .table-wrapper,
 .form-card,
-.page-header,
 .p-dialog .p-dialog-content,
 .p-dialog .p-dialog-header,
 .p-dialog .p-dialog-footer {
