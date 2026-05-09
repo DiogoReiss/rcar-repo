@@ -46,10 +46,12 @@
 
 ## 3) O que está parcialmente concluído
 
-- **Primeira interação do cliente (UI/UX)**: falta ajustar a experiência inicial para priorizar `reservar`/`alugar` para perfil cliente e posicionar login no header.
+- **Primeira interação do cliente (UI/UX)**: trilha inicial com foco em lavagem/locação e login no header já aplicada; pendente ampliar conteúdo orientado a conversão e simplificar a decisão entre fluxos.
+- **Landing pública (conteúdo e decisão de fluxo)**: base de entrada já existe com trilhas de lavagem/locação e contato, porém falta enriquecer conteúdo comercial e adotar toggle explícito entre `agendar lavagem` e `alugar carro`.
 - **PDF**: endpoint protegido com renderização real HTML->PDF já implementado; pendente integração completa de consumo no frontend e assinatura digital.
 - **Aluguel frontend**: fluxo wizard existe, mas itens do checklist original (form/confirm/services de reserva, abertura detalhada, fechamento final) ainda pendentes.
 - **Entrega de veículo (handoff)**: checklist de estado do carro na entrega ao cliente ainda pendente na trilha de vistoria de saída.
+- **Mobile readiness**: ajustes responsivos avançados ainda pendentes para jornada completa (landing, shell, tabelas/dialogs/forms e navegação mobile-first).
 - **Testes**: há base real com unit abrangente em serviços e E2E happy-path por área em web + API, com correção recente de robustez no teardown da suíte API e incremento de cenários negativos iniciais (login inválido/guards); cobertura funcional completa (cenários transacionais amplos e negativos avançados) ainda não atingida.
 - **Swagger/CI/lint**: estrutura pronta; falta fechamento de cobertura e validações finais de pipeline como gate de release.
 
@@ -96,6 +98,7 @@
 2. Portal do cliente com dados reais e documentos.
 3. Fechamento dos itens pendentes da trilha aluguel frontend, incluindo checklist de entrega do veículo (estado no handoff).
 4. Ajuste da experiência inicial do cliente com CTA de reserva/aluguel e login no header.
+5. Landing pública com conteúdo ampliado + toggle explícito entre lavagem/locação e pacote de responsividade mobile-first.
 
 **Saída da wave:** operação comercial digital completa.
 

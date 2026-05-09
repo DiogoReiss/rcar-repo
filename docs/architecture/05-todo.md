@@ -84,7 +84,8 @@
 - 🟢 Shell/layout e acessibilidade base concluídos.
 - 🟢 Roteamento lazy por áreas concluído.
 - 🟢 Biblioteca shared concluída (`confirm-dialog`, `entity-dialog`, `form-field`, `lync-btn`, `row-menu`, pipes, directives, wizard).
-- 🔴 Primeira interação do cliente (onboarding) pendente: ao entrar no app, destacar CTA principal de `reservar`/`alugar` para perfil cliente e mover ação de login para o header.
+- 🟡 Primeira interação do cliente (onboarding) evoluída com CTA/fluxos iniciais (lavagem e locação) e ação de login no header; pendente enriquecer conteúdo da landing e introduzir toggle explícito entre `agendar lavagem` e `alugar carro`.
+- 🔴 Mobile-readiness frontend ainda pendente: consolidar ajustes responsivos cross-feature (header/sidebar/tabelas/dialogs/forms), navegação mobile-first e validação por breakpoints.
 
 ---
 
@@ -228,6 +229,7 @@
 - 🟢 Unit tests existentes em serviços/componentes centrais (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`, `storage.service`, `sse.service`, `users.service`, `clientes.service`, `servicos.service`, `frota.service`, `agendamento.service`, `fila.service`).
 - 🟡 Cobertura unit frontend evoluiu, porém ainda faltam specs de componentes/fluxos finais (aluguel/templates/portal em maior profundidade).
 - 🟡 Playwright com happy-path para autenticação + rotas principais de `admin`, `lavajato`, `aluguel` e `portal`, incluindo cenário transacional básico de criação em admin e negativos iniciais de login/form; ainda parcial para fluxos transacionais completos e negativos avançados.
+- 🟡 Cobertura de UX responsiva/mobile ainda parcial; faltam cenários de viewport mobile para trilhas públicas e administrativas críticas.
 - 🔴 Checklist de lint frontend em `todo-frontend` continua pendente (21.1-21.4) até validação final de pipeline.
 
 ---
