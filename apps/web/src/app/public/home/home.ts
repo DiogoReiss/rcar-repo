@@ -18,6 +18,7 @@ export default class HomeComponent {
   readonly contactName = signal('');
   readonly contactPhone = signal('');
   readonly contactEmail = signal('');
+  readonly activeFlow = signal<'wash' | 'rent'>('wash');
 
   readonly washPlate = signal('');
   readonly washService = signal('LAVAGEM_COMPLETA');
@@ -61,6 +62,10 @@ export default class HomeComponent {
 
   toggleTheme() {
     this.themeService.toggleTheme();
+  }
+
+  setFlow(flow: 'wash' | 'rent') {
+    this.activeFlow.set(flow);
   }
 }
 

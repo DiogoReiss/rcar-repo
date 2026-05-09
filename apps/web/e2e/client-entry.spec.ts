@@ -1,12 +1,24 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Client first interaction', () => {
-  test('shows anonymous-first wash and rent options with login in header', async ({ page }) => {
+  test('shows anonymous-first entry with flow toggle and login in header', async ({ page }) => {
     await page.goto('/');
 
     await expect(page.getByRole('link', { name: /entrar/i })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /agendar lavagem/i })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /iniciar locação/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /agendar lavagem/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /alugar carro/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^agendar lavagem$/i })).toBeVisible();
+  });
+
+  test('switches between wash and rental flows', async ({ page }) => {
+    await page.goto('/');
+
+    await page.getByRole('tab', { name: /alugar carro/i }).click();
+    await expect(page.getByRole('heading', { name: /^iniciar locação$/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^agendar lavagem$/i })).not.toBeVisible();
+
+    await page.getByRole('tab', { name: /agendar lavagem/i }).click();
+    await expect(page.getByRole('heading', { name: /^agendar lavagem$/i })).toBeVisible();
   });
 
   test('toggles theme and keeps selection after reload', async ({ page }) => {
@@ -40,6 +52,7 @@ test.describe('Client first interaction', () => {
 
   test('asks login only on rental finalization', async ({ page }) => {
     await page.goto('/');
+    await page.getByRole('tab', { name: /alugar carro/i }).click();
 
     const continueRent = page.getByRole('button', { name: /continuar sem login/i });
     await expect(continueRent).toBeDisabled();

@@ -15,6 +15,7 @@
   margin-bottom: $spacing-lg;
   padding-bottom: $spacing-sm;
   border-bottom: 1px solid rgba($color-primary, 0.15);
+  color: var(--lync-text);
 
   h1 {
     font-size: 1.5rem;
@@ -117,7 +118,7 @@
 
 // ─── Table ──────────────────────────────────────────────────────────────────
 .table-wrapper {
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: $radius-md;
   box-shadow: $shadow-sm;
   border: 1px solid rgba($color-primary, 0.15);
@@ -129,12 +130,12 @@
   border-collapse: collapse;
 
   th {
-    background: linear-gradient(180deg, rgba($color-primary-light, 0.12), rgba($color-primary-light, 0.04));
+    background: var(--lync-table-head);
     padding: $spacing-sm $spacing-md;
     text-align: left;
     font-size: 0.75rem;
     font-weight: 600;
-    color: $color-neutral-600;
+    color: var(--lync-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     border-bottom: 1px solid $color-neutral-200;
@@ -143,13 +144,13 @@
   td {
     padding: $spacing-sm $spacing-md;
     font-size: 0.875rem;
-    color: $color-neutral-900;
-    border-bottom: 1px solid $color-neutral-100;
+    color: var(--lync-text);
+    border-bottom: 1px solid color-mix(in srgb, var(--lync-border) 50%, transparent 50%);
     vertical-align: middle;
   }
 
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba($color-primary-light, 0.08); }
+  tr:hover td { background: var(--lync-table-hover); }
 
   .actions {
     display: flex;
@@ -187,7 +188,7 @@
 
 // ─── Form ────────────────────────────────────────────────────────────────────
 .form-card {
-  background: #fff;
+  background: var(--lync-surface);
   border-radius: $radius-md;
   box-shadow: $shadow-sm;
   border: 1px solid rgba($color-primary, 0.14);
@@ -211,7 +212,7 @@
   label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: $color-neutral-800;
+    color: var(--lync-text);
   }
 
   input, select, textarea {
@@ -220,7 +221,8 @@
     border-radius: 8px;
     font-size: $font-size-base;
     font-family: $font-family-base;
-    background: #fff;
+    background: var(--lync-input-bg);
+    color: var(--lync-input-text);
 
     &:focus {
       outline: none;
@@ -242,3 +244,35 @@
 .loading { color: $color-neutral-600; padding: $spacing-xl; text-align: center; }
 .error   { color: $color-danger; background: #fef2f2; border: 1px solid rgba($color-danger, 0.5); border-radius: $radius-sm; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
 .success { color: $color-success; background: #f0fdf4; border: 1px solid rgba($color-success, 0.5); border-radius: $radius-sm; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
+
+@media (max-width: $breakpoint-md) {
+  .page {
+    padding: $spacing-md;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-sm;
+
+    h1 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+

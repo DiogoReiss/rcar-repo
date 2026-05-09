@@ -37,3 +37,9 @@
     var(--lync-bg-soft, #f3f6fb);
 }
 
+@media (max-width: $breakpoint-md) {
+  .shell-content {
+    padding: $spacing-md;
+  }
+}
+

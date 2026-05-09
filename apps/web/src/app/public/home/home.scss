@@ -52,6 +52,20 @@
     border-color: #425775;
     color: #f1f6ff;
   }
+
+  .flow-toggle {
+    background: #1a2434;
+    border-color: rgba($color-primary-light, 0.35);
+  }
+
+  .flow-toggle-btn {
+    color: #e5ecf8;
+
+    &.active {
+      background: rgba($color-primary-light, 0.24);
+      color: #fff;
+    }
+  }
 }
 
 .home-page {
@@ -112,6 +126,30 @@
   margin-bottom: $spacing-xl;
 }
 
+.flow-toggle {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba($color-primary, 0.2);
+  background: rgba($color-primary-light, 0.12);
+}
+
+.flow-toggle-btn {
+  border: 0;
+  background: transparent;
+  color: $color-neutral-700;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary, $color-primary-dark);
+    color: #fff;
+  }
+}
+
 .eyebrow {
   margin: 0;
   color: $color-primary;
@@ -143,7 +181,7 @@ h1 {
 .actions-grid {
   display: grid;
   gap: $spacing-lg;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .flow-card {
@@ -243,6 +281,37 @@ h1 {
     color: $color-primary;
     font-weight: 600;
     text-decoration: none;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .home-header {
+    padding: $spacing-sm $spacing-md;
+  }
+
+  .home-content {
+    width: min(1120px, 94vw);
+    padding: 28px 0 44px;
+  }
+
+  .flow-card {
+    padding: $spacing-md;
+  }
+
+  .inline-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cta,
+  .flow-toggle-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .flow-toggle {
+    width: 100%;
+    flex-direction: column;
   }
 }
 

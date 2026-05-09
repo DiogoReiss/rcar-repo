@@ -12,7 +12,9 @@ import HeaderComponent from '../header/header';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ShellComponent {
-  readonly sidebarCollapsed = signal(false);
+  readonly sidebarCollapsed = signal(
+    typeof window !== 'undefined' ? window.innerWidth < 992 : false,
+  );
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update((v) => !v);

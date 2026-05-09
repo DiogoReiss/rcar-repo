@@ -22,6 +22,25 @@ $sidebar-active-bg: rgba(255,255,255,0.07);
   &.collapsed { width: $sidebar-collapsed-width; }
 }
 
+@media (max-width: $breakpoint-md) {
+  :host {
+    position: fixed;
+    top: $header-height;
+    bottom: 0;
+    left: 0;
+    width: min(82vw, 300px);
+    z-index: 150;
+    box-shadow: 12px 0 24px rgba(0, 0, 0, 0.28);
+    transition: transform 0.2s ease;
+
+    &.collapsed {
+      width: min(82vw, 300px);
+      transform: translateX(-102%);
+      box-shadow: none;
+    }
+  }
+}
+
 .sidebar-menu {
   list-style: none;
   margin: 0;

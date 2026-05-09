@@ -18,6 +18,8 @@
   --lync-input-text: #{$color-neutral-900};
   --lync-scroll-track: rgba(#{$color-neutral-300}, 0.35);
   --lync-scroll-thumb: rgba(#{$color-primary}, 0.35);
+  --lync-table-head: rgba(#{$color-primary-light}, 0.14);
+  --lync-table-hover: rgba(#{$color-primary-light}, 0.1);
 }
 
 body[data-theme='dark'] {
@@ -36,6 +38,8 @@ body[data-theme='dark'] {
   --lync-input-text: #e5ecf8;
   --lync-scroll-track: rgba(#{$color-neutral-900}, 0.45);
   --lync-scroll-thumb: rgba(#{$color-primary-light}, 0.6);
+  --lync-table-head: rgba(#{$color-primary-light}, 0.22);
+  --lync-table-hover: rgba(#{$color-primary-light}, 0.2);
 }
 
 *,
@@ -133,6 +137,64 @@ textarea { min-height: 80px; resize: vertical; }
   box-shadow: $shadow-sm;
 }
 
+// Common surfaces in feature views.
+.table-wrapper,
+.form-card,
+.page-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-footer {
+  background: var(--lync-surface);
+  color: var(--lync-text);
+  border-color: var(--lync-border);
+}
+
+.data-table th {
+  background: var(--lync-table-head);
+  color: var(--lync-text-muted);
+}
+
+.data-table td {
+  color: var(--lync-text);
+  border-bottom-color: color-mix(in srgb, var(--lync-border) 50%, transparent 50%);
+}
+
+.data-table tr:hover td {
+  background: var(--lync-table-hover);
+}
+
+.loading-hint,
+.error-hint,
+.text-muted,
+.empty,
+.portal-loading,
+.portal-empty {
+  color: var(--lync-text-muted);
+}
+
+body[data-theme='dark'] {
+  color-scheme: dark;
+
+  .p-menu,
+  .p-dialog,
+  .p-tooltip {
+    color: var(--lync-text);
+  }
+
+  .p-menu {
+    background: var(--lync-surface);
+    border: 1px solid var(--lync-border);
+  }
+
+  .p-menu .p-menuitem-link {
+    color: var(--lync-text);
+
+    &:hover {
+      background: color-mix(in srgb, var(--lync-surface) 72%, $color-primary-light 28%) !important;
+    }
+  }
+}
+
 .section-title {
   font-size: 1.125rem;
   font-weight: 700;
@@ -172,5 +234,29 @@ textarea { min-height: 80px; resize: vertical; }
 
 ::-webkit-scrollbar-track {
   background: var(--lync-scroll-track);
+}
+
+@media (max-width: $breakpoint-md) {
+  .page {
+    padding: $spacing-md;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-sm;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    min-width: 720px;
+  }
 }
 

@@ -178,3 +178,23 @@
   color: var(--lync-text-muted, $color-neutral-500);
   font-weight: 400;
 }
+
+@media (max-width: $breakpoint-md) {
+  .header {
+    padding: 0 $spacing-sm;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .header-right {
+    gap: $spacing-xs;
+  }
+
+  .header-divider,
+  .user-info {
+    display: none;
+  }
+}
+

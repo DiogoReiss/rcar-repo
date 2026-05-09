@@ -22,9 +22,33 @@
       <p class="subtitle">
         Para locação, você só precisa entrar ou criar conta na etapa final.
       </p>
+
+      <div class="flow-toggle" role="tablist" aria-label="Escolha o tipo de atendimento">
+        <button
+          type="button"
+          role="tab"
+          class="flow-toggle-btn"
+          [class.active]="activeFlow() === 'wash'"
+          [attr.aria-selected]="activeFlow() === 'wash'"
+          (click)="setFlow('wash')"
+        >
+          Agendar lavagem
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="flow-toggle-btn"
+          [class.active]="activeFlow() === 'rent'"
+          [attr.aria-selected]="activeFlow() === 'rent'"
+          (click)="setFlow('rent')"
+        >
+          Alugar carro
+        </button>
+      </div>
     </section>
 
     <section class="actions-grid" aria-label="Primeiras ações do cliente">
+      @if (activeFlow() === 'wash') {
       <article class="flow-card">
         <h2>Agendar lavagem</h2>
         <p class="flow-description">Escolha os dados do serviço e envie sua solicitação agora.</p>
@@ -94,7 +118,9 @@
           </div>
         }
       </article>
+      }
 
+      @if (activeFlow() === 'rent') {
       <article class="flow-card">
         <h2>Iniciar locação</h2>
         <p class="flow-description">Monte sua locação primeiro e finalize com login ou criação de conta.</p>
@@ -170,6 +196,7 @@
           </div>
         }
       </article>
+      }
     </section>
 
     <div class="footer-hint">
