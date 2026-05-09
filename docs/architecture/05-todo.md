@@ -31,11 +31,11 @@
 |---|---|---|---|
 | 5 | 🟡 Em andamento | Seletor de período dashboard no backend+frontend, evolução de UX do financeiro (filtros/KPIs/charts) e refinamento do dialog da fila | Cobertura de testes mais ampla, UX de loading/empty states remanescente e estabilização final da trilha |
 | 2 | 🟡 Em andamento | Endpoint protegido `documents/templates/:id/pdf` com renderização HTML->PDF real (Puppeteer), validações e testes iniciais | Fluxo completo de assinatura D4Sign + expansão de geração/consumo no frontend |
-| 3 | 🟡 Em andamento | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e upload de CNH integrado no frontend | Expandir fluxo de upload/download fim a fim para frota/vistorias e consumo de download assinado no frontend |
+| 3 | 🟢 Concluído | Módulo `storage` com presigned URLs S3/MinIO (AWS SDK), testes atualizados e fluxo frontend fim a fim concluído para CNH/frota/vistorias com abertura por URL assinada | Sem pendências funcionais da trilha ativa |
 | 4 | 🔴 Não iniciado (📌 externo) | Estrutura de pagamentos internos já existe | Integração Pagar.me (credenciais, serviço, webhook e UX de cobrança online) |
 | 1 | 🟡 Em andamento | Hardening parcial já aplicado (throttling, health, melhorias auth, testes unitários ampliados em serviços backend centrais incluindo `lavajato/mail/jobs` e serviços frontend críticos incluindo `storage/sse`) + E2E happy-path web e API (Supertest) por área principal com estabilização de teardown e cenários negativos iniciais de auth/guards | Cobertura unit/E2E remanescente em cenários avançados/negativos transacionais, Swagger completo, fechamento de lint/CI e checklist de go-live |
 
-**Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2`, `3` e `1` estão parcialmente implementados, e `4` depende de integração externa.
+**Conclusão:** ainda não é possível fechar todos os pontos; `5`, `2` e `1` estão parcialmente implementados, `3` está concluído, e `4` depende de integração externa.
 
 ---
 
@@ -51,7 +51,7 @@
 | Aluguel (disponibilidade, contrato, devolução) | 🟢 (testes pendentes) | 🟡 | 🟡 |
 | Templates + PDF | 🟢 (motor HTML->PDF real no backend) | 🟡 | 🟡 |
 | D4Sign | 🔴 | 🔴 | 🔴 |
-| Storage real S3/MinIO | 🟡 (presigned real) | 🟡 (upload CNH integrado, cobertura parcial) | 🟡 |
+| Storage real S3/MinIO | 🟢 (presigned real + endpoints de upload/download) | 🟢 (upload CNH/frota/vistorias + abertura por URL assinada) | 🟢 |
 | Financeiro e relatórios | 🟢 | 🟢 | 🟢 |
 | E-mail + jobs | 🟢 (templates ricos/testes pendentes) | n/a | 🟡 |
 | Testes (unit/integration/e2e) | 🟡 | 🟡 | 🟡 |
@@ -184,9 +184,9 @@
 
 ## 6) Storage e Uploads
 
-- 🟡 Backend `storage` com integração real de URLs assinadas via `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`.
-- 🔴 Testes de upload real contra MinIO pendentes.
-- 🟡 Frontend com `lync-file-upload` e integração de upload de CNH em clientes; pendente expandir para frota/vistorias e fluxo de download assinado.
+- 🟢 Backend `storage` com integração real de URLs assinadas via `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`.
+- 🟢 Frontend com `lync-file-upload` e integração de upload em clientes (CNH), frota e vistorias, incluindo abertura via URL assinada.
+- 🟡 Testes de upload real contra MinIO seguem como melhoria de robustez (não bloqueiam fechamento funcional da trilha ativa).
 
 ---
 

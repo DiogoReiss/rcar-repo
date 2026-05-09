@@ -10,7 +10,7 @@
 |---|---|---|
 | 5 (operacional/UX) | 🟡 | UX evoluiu (financeiro e dialogs), faltam testes e fechamento de loading/empty states remanescentes |
 | 2 (documentos/PDF/assinatura) | 🟡 | Renderização HTML->PDF backend já implementada; falta fluxo D4Sign e fechamento frontend |
-| 3 (storage) | 🟡 | Presigned real já implementado; falta expandir upload/download frontend fim a fim para todas as trilhas |
+| 3 (storage) | 🟢 | Presigned real implementado e fluxo frontend fim a fim fechado (CNH, frota e vistorias com ações de abertura via URL assinada) |
 | 4 (pagamentos online) | 🔴/📌 | Integração Pagar.me depende de credenciais e webhook homologado |
 | 1 (hardening final) | 🟡 | Cobertura unit evoluiu amplamente (backend + frontend centrais) e E2E happy-path em web + API (Supertest), com estabilização de teardown na suíte API e cenários negativos iniciais (auth/guards); faltam E2E transacionais e negativos avançados, Swagger e gates finais de CI/go-live |
 
@@ -26,7 +26,7 @@
 | Aluguel (reserva, contratos, devolução) | 🟡 |
 | Financeiro e relatórios | 🟢 |
 | Documentos/PDF/assinatura | 🟡 |
-| Storage real e uploads | 🟡 |
+| Storage real e uploads | 🟢 |
 | Qualidade de testes/e2e/go-live hardening | 🟡 |
 | Expansão (PWA, WhatsApp, multi-unidade etc.) | 🔴 |
 
@@ -37,6 +37,7 @@
 - Backend: base NestJS + Prisma + schema/migrations + módulos principais (`auth`, `users`, `customers`, `fleet`, `wash/lavajato`, `rental`, `reports`, `payments`, `templates`, `mail`, `jobs`, `health`).
 - Frontend: base Angular 21 + shell + rotas lazy + áreas admin/lavajato/aluguel + financeiro completo + dashboard com período.
 - Frontend: compatibilidade de footer PrimeNG v21 aplicada nos dialogs principais (`#footer`) e refinamento de UX no dialog de fila.
+- Storage: trilha de upload/download frontend concluída para CNH, frota e vistorias, incluindo abertura de arquivos com URL assinada.
 - Financeiro ponta a ponta (quick wins): endpoints e UI de DRE, receivables, manutenção e custo de estoque.
 - Financeiro (frontend) evoluído com presets de período, KPIs adicionais e novos blocos analíticos (aging/top pendências/top rentabilidade).
 - Qualidade inicial: testes unitários em api (documents/reports/storage/users/customers/fleet/wash/templates/payments/inventory/rental/lavajato/mail/jobs/queue-events) e web (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`, `storage.service`, `sse.service`, `users.service`, `clientes.service`, `servicos.service`, `frota.service`, `agendamento.service`, `fila.service`).
@@ -45,7 +46,6 @@
 
 ## 3) O que está parcialmente concluído
 
-- **Storage**: backend com presigned URL real (AWS SDK) e upload CNH no frontend já integrados; pendente cobertura total (frota/vistorias/download assinado).
 - **PDF**: endpoint protegido com renderização real HTML->PDF já implementado; pendente integração completa de consumo no frontend e assinatura digital.
 - **Aluguel frontend**: fluxo wizard existe, mas itens do checklist original (form/confirm/services de reserva, abertura detalhada, fechamento final) ainda pendentes.
 - **Testes**: há base real com unit abrangente em serviços e E2E happy-path por área em web + API, com correção recente de robustez no teardown da suíte API e incremento de cenários negativos iniciais (login inválido/guards); cobertura funcional completa (cenários transacionais amplos e negativos avançados) ainda não atingida.
