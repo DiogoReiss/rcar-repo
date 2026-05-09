@@ -18,6 +18,7 @@
 }
 
 .login-header {
+  position: relative;
   text-align: center;
   margin-bottom: $spacing-lg;
 
@@ -33,6 +34,27 @@
     font-size: 0.875rem;
     color: #64748b;
     margin: 0;
+  }
+}
+
+.back-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba($color-primary, 0.35);
+  background: rgba($color-primary-light, 0.12);
+  color: $color-primary-dark;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  &:hover {
+    border-color: $color-primary;
+    background: rgba($color-primary-light, 0.2);
   }
 }
 
@@ -116,7 +138,7 @@
 
 .login-links {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   gap: $spacing-sm;
   font-size: 0.85rem;
 

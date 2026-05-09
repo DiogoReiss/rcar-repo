@@ -5,6 +5,12 @@ test.describe('Login flow', () => {
     await page.goto('/auth/login');
   });
 
+  test('shows landing header auth actions', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('header.home-header .header-actions a[href="/auth/register"]')).toBeVisible();
+    await expect(page.locator('header.home-header .header-actions a[href="/auth/login"]')).toBeVisible();
+  });
+
   test('shows login form', async ({ page }) => {
     await expect(page.getByLabel(/e-mail/i)).toBeVisible();
     await expect(page.getByLabel(/senha/i)).toBeVisible();

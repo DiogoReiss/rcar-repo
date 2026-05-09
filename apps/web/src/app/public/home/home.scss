@@ -53,6 +53,18 @@
     color: #f1f6ff;
   }
 
+  .register-btn {
+    border-color: #425775;
+    color: #f1f6ff;
+    background: #1f2b3e;
+  }
+
+  .login-btn {
+    background: $color-primary;
+    color: #fff;
+    border-color: $color-primary;
+  }
+
   .flow-toggle {
     background: #1a2434;
     border-color: rgba($color-primary-light, 0.35);
@@ -106,13 +118,23 @@
   color: $color-primary-dark;
 }
 
+.register-btn,
 .login-btn {
   text-decoration: none;
   font-weight: 600;
   padding: $spacing-xs $spacing-md;
   border-radius: 8px;
   border: 1px solid $color-primary;
+}
+
+.register-btn {
   color: $color-primary;
+  background: #fff;
+}
+
+.login-btn {
+  background: $color-primary;
+  color: #fff;
 }
 
 .home-content {
