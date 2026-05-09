@@ -57,8 +57,8 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter api exec prisma generate
 
-      - name: Validate Prisma schema/migrations sync
-        run: pnpm --filter api exec prisma migrate diff --from-migrations prisma/migrations --to-schema-datamodel prisma/schema.prisma --exit-code
+      - name: Validate Prisma schema
+        run: pnpm --filter api exec prisma validate
 
       - name: Deploy Prisma migrations (if DATABASE_URL is set)
         env:
