@@ -9,6 +9,17 @@ test.describe('Client first interaction', () => {
     await expect(page.getByRole('heading', { name: /iniciar locação/i })).toBeVisible();
   });
 
+  test('toggles theme and keeps selection after reload', async ({ page }) => {
+    await page.goto('/');
+
+    const themeToggle = page.getByRole('button', { name: /alternar tema/i });
+    await themeToggle.click();
+
+    await expect(page.locator('body')).toHaveAttribute('data-theme', 'dark');
+    await page.reload();
+    await expect(page.locator('body')).toHaveAttribute('data-theme', 'dark');
+  });
+
   test('allows scheduling wash without login', async ({ page }) => {
     await page.goto('/');
 

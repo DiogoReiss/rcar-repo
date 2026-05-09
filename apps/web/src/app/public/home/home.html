@@ -1,7 +1,18 @@
 <section class="home-page">
   <header class="home-header">
     <a class="brand" routerLink="/" aria-label="Página inicial RCar">RCar</a>
-    <a class="login-btn" routerLink="/auth/login">Entrar</a>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="theme-btn"
+        (click)="toggleTheme()"
+        aria-label="Alternar tema"
+        [title]="isDarkTheme() ? 'Ativar tema claro' : 'Ativar tema escuro'"
+      >
+        <i class="pi" [class.pi-sun]="isDarkTheme()" [class.pi-moon]="!isDarkTheme()" aria-hidden="true"></i>
+      </button>
+      <a class="login-btn" routerLink="/auth/login">Entrar</a>
+    </div>
   </header>
 
   <main class="home-content" role="main">

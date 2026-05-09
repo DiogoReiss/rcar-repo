@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth/services/auth.service';
+import ThemeService from '@core/services/theme.service';
 
 const ROLE_LABELS: Record<string, string> = {
   GESTOR_GERAL: 'Gestor Geral',
@@ -18,13 +19,16 @@ const ROLE_LABELS: Record<string, string> = {
 })
 export default class HeaderComponent {
   private readonly authService = inject(AuthService);
+  private readonly themeService = inject(ThemeService);
 
   readonly collapsed = input(false);
   readonly toggleSidebar = output<void>();
   readonly currentUser = this.authService.currentUser;
+  readonly isDarkTheme = this.themeService.isDark;
 
   onToggle(): void { this.toggleSidebar.emit(); }
   logout(): void { this.authService.logout(); }
+  toggleTheme(): void { this.themeService.toggleTheme(); }
   roleLabel(role: string): string { return ROLE_LABELS[role] ?? role; }
 
   userInitials(name: string): string {

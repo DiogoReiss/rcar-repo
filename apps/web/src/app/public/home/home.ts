@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import ThemeService from '@core/services/theme.service';
 
 @Component({
   selector: 'lync-home',
@@ -10,6 +11,10 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class HomeComponent {
+  private readonly themeService = inject(ThemeService);
+
+  readonly isDarkTheme = this.themeService.isDark;
+
   readonly contactName = signal('');
   readonly contactPhone = signal('');
   readonly contactEmail = signal('');
@@ -52,6 +57,10 @@ export default class HomeComponent {
 
   editRentSearch() {
     this.rentStep.set(1);
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
   }
 }
 

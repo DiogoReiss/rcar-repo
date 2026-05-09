@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
+import ThemeService from './core/services/theme.service';
 
 @Component({
   selector: 'lync-root',
@@ -9,4 +10,8 @@ import { Toast } from 'primeng/toast';
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class App {}
+export default class App {
+  private readonly themeService = inject(ThemeService);
+}
+
+
