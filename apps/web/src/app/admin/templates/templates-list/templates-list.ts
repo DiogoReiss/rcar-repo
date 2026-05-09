@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,7 +33,8 @@ export default class TemplatesListComponent {
   private readonly api = inject(ApiService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly htmlEditor = viewChild<ElementRef<HTMLTextAreaElement>>('htmlEditor');
+  private readonly injector = inject(Injector);
+  private readonly richEditor = viewChild<ElementRef<HTMLDivElement>>('richEditor');
 
   readonly templates = signal<Template[]>([]);
   readonly loading = signal(false);
@@ -34,6 +46,9 @@ export default class TemplatesListComponent {
   readonly editHtml = signal('');
   readonly editVars = signal('');
   readonly draggingOverEditor = signal(false);
+  readonly linkPanelOpen = signal(false);
+  readonly linkUrl = signal('');
+  readonly linkText = signal('');
 
   // Preview
   readonly previewHtml = signal<SafeHtml | null>(null);
@@ -69,9 +84,14 @@ export default class TemplatesListComponent {
     this.editVars.set(t.variaveis.join(', '));
     this.previewHtml.set(null);
     this.previewVars.set(this.buildPreviewSeedJson(t.variaveis));
+
+    afterNextRender(() => {
+      this.setEditorContent(t.conteudoHtml);
+    }, { injector: this.injector });
   }
 
   onSave() {
+    this.syncEditorToModel();
     this.saving.set(true);
     const vars = this.parseVars(this.editVars());
     this.api.patch(`/templates/${this.editing()!.id}`, {
@@ -83,6 +103,7 @@ export default class TemplatesListComponent {
   }
 
   onPreview() {
+    this.syncEditorToModel();
     this.previewing.set(true);
     let vars: Record<string, unknown> = {};
     try { vars = JSON.parse(this.previewVars()); } catch { /* use empty */ }
@@ -104,6 +125,142 @@ export default class TemplatesListComponent {
 
   insertVariable(variable: string) {
     this.insertTokenAtCursor(`{{${variable}}}`);
+  }
+
+  applyFormat(command: 'bold' | 'italic' | 'underline' | 'insertUnorderedList') {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.focus();
+    document.execCommand(command, false);
+    this.syncEditorToModel();
+  }
+
+  applyBlock(block: 'H1' | 'H2' | 'P') {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.focus();
+    document.execCommand('formatBlock', false, block);
+    this.syncEditorToModel();
+  }
+
+  undo() {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.focus();
+    document.execCommand('undo', false);
+    this.syncEditorToModel();
+  }
+
+  redo() {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.focus();
+    document.execCommand('redo', false);
+    this.syncEditorToModel();
+  }
+
+  clearFormatting() {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.focus();
+    document.execCommand('removeFormat', false);
+    this.syncEditorToModel();
+  }
+
+  onEditorInput() {
+    this.syncEditorToModel();
+  }
+
+  onEditorKeyDown(event: KeyboardEvent) {
+    const hasCommandKey = event.ctrlKey || event.metaKey;
+    if (!hasCommandKey) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (key === 'k') {
+      event.preventDefault();
+      this.openLinkPanel();
+      return;
+    }
+
+    if (key === 'z' && event.shiftKey) {
+      event.preventDefault();
+      this.redo();
+      return;
+    }
+
+    if (key === 'y') {
+      event.preventDefault();
+      this.redo();
+    }
+  }
+
+  openLinkPanel() {
+    this.linkPanelOpen.set(true);
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim() ?? '';
+    this.linkText.set(selectedText);
+    this.linkUrl.set('https://');
+  }
+
+  closeLinkPanel() {
+    this.linkPanelOpen.set(false);
+    this.linkUrl.set('');
+    this.linkText.set('');
+  }
+
+  insertLinkFromPanel() {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+
+    const href = this.linkUrl().trim();
+    if (!href || href === 'https://') {
+      return;
+    }
+
+    const label = this.linkText().trim() || href;
+    editor.focus();
+
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
+      this.placeCaretAtEnd(editor, selection);
+    }
+    if (!selection.rangeCount) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = label;
+    range.insertNode(link);
+    range.setStartAfter(link);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    this.syncEditorToModel();
+    this.closeLinkPanel();
   }
 
   onVariableDragStart(event: DragEvent, variable: string) {
@@ -136,22 +293,61 @@ export default class TemplatesListComponent {
   }
 
   private insertTokenAtCursor(token: string) {
-    const textarea = this.htmlEditor()?.nativeElement;
-    if (!textarea) {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
       this.editHtml.update((value) => `${value}${token}`);
       return;
     }
 
-    textarea.focus();
-    const current = this.editHtml();
-    const start = textarea.selectionStart ?? current.length;
-    const end = textarea.selectionEnd ?? current.length;
-    const next = `${current.slice(0, start)}${token}${current.slice(end)}`;
+    editor.focus();
+    const selection = window.getSelection();
+    if (!selection) {
+      this.editHtml.update((value) => `${value}${token}`);
+      this.setEditorContent(this.editHtml());
+      return;
+    }
 
-    this.editHtml.set(next);
+    if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
+      this.placeCaretAtEnd(editor, selection);
+    }
 
-    const caret = start + token.length;
-    textarea.setSelectionRange(caret, caret);
+    if (!selection.rangeCount) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    const tokenNode = this.buildTokenNode(token);
+    range.insertNode(tokenNode);
+    range.setStartAfter(tokenNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    this.syncEditorToModel();
+  }
+
+  private setEditorContent(content: string) {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    editor.innerHTML = this.toEditorMarkup(content);
+  }
+
+  private syncEditorToModel() {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+    this.editHtml.set(this.toTemplateMarkup(editor.innerHTML));
+  }
+
+  private placeCaretAtEnd(editor: HTMLDivElement, selection: Selection) {
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   private parseVars(raw: string): string[] {
@@ -186,5 +382,32 @@ export default class TemplatesListComponent {
       const value = vars[key];
       return value === undefined || value === null ? `{{${key}}}` : String(value);
     });
+  }
+
+  private buildTokenNode(token: string): HTMLSpanElement {
+    const span = document.createElement('span');
+    span.className = 'template-token';
+    span.contentEditable = 'false';
+    span.dataset['token'] = token;
+    span.textContent = token;
+    return span;
+  }
+
+  private toEditorMarkup(content: string): string {
+    return content.replace(/{{\s*([\w.]+)\s*}}/g, (_, key: string) => {
+      const token = `{{${key}}}`;
+      return `<span class="template-token" contenteditable="false" data-token="${token}">${token}</span>`;
+    });
+  }
+
+  private toTemplateMarkup(content: string): string {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = content;
+    const tokens = wrapper.querySelectorAll<HTMLSpanElement>('span.template-token[data-token]');
+    for (const token of tokens) {
+      const value = token.dataset['token'] ?? token.textContent ?? '';
+      token.replaceWith(document.createTextNode(value));
+    }
+    return wrapper.innerHTML;
   }
 }

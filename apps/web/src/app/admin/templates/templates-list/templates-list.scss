@@ -65,21 +65,72 @@
   font-size: 0.78rem;
 }
 
-.html-editor {
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.link-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.link-input {
+  border: 1px solid var(--lync-border);
+  border-radius: 6px;
+  padding: $spacing-xs $spacing-sm;
+  font-size: 0.82rem;
+  background: var(--lync-input-bg);
+  color: var(--lync-input-text);
+}
+
+.rich-editor {
   min-height: 320px;
-  font-family: monospace;
+  font-family: $font-family-base;
   font-size: 0.85rem;
-  resize: vertical;
   border: 1px solid var(--lync-border);
   border-radius: 8px;
   padding: $spacing-sm;
   background: var(--lync-input-bg);
   color: var(--lync-input-text);
+  overflow: auto;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+  }
+
 }
 
-.html-editor--dragging {
+:host ::ng-deep .template-token {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--lync-tag-border);
+  background: var(--lync-tag-bg);
+  color: $color-primary-dark;
+  border-radius: 14px;
+  padding: 0 0.45rem;
+  margin: 0 0.1rem;
+  font-family: monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.rich-editor--dragging {
   border-color: $color-primary;
   box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+}
+
+.editor-shortcuts {
+  margin: $spacing-xs 0 0;
+  font-size: 0.74rem;
+  color: var(--lync-text-muted);
 }
 
 .preview-controls { display:flex; gap:0.5rem; align-items:center; }
@@ -101,6 +152,10 @@
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .link-panel {
+    grid-template-columns: 1fr;
   }
 }
 

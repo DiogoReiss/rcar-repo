@@ -167,8 +167,12 @@ export const routes: Routes = [
 - Página: `src/app/admin/templates/templates-list/`
 - Fluxo de edição:
   - define variáveis do template no campo CSV (`clienteNome, valorTotal, ...`)
+  - edita conteúdo em **rich editor** (toolbar de formatação: negrito, itálico, sublinhado e lista)
+  - aplica blocos (`H1`, `H2`, `Parágrafo`) e inserção de link por painel no editor
   - usa **Playground de variáveis** com chips arrastáveis (`{{variavel}}`)
   - pode inserir por drag-and-drop no editor HTML ou por clique no chip (inserção no cursor)
+  - tokens inseridos aparecem como chips inline não-editáveis no editor, mas persistem como Handlebars no HTML salvo
+  - atalhos do editor: `Cmd/Ctrl+K` (link), `Cmd/Ctrl+Z` (desfazer), `Cmd/Ctrl+Shift+Z` / `Cmd/Ctrl+Y` (refazer)
   - renderiza preview com JSON customizável no painel lateral
 - Mock mode (`pnpm --filter web dev:mock`) oferece ciclo completo para testes locais:
   - listagem, edição e persistência em memória

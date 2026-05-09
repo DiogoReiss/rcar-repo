@@ -63,18 +63,59 @@
         </div>
 
         <div class="form-field spacing-top">
-          <label>HTML do Template (suporta Handlebars {{ '{{variavel}}' }})</label>
-          <textarea
-            #htmlEditor
-            class="html-editor"
-            [class.html-editor--dragging]="draggingOverEditor()"
-            [ngModel]="editHtml()"
-            (ngModelChange)="editHtml.set($event)"
+          <label>Editor do Template (arraste chips e formate o conteúdo)</label>
+
+          <div class="editor-toolbar" role="toolbar" aria-label="Formatação do editor">
+            <button type="button" class="btn-secondary btn-sm" (click)="applyBlock('H1')">H1</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyBlock('H2')">H2</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyBlock('P')">Parágrafo</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyFormat('bold')"><strong>B</strong></button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyFormat('italic')"><em>I</em></button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyFormat('underline')"><u>U</u></button>
+            <button type="button" class="btn-secondary btn-sm" (click)="applyFormat('insertUnorderedList')">Lista</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="openLinkPanel()">Link</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="undo()">Desfazer</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="redo()">Refazer</button>
+            <button type="button" class="btn-secondary btn-sm" (click)="clearFormatting()">Limpar</button>
+          </div>
+
+          @if (linkPanelOpen()) {
+            <div class="link-panel">
+              <input
+                [ngModel]="linkUrl()"
+                (ngModelChange)="linkUrl.set($event)"
+                class="link-input"
+                name="linkUrl"
+                placeholder="https://exemplo.com"
+              />
+              <input
+                [ngModel]="linkText()"
+                (ngModelChange)="linkText.set($event)"
+                class="link-input"
+                name="linkText"
+                placeholder="Texto do link"
+              />
+              <button type="button" class="btn-primary btn-sm" (click)="insertLinkFromPanel()">Inserir</button>
+              <button type="button" class="btn-secondary btn-sm" (click)="closeLinkPanel()">Cancelar</button>
+            </div>
+          }
+
+          <div
+            #richEditor
+            class="rich-editor"
+            data-testid="template-rich-editor"
+            contenteditable="true"
+            [class.rich-editor--dragging]="draggingOverEditor()"
+            (input)="onEditorInput()"
+            (keydown)="onEditorKeyDown($event)"
             (dragover)="onEditorDragOver($event)"
             (dragleave)="onEditorDragLeave()"
             (drop)="onEditorDrop($event)"
-            name="html"
-          ></textarea>
+          ></div>
+
+          <p class="editor-shortcuts">
+            Atalhos: Cmd/Ctrl+K (link), Cmd/Ctrl+Z (desfazer), Cmd/Ctrl+Shift+Z ou Cmd/Ctrl+Y (refazer)
+          </p>
         </div>
 
         <div class="form-actions spacing-top-lg">

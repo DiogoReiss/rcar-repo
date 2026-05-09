@@ -20,13 +20,23 @@ test.describe('Templates editor', () => {
     const varsInput = page.locator('input[name="vars"]');
     await varsInput.fill('nomeCliente, valorTotal, assinaturaDigital');
 
-    const editor = page.locator('textarea[name="html"]');
-    await editor.fill('<p>{{nomeCliente}}</p><p>{{valorTotal}}</p>');
+    const editor = page.locator('[data-testid="template-rich-editor"]');
     await editor.click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type('{{nomeCliente}} {{valorTotal}}');
+
+    await page.getByRole('button', { name: /^H2$/ }).click();
+    await page.getByRole('button', { name: /^Link$/ }).click();
+    await page.locator('input[name="linkUrl"]').fill('https://rcar.dev/docs');
+    await page.locator('input[name="linkText"]').fill('Documentacao RCar');
+    await page.getByRole('button', { name: /^Inserir$/ }).click();
+
     await editor.press('End');
     await page.getByRole('button', { name: '{{assinaturaDigital}}' }).click();
 
-    await expect(editor).toHaveValue(/{{assinaturaDigital}}/);
+    await expect(editor).toContainText('{{assinaturaDigital}}');
+    await expect(editor.locator('.template-token[data-token="{{assinaturaDigital}}"]')).toBeVisible();
 
     await page.locator('input[name="pvars"]').fill(
       '{"nomeCliente":"Joao","valorTotal":"199.90","assinaturaDigital":"Assinado digitalmente"}',
