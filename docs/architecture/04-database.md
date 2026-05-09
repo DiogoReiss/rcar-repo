@@ -471,9 +471,10 @@ model Payment {
 
 enum TemplateType {
   CONTRATO_LOCACAO
-  RECIBO_PAGAMENTO
-  TERMO_VISTORIA
-  OUTRO
+  RECIBO_LAVAGEM
+  RECIBO_LOCACAO
+  VISTORIA
+  TERMO_RESPONSABILIDADE
 }
 
 model Template {
@@ -619,6 +620,21 @@ async function main() {
       nome: 'Recibo de Lavagem',
       tipo: 'RECIBO_LAVAGEM',
       variaveis: ['nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
+    },
+    {
+      nome: 'Termo de Vistoria - Saída',
+      tipo: 'VISTORIA',
+      variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+    },
+    {
+      nome: 'Termo de Vistoria - Chegada',
+      tipo: 'VISTORIA',
+      variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+    },
+    {
+      nome: 'Termo de Responsabilidade do Locatário',
+      tipo: 'TERMO_RESPONSABILIDADE',
+      variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'dataRetirada', 'dataDevolucao', 'valorTotal'],
     },
   ];
 

@@ -84,6 +84,7 @@ export default class TemplatesListComponent {
     { value: 'RECIBO_LOCACAO', label: 'Recibo de Locação' },
     { value: 'RECIBO_LAVAGEM', label: 'Recibo de Lavagem' },
     { value: 'VISTORIA', label: 'Termo de Vistoria' },
+    { value: 'TERMO_RESPONSABILIDADE', label: 'Termo de Responsabilidade' },
   ];
 
   readonly variableCatalog: Record<string, VariableOption[]> = {
@@ -125,6 +126,15 @@ export default class TemplatesListComponent {
       { value: 'data', label: 'Vistoria - data' },
       { value: 'tipo', label: 'Vistoria - tipo' },
     ],
+    TERMO_RESPONSABILIDADE: [
+      { value: 'nomeCliente', label: 'Cliente - nome' },
+      { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
+      { value: 'veiculo', label: 'Veículo - modelo' },
+      { value: 'placa', label: 'Veículo - placa' },
+      { value: 'dataRetirada', label: 'Locação - retirada' },
+      { value: 'dataDevolucao', label: 'Locação - devolução' },
+      { value: 'valorTotal', label: 'Locação - valor total' },
+    ],
   };
 
   readonly tipoLabel: Record<string, string> = {
@@ -132,6 +142,7 @@ export default class TemplatesListComponent {
     RECIBO_LAVAGEM: 'Recibo Lavagem',
     RECIBO_LOCACAO: 'Recibo Locação',
     VISTORIA: 'Termo de Vistoria',
+    TERMO_RESPONSABILIDADE: 'Termo de Responsabilidade',
   };
 
   constructor() {

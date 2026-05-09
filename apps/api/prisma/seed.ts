@@ -63,6 +63,48 @@ const defaultTemplates = [
 <p style="margin-top:40px">Obrigado por escolher a RCar.</p>`,
     variaveis: ['nomeCliente', 'telefoneCliente', 'servico', 'placa', 'data', 'valor'],
   },
+  {
+    nome: 'Termo de Vistoria - Saída',
+    tipo: 'VISTORIA' as const,
+    conteudoHtml: `<h2>TERMO DE VISTORIA - SAÍDA</h2>
+<p><strong>Cliente:</strong> {{nomeCliente}}</p>
+<p><strong>Veículo:</strong> {{veiculo}} ({{placa}})</p>
+<p><strong>KM:</strong> {{km}}</p>
+<p><strong>Data:</strong> {{data}}</p>
+<p><strong>Tipo:</strong> {{tipo}}</p>
+<p style="margin-top:40px">Declaro que recebi o veículo nas condições acima.</p>
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Cliente</p>`,
+    variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+  },
+  {
+    nome: 'Termo de Vistoria - Chegada',
+    tipo: 'VISTORIA' as const,
+    conteudoHtml: `<h2>TERMO DE VISTORIA - DEVOLUÇÃO</h2>
+<p><strong>Cliente:</strong> {{nomeCliente}}</p>
+<p><strong>Veículo:</strong> {{veiculo}} ({{placa}})</p>
+<p><strong>KM Devolução:</strong> {{km}}</p>
+<p><strong>Data:</strong> {{data}}</p>
+<p><strong>Tipo:</strong> {{tipo}}</p>
+<p style="margin-top:40px">Condição geral registrada na devolução do veículo.</p>
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Responsável</p>`,
+    variaveis: ['nomeCliente', 'veiculo', 'placa', 'km', 'data', 'tipo'],
+  },
+  {
+    nome: 'Termo de Responsabilidade do Locatário',
+    tipo: 'TERMO_RESPONSABILIDADE' as const,
+    conteudoHtml: `<h2>TERMO DE RESPONSABILIDADE</h2>
+<p>Eu, <strong>{{nomeCliente}}</strong>, inscrito(a) em {{cpfCnpj}}, declaro estar ciente das regras de uso do veículo <strong>{{veiculo}}</strong> de placa <strong>{{placa}}</strong>.</p>
+<p><strong>Início da locação:</strong> {{dataRetirada}}</p>
+<p><strong>Previsão de devolução:</strong> {{dataDevolucao}}</p>
+<p><strong>Valor acordado:</strong> R$ {{valorTotal}}</p>
+<ul>
+  <li>Responsabilidade por multas e infrações durante o período de locação.</li>
+  <li>Responsabilidade por danos causados por uso indevido.</li>
+  <li>Devolução no prazo e condições acordadas.</li>
+</ul>
+<p style="margin-top:48px">_____________________________________<br/>Assinatura do Locatário</p>`,
+    variaveis: ['nomeCliente', 'cpfCnpj', 'veiculo', 'placa', 'dataRetirada', 'dataDevolucao', 'valorTotal'],
+  },
 ];
 
 async function main() {

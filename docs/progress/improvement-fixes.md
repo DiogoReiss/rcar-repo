@@ -107,4 +107,5 @@
 
 - Expanded API seed (`apps/api/prisma/seed.ts`) to populate default templates for all current `TemplateType` values.
 - Seed now applies templates idempotently by `nome + tipo`, updating content/variables when template already exists.
+- Extended Prisma `TemplateType` with `VISTORIA` and `TERMO_RESPONSABILIDADE` + migration `20260509121500_extend_template_type_enum`.
 
