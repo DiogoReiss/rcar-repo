@@ -98,6 +98,8 @@
 - Reworked `/admin/templates` editor with a playful variable playground (drag-and-drop chips + click-to-insert at cursor).
 - Added a richer contenteditable editor with formatting toolbar for non-technical users.
 - Added block controls (H1/H2/parágrafo), link insertion panel, inline non-editable token chips, and undo/redo shortcuts.
+- Added template creation flow (`+ Novo Template`) using shared modal/form components.
+- Replaced free-text template variables with dropdown selector from app variable catalog per template type.
 - Improved mock-mode support for templates with in-memory CRUD persistence and `/templates/:id/preview` interpolation.
 - Added focused Playwright coverage in `apps/web/e2e/templates.spec.ts` for variable insertion + preview rendering flow.
 

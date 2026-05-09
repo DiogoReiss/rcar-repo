@@ -165,8 +165,11 @@ export const routes: Routes = [
 
 - Rota: `/admin/templates`
 - Página: `src/app/admin/templates/templates-list/`
+- Fluxo de cadastro:
+  - botão `+ Novo Template` abre modal com nome, tipo, conteúdo inicial e variáveis
+  - variáveis são escolhidas por **dropdown de catálogo da aplicação** (por tipo de template), sem campo livre
 - Fluxo de edição:
-  - define variáveis do template no campo CSV (`clienteNome, valorTotal, ...`)
+  - define variáveis por seletor (`dropdown + adicionar`) com chips removíveis
   - edita conteúdo em **rich editor** (toolbar de formatação: negrito, itálico, sublinhado e lista)
   - aplica blocos (`H1`, `H2`, `Parágrafo`) e inserção de link por painel no editor
   - usa **Playground de variáveis** com chips arrastáveis (`{{variavel}}`)

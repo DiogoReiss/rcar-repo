@@ -9,6 +9,25 @@ async function adminLogin(page: import('@playwright/test').Page) {
 }
 
 test.describe('Templates editor', () => {
+  test('creates a new template from admin', async ({ page }) => {
+    await adminLogin(page);
+
+    await page.goto('/admin/templates');
+    await page.getByRole('button', { name: /\+ novo template/i }).click();
+
+    await page.locator('input[name="createName"]').fill('Template de Teste E2E');
+    await page.locator('select[name="createTipo"]').selectOption('RECIBO_LAVAGEM');
+
+    await page.locator('select[name="createVariableToAdd"]').selectOption('servico');
+    await page.getByRole('button', { name: /^Adicionar$/ }).first().click();
+
+    await page.locator('textarea[name="createContent"]').fill('<h2>Recibo Teste</h2><p>{{nomeCliente}}</p><p>{{servico}}</p>');
+    await page.getByRole('button', { name: /criar template/i }).click();
+
+    await expect(page.getByRole('heading', { name: /editar: template de teste e2e/i })).toBeVisible();
+    await expect(page.locator('[data-testid="template-rich-editor"]')).toContainText('{{servico}}');
+  });
+
   test('inserts variable chips and previews with mock data', async ({ page }) => {
     await adminLogin(page);
 
@@ -17,8 +36,8 @@ test.describe('Templates editor', () => {
 
     await page.getByRole('button', { name: /editar \/ preview/i }).first().click();
 
-    const varsInput = page.locator('input[name="vars"]');
-    await varsInput.fill('nomeCliente, valorTotal, assinaturaDigital');
+    await page.locator('select[name="editVariableToAdd"]').selectOption('emailCliente');
+    await page.getByRole('button', { name: /^Adicionar$/ }).first().click();
 
     const editor = page.locator('[data-testid="template-rich-editor"]');
     await editor.click();
@@ -33,17 +52,17 @@ test.describe('Templates editor', () => {
     await page.getByRole('button', { name: /^Inserir$/ }).click();
 
     await editor.press('End');
-    await page.getByRole('button', { name: '{{assinaturaDigital}}' }).click();
+    await page.locator('.palette-chip', { hasText: '{{emailCliente}}' }).click();
 
-    await expect(editor).toContainText('{{assinaturaDigital}}');
-    await expect(editor.locator('.template-token[data-token="{{assinaturaDigital}}"]')).toBeVisible();
+    await expect(editor).toContainText('{{emailCliente}}');
+    await expect(editor.locator('.template-token[data-token="{{emailCliente}}"]')).toBeVisible();
 
     await page.locator('input[name="pvars"]').fill(
-      '{"nomeCliente":"Joao","valorTotal":"199.90","assinaturaDigital":"Assinado digitalmente"}',
+      '{"nomeCliente":"Joao","emailCliente":"joao@rcar.dev"}',
     );
     await page.getByRole('button', { name: /renderizar/i }).click();
 
-    await expect(page.locator('.preview-frame')).toContainText('Assinado digitalmente');
+    await expect(page.locator('.preview-frame')).toContainText('joao@rcar.dev');
   });
 });
 

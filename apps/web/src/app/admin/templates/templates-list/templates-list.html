@@ -1,5 +1,7 @@
 <section class="page">
-  <lync-page-header title="Templates de Documentos" />
+  <lync-page-header title="Templates de Documentos">
+    <lync-btn label="+ Novo Template" (clicked)="openCreateDialog()" />
+  </lync-page-header>
 
   @if (loading()) {
     <div class="loading">Carregando...</div>
@@ -36,9 +38,37 @@
           <input [ngModel]="editName()" (ngModelChange)="editName.set($event)" name="nome" />
         </div>
 
-        <div class="form-field spacing-top">
-          <label>Variáveis disponíveis (separadas por vírgula)</label>
-          <input [ngModel]="editVars()" (ngModelChange)="editVars.set($event)" name="vars" placeholder="clienteNome, valorTotal, data" />
+        <div class="form-grid spacing-top">
+          <lync-form-field label="Tipo de template" [required]="true">
+            <select [ngModel]="editTipo()" (ngModelChange)="onEditTipoChange($event)" name="tipoEdicao">
+              @for (typeOption of templateTypeOptions; track typeOption.value) {
+                <option [value]="typeOption.value">{{ typeOption.label }}</option>
+              }
+            </select>
+          </lync-form-field>
+
+          <lync-form-field label="Variáveis disponíveis" [required]="true" [full]="true">
+            <div class="variable-picker-row">
+              <select [ngModel]="editVariableToAdd()" (ngModelChange)="editVariableToAdd.set($event)" name="editVariableToAdd">
+                <option value="">Selecione uma variável</option>
+                @for (option of availableEditVariableOptions(); track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+              <lync-btn label="Adicionar" size="sm" variant="secondary" (clicked)="addEditVariable()" />
+            </div>
+            <div class="selected-vars">
+              @for (variable of editSelectedVars(); track variable) {
+                <button type="button" class="selected-var-chip" (click)="removeEditVariable(variable)">
+                  {{ '{{' + variable + '}}' }}
+                  <span aria-hidden="true">×</span>
+                </button>
+              }
+              @if (!editSelectedVars().length) {
+                <span class="palette-empty">Adicione ao menos uma variável para usar no template.</span>
+              }
+            </div>
+          </lync-form-field>
         </div>
 
         <div class="playground">
@@ -107,6 +137,9 @@
             contenteditable="true"
             [class.rich-editor--dragging]="draggingOverEditor()"
             (input)="onEditorInput()"
+            (mouseup)="onEditorSelectionChange()"
+            (keyup)="onEditorSelectionChange()"
+            (focus)="onEditorSelectionChange()"
             (keydown)="onEditorKeyDown($event)"
             (dragover)="onEditorDragOver($event)"
             (dragleave)="onEditorDragLeave()"
@@ -143,6 +176,58 @@
     </div>
   }
 </section>
+
+<lync-entity-dialog
+  title="Novo Template"
+  [visible]="createDialogOpen()"
+  [loading]="creating()"
+  saveLabel="Criar template"
+  [wide]="true"
+  (submitted)="onCreateTemplate()"
+  (cancelled)="closeCreateDialog()"
+  (visibleChange)="createDialogOpen.set($event)"
+>
+  <div class="form-grid">
+    <lync-form-field label="Nome" [required]="true" [full]="true">
+      <input [ngModel]="createName()" (ngModelChange)="createName.set($event)" name="createName" placeholder="Ex.: Contrato Executivo" />
+    </lync-form-field>
+
+    <lync-form-field label="Tipo" [required]="true">
+      <select [ngModel]="createTipo()" (ngModelChange)="onCreateTipoChange($event)" name="createTipo">
+        @for (typeOption of templateTypeOptions; track typeOption.value) {
+          <option [value]="typeOption.value">{{ typeOption.label }}</option>
+        }
+      </select>
+    </lync-form-field>
+
+    <lync-form-field label="Variáveis" [required]="true" [full]="true">
+      <div class="variable-picker-row">
+        <select [ngModel]="createVariableToAdd()" (ngModelChange)="createVariableToAdd.set($event)" name="createVariableToAdd">
+          <option value="">Selecione uma variável</option>
+          @for (option of availableCreateVariableOptions(); track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+        <lync-btn label="Adicionar" size="sm" variant="secondary" (clicked)="addCreateVariable()" />
+      </div>
+      <div class="selected-vars">
+        @for (variable of createSelectedVars(); track variable) {
+          <button type="button" class="selected-var-chip" (click)="removeCreateVariable(variable)">
+            {{ '{{' + variable + '}}' }}
+            <span aria-hidden="true">×</span>
+          </button>
+        }
+        @if (!createSelectedVars().length) {
+          <span class="palette-empty">Selecione pelo menos uma variável.</span>
+        }
+      </div>
+    </lync-form-field>
+
+    <lync-form-field label="Conteúdo inicial (HTML)" [full]="true">
+      <textarea [ngModel]="createContent()" (ngModelChange)="createContent.set($event)" name="createContent" rows="5"></textarea>
+    </lync-form-field>
+  </div>
+</lync-entity-dialog>
 
 
 

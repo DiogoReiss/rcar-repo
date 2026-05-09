@@ -65,6 +65,46 @@
   font-size: 0.78rem;
 }
 
+.variable-picker-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $spacing-xs;
+  align-items: center;
+}
+
+.selected-vars {
+  margin-top: $spacing-xs;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.selected-var-chip {
+  border: 1px solid var(--lync-tag-border);
+  background: var(--lync-tag-bg);
+  color: $color-primary-dark;
+  border-radius: 14px;
+  padding: 0.2rem 0.55rem;
+  font-family: monospace;
+  font-size: 0.76rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--lync-border);
+  border-radius: 6px;
+  padding: $spacing-xs $spacing-sm;
+  font-size: 0.85rem;
+  background: var(--lync-input-bg);
+  color: var(--lync-input-text);
+}
+
 .editor-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -98,6 +138,8 @@
   background: var(--lync-input-bg);
   color: var(--lync-input-text);
   overflow: auto;
+  cursor: text;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 
   &:focus {
     outline: none;
@@ -155,6 +197,10 @@
   }
 
   .link-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .variable-picker-row {
     grid-template-columns: 1fr;
   }
 }

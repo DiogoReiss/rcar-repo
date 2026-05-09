@@ -16,15 +16,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '@core/services/api.service';
 import { environment } from '@env/environment';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
+import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
+import AppButtonComponent from '@shared/components/app-button/app-button';
+import FormFieldComponent from '@shared/components/form-field/form-field';
 
 interface Template {
   id: string; nome: string; tipo: string;
   conteudoHtml: string; variaveis: string[]; ativo: boolean;
 }
 
+interface VariableOption {
+  value: string;
+  label: string;
+}
+
 @Component({
   selector: 'lync-templates-list',
-  imports: [FormsModule, PageHeaderComponent],
+  imports: [FormsModule, PageHeaderComponent, EntityDialogComponent, AppButtonComponent, FormFieldComponent],
   templateUrl: './templates-list.html',
   styleUrl: './templates-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +43,7 @@ export default class TemplatesListComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly richEditor = viewChild<ElementRef<HTMLDivElement>>('richEditor');
+  private lastEditorRange: Range | null = null;
 
   readonly templates = signal<Template[]>([]);
   readonly loading = signal(false);
@@ -44,23 +53,85 @@ export default class TemplatesListComponent {
   readonly saving = signal(false);
   readonly editName = signal('');
   readonly editHtml = signal('');
-  readonly editVars = signal('');
+  readonly editTipo = signal('CONTRATO_LOCACAO');
+  readonly editSelectedVars = signal<string[]>([]);
+  readonly editVariableToAdd = signal('');
   readonly draggingOverEditor = signal(false);
   readonly linkPanelOpen = signal(false);
   readonly linkUrl = signal('');
   readonly linkText = signal('');
+
+  // Create template dialog
+  readonly createDialogOpen = signal(false);
+  readonly creating = signal(false);
+  readonly createName = signal('');
+  readonly createTipo = signal('CONTRATO_LOCACAO');
+  readonly createContent = signal('<h2>Novo template</h2><p>{{nomeCliente}}</p>');
+  readonly createSelectedVars = signal<string[]>(['nomeCliente']);
+  readonly createVariableToAdd = signal('');
 
   // Preview
   readonly previewHtml = signal<SafeHtml | null>(null);
   readonly previewVars = signal('{}');
   readonly previewing = signal(false);
   readonly isMock = environment.mock;
-  readonly variableList = computed(() => this.parseVars(this.editVars()));
+  readonly variableList = computed(() => this.editSelectedVars());
+  readonly availableEditVariableOptions = computed(() => this.availableVariablesForType(this.editTipo()).filter((option) => !this.editSelectedVars().includes(option.value)));
+  readonly availableCreateVariableOptions = computed(() => this.availableVariablesForType(this.createTipo()).filter((option) => !this.createSelectedVars().includes(option.value)));
+
+  readonly templateTypeOptions: Array<{ value: string; label: string }> = [
+    { value: 'CONTRATO_LOCACAO', label: 'Contrato de Locação' },
+    { value: 'RECIBO_LOCACAO', label: 'Recibo de Locação' },
+    { value: 'RECIBO_LAVAGEM', label: 'Recibo de Lavagem' },
+    { value: 'VISTORIA', label: 'Termo de Vistoria' },
+  ];
+
+  readonly variableCatalog: Record<string, VariableOption[]> = {
+    CONTRATO_LOCACAO: [
+      { value: 'nomeCliente', label: 'Cliente - nome' },
+      { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
+      { value: 'emailCliente', label: 'Cliente - e-mail' },
+      { value: 'telefoneCliente', label: 'Cliente - telefone' },
+      { value: 'veiculo', label: 'Veículo - modelo' },
+      { value: 'placa', label: 'Veículo - placa' },
+      { value: 'categoria', label: 'Veículo - categoria' },
+      { value: 'dataRetirada', label: 'Locação - retirada' },
+      { value: 'dataDevolucao', label: 'Locação - devolução' },
+      { value: 'valorDiaria', label: 'Locação - valor diária' },
+      { value: 'valorTotal', label: 'Locação - valor total' },
+    ],
+    RECIBO_LOCACAO: [
+      { value: 'nomeCliente', label: 'Cliente - nome' },
+      { value: 'cpfCnpj', label: 'Cliente - CPF/CNPJ' },
+      { value: 'veiculo', label: 'Veículo - modelo' },
+      { value: 'placa', label: 'Veículo - placa' },
+      { value: 'data', label: 'Recibo - data' },
+      { value: 'valor', label: 'Recibo - valor pago' },
+      { value: 'formaPagamento', label: 'Recibo - forma de pagamento' },
+    ],
+    RECIBO_LAVAGEM: [
+      { value: 'nomeCliente', label: 'Cliente - nome' },
+      { value: 'telefoneCliente', label: 'Cliente - telefone' },
+      { value: 'servico', label: 'Lavagem - serviço' },
+      { value: 'placa', label: 'Veículo - placa' },
+      { value: 'data', label: 'Lavagem - data' },
+      { value: 'valor', label: 'Lavagem - valor' },
+    ],
+    VISTORIA: [
+      { value: 'nomeCliente', label: 'Cliente - nome' },
+      { value: 'veiculo', label: 'Veículo - modelo' },
+      { value: 'placa', label: 'Veículo - placa' },
+      { value: 'km', label: 'Vistoria - KM' },
+      { value: 'data', label: 'Vistoria - data' },
+      { value: 'tipo', label: 'Vistoria - tipo' },
+    ],
+  };
 
   readonly tipoLabel: Record<string, string> = {
     CONTRATO_LOCACAO: 'Contrato de Locação',
     RECIBO_LAVAGEM: 'Recibo Lavagem',
     RECIBO_LOCACAO: 'Recibo Locação',
+    VISTORIA: 'Termo de Vistoria',
   };
 
   constructor() {
@@ -80,8 +151,10 @@ export default class TemplatesListComponent {
   startEdit(t: Template) {
     this.editing.set(t);
     this.editName.set(t.nome);
+    this.editTipo.set(t.tipo);
     this.editHtml.set(t.conteudoHtml);
-    this.editVars.set(t.variaveis.join(', '));
+    this.editSelectedVars.set(t.variaveis);
+    this.editVariableToAdd.set('');
     this.previewHtml.set(null);
     this.previewVars.set(this.buildPreviewSeedJson(t.variaveis));
 
@@ -91,15 +164,107 @@ export default class TemplatesListComponent {
   }
 
   onSave() {
+    if (!this.editName().trim() || !this.editSelectedVars().length) {
+      return;
+    }
     this.syncEditorToModel();
     this.saving.set(true);
-    const vars = this.parseVars(this.editVars());
+    const vars = this.editSelectedVars();
     this.api.patch(`/templates/${this.editing()!.id}`, {
-      nome: this.editName(), conteudoHtml: this.editHtml(), variaveis: vars,
+      nome: this.editName(),
+      tipo: this.editTipo(),
+      conteudoHtml: this.editHtml(),
+      variaveis: vars,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.editing.set(null); this.saving.set(false); this.load(); },
       error: () => this.saving.set(false),
     });
+  }
+
+  openCreateDialog() {
+    this.createName.set('');
+    this.createTipo.set('CONTRATO_LOCACAO');
+    this.createContent.set('<h2>Novo template</h2><p>{{nomeCliente}}</p>');
+    this.createSelectedVars.set(['nomeCliente']);
+    this.createVariableToAdd.set('');
+    this.createDialogOpen.set(true);
+  }
+
+  closeCreateDialog() {
+    this.createDialogOpen.set(false);
+  }
+
+  onCreateTemplate() {
+    if (!this.createName().trim() || !this.createSelectedVars().length) {
+      return;
+    }
+    this.creating.set(true);
+    const payload = {
+      nome: this.createName().trim(),
+      tipo: this.createTipo(),
+      conteudoHtml: this.createContent(),
+      variaveis: this.createSelectedVars(),
+      ativo: true,
+    };
+
+    this.api.post<Template>('/templates', payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (created) => {
+          this.creating.set(false);
+          this.createDialogOpen.set(false);
+          this.load();
+          this.startEdit(created);
+        },
+        error: () => {
+          this.creating.set(false);
+        },
+      });
+  }
+
+  onEditTipoChange(tipo: string) {
+    this.editTipo.set(tipo);
+    const allowed = new Set(this.availableVariablesForType(tipo).map((item) => item.value));
+    this.editSelectedVars.update((current) => current.filter((item) => allowed.has(item)));
+    this.editVariableToAdd.set('');
+  }
+
+  onCreateTipoChange(tipo: string) {
+    this.createTipo.set(tipo);
+    const allowed = new Set(this.availableVariablesForType(tipo).map((item) => item.value));
+    this.createSelectedVars.update((current) => {
+      const filtered = current.filter((item) => allowed.has(item));
+      return filtered.length ? filtered : ['nomeCliente'];
+    });
+    this.createVariableToAdd.set('');
+  }
+
+  addEditVariable() {
+    const value = this.editVariableToAdd();
+    if (!value) {
+      return;
+    }
+    this.editSelectedVars.update((current) => current.includes(value) ? current : [...current, value]);
+    this.editVariableToAdd.set('');
+    this.previewVars.set(this.buildPreviewSeedJson(this.editSelectedVars()));
+  }
+
+  removeEditVariable(variable: string) {
+    this.editSelectedVars.update((current) => current.filter((item) => item !== variable));
+    this.previewVars.set(this.buildPreviewSeedJson(this.editSelectedVars()));
+  }
+
+  addCreateVariable() {
+    const value = this.createVariableToAdd();
+    if (!value) {
+      return;
+    }
+    this.createSelectedVars.update((current) => current.includes(value) ? current : [...current, value]);
+    this.createVariableToAdd.set('');
+  }
+
+  removeCreateVariable(variable: string) {
+    this.createSelectedVars.update((current) => current.filter((item) => item !== variable));
   }
 
   onPreview() {
@@ -178,7 +343,12 @@ export default class TemplatesListComponent {
   }
 
   onEditorInput() {
+    this.captureEditorSelection();
     this.syncEditorToModel();
+  }
+
+  onEditorSelectionChange() {
+    this.captureEditorSelection();
   }
 
   onEditorKeyDown(event: KeyboardEvent) {
@@ -289,6 +459,7 @@ export default class TemplatesListComponent {
     if (!token) {
       return;
     }
+    this.placeCaretFromPoint(event.clientX, event.clientY);
     this.insertTokenAtCursor(token);
   }
 
@@ -307,6 +478,8 @@ export default class TemplatesListComponent {
       return;
     }
 
+    this.restoreEditorSelection(selection, editor);
+
     if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
       this.placeCaretAtEnd(editor, selection);
     }
@@ -323,7 +496,46 @@ export default class TemplatesListComponent {
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
+    this.lastEditorRange = range.cloneRange();
     this.syncEditorToModel();
+  }
+
+  private placeCaretFromPoint(x: number, y: number) {
+    const editor = this.richEditor()?.nativeElement;
+    if (!editor) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const doc = document as Document & {
+      caretRangeFromPoint?: (px: number, py: number) => Range | null;
+      caretPositionFromPoint?: (px: number, py: number) => { offsetNode: Node; offset: number } | null;
+    };
+
+    let range: Range | null = null;
+    if (typeof doc.caretRangeFromPoint === 'function') {
+      range = doc.caretRangeFromPoint(x, y);
+    } else if (typeof doc.caretPositionFromPoint === 'function') {
+      const position = doc.caretPositionFromPoint(x, y);
+      if (position) {
+        range = document.createRange();
+        range.setStart(position.offsetNode, position.offset);
+        range.collapse(true);
+      }
+    }
+
+    if (!range || !this.isRangeInsideEditor(range, editor)) {
+      this.placeCaretAtEnd(editor, selection);
+      return;
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+    this.lastEditorRange = range.cloneRange();
   }
 
   private setEditorContent(content: string) {
@@ -348,14 +560,39 @@ export default class TemplatesListComponent {
     range.collapse(false);
     selection.removeAllRanges();
     selection.addRange(range);
+    this.lastEditorRange = range.cloneRange();
   }
 
-  private parseVars(raw: string): string[] {
-    return raw
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .filter((item, index, all) => all.indexOf(item) === index);
+  private captureEditorSelection() {
+    const editor = this.richEditor()?.nativeElement;
+    const selection = window.getSelection();
+    if (!editor || !selection || !selection.rangeCount) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!this.isRangeInsideEditor(range, editor)) {
+      return;
+    }
+
+    this.lastEditorRange = range.cloneRange();
+  }
+
+  private restoreEditorSelection(selection: Selection, editor: HTMLDivElement) {
+    if (!this.lastEditorRange || !this.isRangeInsideEditor(this.lastEditorRange, editor)) {
+      return;
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(this.lastEditorRange.cloneRange());
+  }
+
+  private isRangeInsideEditor(range: Range, editor: HTMLDivElement): boolean {
+    return editor.contains(range.startContainer) && editor.contains(range.endContainer);
+  }
+
+  private availableVariablesForType(tipo: string): VariableOption[] {
+    return this.variableCatalog[tipo] ?? this.variableCatalog['CONTRATO_LOCACAO'];
   }
 
   private buildPreviewSeedJson(vars: string[]): string {
