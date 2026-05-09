@@ -2,6 +2,7 @@
 
 **Started:** 2026-05-06
 **Completed:** 2026-05-06
+**Follow-up:** 2026-05-09
 **Source:** `docs/progress/roadmap.md` → "Deep Code Review — Improvement Points"
 
 ---
@@ -85,3 +86,10 @@
 - **Q9** ✅ Resolved — `packages/shared-types` is the single source of truth for all domain types.
 - All code builds cleanly (`pnpm build` passes for both `api` and `web`).
 - See `docs/progress/deep-review-2.md` for the next round of improvement points (S8–S12, D6–D9, A11–A18, Q11–Q18).
+
+### 2026-05-09 auth follow-up
+
+- Added customer self-register endpoint (`POST /api/auth/register`) and aligned web auth flow with `/auth/register` page.
+- Hardened auth Playwright selectors in `apps/web/e2e/auth.spec.ts` to reduce flakiness around login-page link detection.
+- Verified full web E2E suite after changes: `pnpm --filter web test:e2e` → 17 passed.
+

@@ -215,6 +215,26 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     else                                    mockCurrentUser = MOCK_ADMIN_USER;
     return ok({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token', user: mockCurrentUser });
   }
+  if (method === 'POST' && path === '/auth/register') {
+    const body = (req.body ?? {}) as { nome?: string; email?: string };
+    const email = (body.email ?? '').toLowerCase();
+    const existing = MOCK_USERS_LIST.find((u) => String((u as { email?: string }).email ?? '').toLowerCase() === email);
+    if (existing) {
+      return of(new HttpResponse({ status: 400, body: { message: 'E-mail já cadastrado.' } }));
+    }
+
+    const newUser = {
+      id: `u${MOCK_USERS_LIST.length + 10}`,
+      nome: body.nome ?? 'Novo Cliente',
+      email: body.email ?? 'cliente@rcar.dev',
+      role: 'CLIENTE' as const,
+      ativo: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    MOCK_USERS_LIST.unshift(newUser);
+    return ok({ message: 'Conta criada com sucesso. Faça login para continuar.', user: newUser });
+  }
   if (method === 'GET'  && path === '/auth/me')   return ok(mockCurrentUser);
   if (method === 'POST' && (path === '/auth/logout' || path === '/auth/refresh')) return ok({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
   if (method === 'POST' && path === '/auth/forgot-password') return ok({ message: 'E-mail enviado (mock).' });

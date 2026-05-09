@@ -11,6 +11,7 @@ import { LoginAttemptsService } from './login-attempts.service.js';
 const mockPrisma = {
   user: {
     findUnique: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
   },
   passwordResetToken: {
@@ -92,6 +93,51 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'x@x.com', senha: 'pass' }, mockRes),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('register', () => {
+    it('should create account with CLIENTE role', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({
+        id: 'u100',
+        nome: 'Novo Cliente',
+        email: 'novo@rcar.com.br',
+        role: 'CLIENTE',
+        ativo: true,
+        createdAt: new Date(),
+      });
+
+      const result = await service.register({
+        nome: 'Novo Cliente',
+        email: 'novo@rcar.com.br',
+        senha: 'senha1234',
+      });
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            role: 'CLIENTE',
+            ativo: true,
+          }),
+        }),
+      );
+      expect(result.message).toContain('Conta criada com sucesso');
+    });
+
+    it('should reject duplicate email', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'admin@rcar.dev',
+      });
+
+      await expect(
+        service.register({
+          nome: 'Duplicado',
+          email: 'admin@rcar.dev',
+          senha: 'senha1234',
+        }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

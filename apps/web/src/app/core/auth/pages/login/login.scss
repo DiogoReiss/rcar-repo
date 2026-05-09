@@ -114,6 +114,22 @@
   &:hover { text-decoration: underline; }
 }
 
+.login-links {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  font-size: 0.85rem;
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 // ─── Mock quick-access ────────────────────────────────────────────────────────
 .quick-access {
   margin-top: $spacing-lg;

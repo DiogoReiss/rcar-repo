@@ -66,6 +66,7 @@ apps/
         │   │   │   └── refresh-jwt.strategy.ts
         │   │   └── dto/
         │   │       ├── login.dto.ts
+        │   │       ├── register.dto.ts
         │   │       └── token-response.dto.ts
         │   │
         │   ├── users/
@@ -187,6 +188,7 @@ apps/
 ### Auth
 
 ```
+POST   /api/auth/register           # Cadastro de cliente (role CLIENTE)
 POST   /api/auth/login              # Login → { accessToken, refreshToken }
 POST   /api/auth/refresh            # Refresh token
 POST   /api/auth/forgot-password    # Envia e-mail de recuperação

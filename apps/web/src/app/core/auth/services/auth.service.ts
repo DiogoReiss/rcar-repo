@@ -5,6 +5,12 @@ import { Observable, tap } from 'rxjs';
 import { ApiService } from '@core/services/api.service';
 import { AuthTokens, LoginCredentials, User } from '../models/user.model';
 
+interface RegisterPayload {
+  nome: string;
+  email: string;
+  senha: string;
+}
+
 /**
  * S5: Tokens are stored in httpOnly cookies set by the API (not accessible to JS).
  * The frontend only stores the decoded user profile in memory/signal.
@@ -47,6 +53,10 @@ export class AuthService {
         localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(res.user));
       }),
     );
+  }
+
+  register(payload: RegisterPayload): Observable<{ message: string; user: Partial<User> }> {
+    return this.api.post<{ message: string; user: Partial<User> }>('/auth/register', payload);
   }
 
   logout(): void {

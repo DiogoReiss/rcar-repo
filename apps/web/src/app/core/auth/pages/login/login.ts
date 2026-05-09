@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +11,7 @@ import { environment } from '@env/environment';
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class LoginComponent {
+export default class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router      = inject(Router);
   private readonly route       = inject(ActivatedRoute);
@@ -32,6 +32,13 @@ export default class LoginComponent {
     this.email.set(u.email);
     this.senha.set(u.senha);
     this.onSubmit();
+  }
+
+  ngOnInit(): void {
+    const email = this.route.snapshot.queryParamMap.get('email');
+    if (email) {
+      this.email.set(email);
+    }
   }
 
   onSubmit(): void {

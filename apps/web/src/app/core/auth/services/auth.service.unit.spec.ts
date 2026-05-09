@@ -51,6 +51,16 @@ describe('AuthService', () => {
     req.flush(mockResponse);
   });
 
+  it('register should call auth/register endpoint', () => {
+    service.register({ nome: 'Maria', email: 'maria@test.com', senha: 'senha1234' }).subscribe((res) => {
+      expect(res.message).toContain('Conta criada');
+    });
+
+    const req = httpMock.expectOne((r) => r.url.includes('/auth/register'));
+    expect(req.request.method).toBe('POST');
+    req.flush({ message: 'Conta criada com sucesso.', user: { id: 'u10' } });
+  });
+
   it('logout should clear user and redirect', () => {
     const router = TestBed.inject(Router);
     const navigateSpy = vi.spyOn(router, 'navigate');

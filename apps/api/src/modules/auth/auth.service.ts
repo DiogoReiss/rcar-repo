@@ -14,6 +14,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { TokenBlacklistService } from './token-blacklist.service.js';
 import { MailService } from '../mail/mail.service.js';
 import { LoginDto } from './dto/login.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
 import { LoginAttemptsService } from './login-attempts.service.js';
 
 const COOKIE_BASE = {
@@ -63,6 +64,40 @@ export class AuthService {
   private clearTokenCookies(res: Response) {
     res.clearCookie('access_token', COOKIE_BASE);
     res.clearCookie('refresh_token', COOKIE_BASE);
+  }
+
+  async register(dto: RegisterDto) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (existing) {
+      throw new BadRequestException('E-mail já cadastrado.');
+    }
+
+    const senhaHash = await bcrypt.hash(dto.senha, 12);
+    const user = await this.prisma.user.create({
+      data: {
+        nome: dto.nome,
+        email: dto.email,
+        senhaHash,
+        role: 'CLIENTE',
+        ativo: true,
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        role: true,
+        ativo: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      message: 'Conta criada com sucesso. Faça login para continuar.',
+      user,
+    };
   }
 
   async login(dto: LoginDto, res: Response) {

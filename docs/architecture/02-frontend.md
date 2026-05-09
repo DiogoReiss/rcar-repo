@@ -140,6 +140,12 @@ export const routes: Routes = [
 
 > **Nota:** O dashboard vive em `/admin` (empty-path em `admin.routes.ts`), **não** em `/admin/dashboard`. Links internos devem usar `routerLink="/admin"`.
 
+### Auth (implementado)
+
+- Rotas: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password`
+- Login expõe links diretos para cadastro (`/auth/register`) e retorno para landing (`/`)
+- Fluxo de cadastro redireciona para `/auth/login` com prefill de `email` via query param
+
 ### Admin — Financeiro (implementado)
 
 - Rota: `/admin/financeiro`
