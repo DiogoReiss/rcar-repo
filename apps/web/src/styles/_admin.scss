@@ -4,6 +4,8 @@
 .page {
   display: block;
   padding: $spacing-lg;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .page-header {
@@ -11,6 +13,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid rgba($color-primary, 0.15);
 
   h1 {
     font-size: 1.5rem;
@@ -114,9 +118,9 @@
 // ─── Table ──────────────────────────────────────────────────────────────────
 .table-wrapper {
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  border: 1px solid $color-neutral-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  border: 1px solid rgba($color-primary, 0.15);
   overflow: hidden;
 }
 
@@ -125,7 +129,7 @@
   border-collapse: collapse;
 
   th {
-    background: $color-neutral-50;
+    background: linear-gradient(180deg, rgba($color-primary-light, 0.12), rgba($color-primary-light, 0.04));
     padding: $spacing-sm $spacing-md;
     text-align: left;
     font-size: 0.75rem;
@@ -145,7 +149,7 @@
   }
 
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: $color-neutral-50; }
+  tr:hover td { background: rgba($color-primary-light, 0.08); }
 
   .actions {
     display: flex;
@@ -184,9 +188,9 @@
 // ─── Form ────────────────────────────────────────────────────────────────────
 .form-card {
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  border: 1px solid $color-neutral-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  border: 1px solid rgba($color-primary, 0.14);
   padding: $spacing-xl;
   max-width: 600px;
 }
@@ -236,5 +240,5 @@
 
 // ─── State messages ──────────────────────────────────────────────────────────
 .loading { color: $color-neutral-600; padding: $spacing-xl; text-align: center; }
-.error   { color: $color-danger; background: #fef2f2; border: 1px solid $color-danger; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
-.success { color: $color-success; background: #f0fdf4; border: 1px solid $color-success; border-radius: 8px; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
+.error   { color: $color-danger; background: #fef2f2; border: 1px solid rgba($color-danger, 0.5); border-radius: $radius-sm; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }
+.success { color: $color-success; background: #f0fdf4; border: 1px solid rgba($color-success, 0.5); border-radius: $radius-sm; padding: $spacing-sm $spacing-md; margin-bottom: $spacing-md; }

@@ -1,6 +1,6 @@
 @use 'variables' as *;
 
-$sidebar-bg:        #1c1f26;
+$sidebar-bg:        #1b1d25;
 $sidebar-text:      #a8b0c0;
 $sidebar-text-hover:#e8ecf2;
 $sidebar-active-bg: rgba(255,255,255,0.07);
@@ -10,9 +10,11 @@ $sidebar-active-bg: rgba(255,255,255,0.07);
   flex-direction: column;
   width: $sidebar-width;
   min-height: 0;
-  background: $sidebar-bg;
+  background:
+    linear-gradient(180deg, rgba($color-primary, 0.2), transparent 26%),
+    $sidebar-bg;
   color: $sidebar-text;
-  border-right: none;
+  border-right: 1px solid rgba($color-primary, 0.24);
   transition: width 0.2s ease;
   overflow-y: auto;
   overflow-x: hidden;
@@ -41,12 +43,12 @@ $sidebar-active-bg: rgba(255,255,255,0.07);
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba($color-primary-light, 0.14);
     color: $sidebar-text-hover;
   }
 
   &.active {
-    background: $sidebar-active-bg;
+    background: linear-gradient(90deg, rgba($color-primary, 0.26), rgba($color-primary, 0.08));
     color: #fff;
     border-left-color: $color-primary;
     font-weight: 600;

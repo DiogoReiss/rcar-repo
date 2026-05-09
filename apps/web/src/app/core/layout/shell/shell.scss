@@ -32,6 +32,8 @@
   flex: 1;
   overflow-y: auto;
   padding: $spacing-lg;
-  background: #f0f2f5;
+  background:
+    linear-gradient(180deg, rgba($color-primary-light, 0.08), rgba($color-neutral-50, 0.9) 35%),
+    #f3f6fb;
 }
 

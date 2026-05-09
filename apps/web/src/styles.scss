@@ -15,10 +15,21 @@ body {
   height: 100%;
   font-family: $font-family-base;
   font-size: $font-size-base;
+  line-height: 1.45;
   color: $color-neutral-900;
-  background: $color-neutral-50;
+  background:
+    radial-gradient(circle at 0% 0%, rgba($color-primary, 0.08), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba($color-primary-light, 0.08), transparent 26%),
+    $color-neutral-50;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  color: $color-neutral-900;
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -29,6 +40,14 @@ a {
     color: $color-primary-dark;
     text-decoration: underline;
   }
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  font-family: $font-family-base;
 }
 
 ::selection {
@@ -70,6 +89,27 @@ textarea {
 
 textarea { min-height: 80px; resize: vertical; }
 
+// Shared app surfaces used across pages/components.
+.surface-card {
+  background: #fff;
+  border: 1px solid rgba($color-primary, 0.12);
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $color-primary-dark;
+}
+
+.empty-state {
+  @extend .surface-card;
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-neutral-600;
+}
+
 // ─── PrimeNG context menu danger item ────────────────────────────────────────
 .p-menu .menu-item--danger .p-menuitem-link {
   color: #dc2626 !important;
@@ -82,5 +122,19 @@ textarea { min-height: 80px; resize: vertical; }
 .p-menu .p-menuitem-link {
   text-decoration: none !important;
   &:hover { text-decoration: none !important; }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba($color-primary, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba($color-neutral-300, 0.35);
 }
 

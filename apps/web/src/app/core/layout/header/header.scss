@@ -15,9 +15,10 @@
   justify-content: space-between;
   height: $header-height;
   padding: 0 $spacing-lg;
-  background: #fff;
-  border-bottom: 1px solid $color-neutral-200;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  background: rgba(#fff, 0.96);
+  border-bottom: 1px solid rgba($color-primary, 0.16);
+  box-shadow: 0 6px 20px rgba($color-primary-dark, 0.08);
+  backdrop-filter: blur(6px);
 }
 
 // ─── Left ────────────────────────────────────────────────────────────────────
@@ -107,11 +108,17 @@
 
 .login-link {
   text-decoration: none;
-  color: $color-primary;
-  border: 1px solid $color-primary;
-  border-radius: 8px;
-  padding: 6px 12px;
+  color: #fff;
+  background: linear-gradient(135deg, $color-primary, $color-primary-dark);
+  border: 1px solid $color-primary-dark;
+  border-radius: $radius-sm;
+  padding: 7px 14px;
   font-weight: 600;
+
+  &:hover {
+    background: linear-gradient(135deg, $color-primary-dark, $color-primary-darker);
+    text-decoration: none;
+  }
 }
 
 .header-divider {
