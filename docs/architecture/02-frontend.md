@@ -27,7 +27,7 @@ src/
 │   │   ├── auth/
 │   │   │   ├── guards/
 │   │   │   │   ├── auth.guard.ts            # Verifica se usuário está autenticado
-│   │   │   │   └── role.guard.ts            # Verifica perfil (gestor_geral, operador, cliente)
+│   │   │   │   └── role.guard.ts            # Verifica perfil (gestor_geral, operador, operador_leitura, cliente)
 │   │   │   ├── interceptors/
 │   │   │   │   ├── auth.interceptor.ts      # Injeta JWT no header
 │   │   │   │   └── refresh-token.interceptor.ts
@@ -160,6 +160,31 @@ export const routes: Routes = [
   - gráfico doughnut de distribuição por método de pagamento
   - rentabilidade por veículo completa (receita - manutenção)
   - card de valoração total do estoque e export CSV/PDF
+
+### Admin — Aluguel (bulk operations e recorrência)
+
+- Rota: `/admin/aluguel/acordos-em-lote`
+- Páginas planejadas:
+  - `src/app/aluguel/acordos-em-lote/bulk-agreement-list/`
+  - `src/app/aluguel/acordos-em-lote/bulk-agreement-form/`
+  - `src/app/aluguel/acordos-em-lote/bulk-agreement-detail/`
+- Público-alvo: somente `gestor_geral`.
+- Fluxo de criação:
+  - seleciona cliente com múltiplos veículos cadastrados
+  - escolhe os veículos vinculados ao acordo
+  - define recorrência (mensal ou anual na primeira versão)
+  - visualiza prévia consolidada da cobrança antes de salvar
+- Fluxo de gestão:
+  - lista acordos com status, próximo vencimento e quantidade de veículos
+  - detalhe com histórico de ciclos, vínculos dos veículos e pagamentos registrados
+  - ações de extensão e troca de veículo com confirmação explícita
+
+### Portal do Cliente — renovação e troca de veículo
+
+- O portal deve exibir acordos ativos do cliente com os veículos vinculados e a próxima cobrança.
+- Na renovação, o cliente pode solicitar troca de veículo dentre os disponíveis no momento.
+- A interface deve mostrar a disponibilidade de forma clara e destacar que a troca depende de aprovação operacional quando aplicável.
+- Estados de loading e vazio devem seguir o padrão existente com `@if` e componentes compartilhados de página.
 
 ### Admin — Templates (playful editor)
 

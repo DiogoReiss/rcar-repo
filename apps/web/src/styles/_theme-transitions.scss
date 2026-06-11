@@ -1,0 +1,38 @@
+// Smooth transitions when switching between light and dark themes
+@use 'variables' as *;
+
+* {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.18s ease;
+}
+
+// Disable transitions for elements that should change instantly
+button,
+a,
+input,
+select,
+textarea,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-sm,
+[role="button"],
+.p-button {
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.1s ease !important;
+}
+
+// Exception: icons and subtle elements can have instant color transition
+i,
+svg,
+.pi {
+  transition: color 0.12s ease, opacity 0.12s ease;
+}
+

@@ -36,6 +36,7 @@ interface VariableOption {
   templateUrl: './templates-list.html',
   styleUrl: './templates-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export default class TemplatesListComponent {
   private readonly api = inject(ApiService);

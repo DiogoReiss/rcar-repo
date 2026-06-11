@@ -128,4 +128,5 @@ GET  /api/inventory/movements
 
 - Unit tests for AuthService and AuthGuard → Phase 3
 - `forgotPassword` and `resetPassword` full email flow → Phase 6
+- Bulk operations for multi-vehicle customers + recurrent billing → future expansion / next commercial wave
 

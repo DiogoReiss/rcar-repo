@@ -351,6 +351,24 @@ Lucro bruto / Custo de aquisição (se rastreado) = ROI (%)
 Sem custoAquisicao no schema → considerar implementação futura
 ```
 
+### 5.4 Acordos em lote e receita recorrente
+
+```
+Receita recorrente consolidada = Σ pagamentos confirmados vinculados ao acordo em lote
+Receita prevista do ciclo       = Σ valores dos veículos vinculados ao período
+Receita recebida do ciclo       = Σ Payment.valor CONFIRMADO no ciclo
+Em aberto                       = Receita prevista do ciclo - Receita recebida
+```
+
+**Regra proposta:** para clientes com múltiplos veículos, a cobrança passa a ser organizada por acordo mestre, mas a apuração financeira continua rastreável por veículo e por ciclo.
+
+**O que implementar futuramente:**
+
+- consolidação mensal/anual de cobranças por cliente com múltiplos veículos;
+- alerta de vencimento do próximo ciclo no dashboard financeiro;
+- histórico de trocas de veículo sem perda de rastreabilidade financeira;
+- reconciliação entre pagamentos do acordo mestre e contratos-filho associados.
+
 ---
 
 ## 6. Pagamentos — Status e rastreabilidade
@@ -419,6 +437,17 @@ Gráfico pizza/doughnut:
 | P2         | Análise de custo-benefício: preventiva vs. corretiva         | Backend   |
 | P2         | Export CSV/PDF do relatório financeiro                        | Full stack|
 | P3         | Depreciation schedule (se `custoAquisicao` for adicionado)   | Schema    |
+
+### Fase 4 (bulk operations e billing recorrente)
+
+| Prioridade | Tarefa                                                       | Escopo    |
+|------------|--------------------------------------------------------------|-----------|
+| P1         | Acordos em lote para clientes com múltiplos veículos         | Full stack|
+| P1         | Cobrança recorrente consolidada por acordo mestre            | Backend   |
+| P1         | Gestão manager-only de acordos em lote                       | Backend   |
+| P2         | Troca de veículo na renovação com validação de disponibilidade | Full stack|
+| P2         | Cards de receita recorrente e próximos vencimentos           | Frontend  |
+| P3         | Regras futuras de desconto por volume                        | Produto   |
 
 ---
 

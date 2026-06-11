@@ -156,7 +156,20 @@ async function main() {
   });
   console.log(`  ✓ User: ${operador.email} (${operador.role})`);
 
-  // 3. Wash services
+  // 3. Operador Leitura user
+  const operadorLeitura = await prisma.user.upsert({
+    where: { email: 'leitura@rcar.com.br' },
+    update: {},
+    create: {
+      nome: 'Funcionário Leitura',
+      email: 'leitura@rcar.com.br',
+      senhaHash: await bcrypt.hash('mudar123', 10),
+      role: 'OPERADOR_LEITURA',
+    },
+  });
+  console.log(`  ✓ User: ${operadorLeitura.email} (${operadorLeitura.role})`);
+
+  // 4. Wash services
   const servicos = [
     { nome: 'Lavagem Simples', descricao: 'Lavagem externa completa com secagem', preco: 40.00, duracaoMin: 30 },
     { nome: 'Lavagem Completa', descricao: 'Lavagem externa + interna + aspiração', preco: 70.00, duracaoMin: 60 },
@@ -178,7 +191,7 @@ async function main() {
   }
   console.log(`  ✓ Wash services: ${await prisma.washService.count()} total`);
 
-  // 4. Vehicles
+  // 5. Vehicles
   const veiculos = [
     { placa: 'ABC-1234', modelo: 'Toyota Corolla', ano: 2023, cor: 'Prata', categoria: 'INTERMEDIARIO' as const },
     { placa: 'DEF-5678', modelo: 'Hyundai HB20', ano: 2024, cor: 'Branco', categoria: 'ECONOMICO' as const },
@@ -196,7 +209,7 @@ async function main() {
   }
   console.log(`  ✓ Vehicles: ${await prisma.vehicle.count()} total`);
 
-  // 5. Templates padrão (idempotente por nome + tipo)
+  // 6. Templates padrão (idempotente por nome + tipo)
   for (const tpl of defaultTemplates) {
     const existing = await prisma.template.findFirst({
       where: { nome: tpl.nome, tipo: tpl.tipo },
@@ -226,7 +239,7 @@ async function main() {
   }
   console.log(`  ✓ Templates: ${await prisma.template.count()} total`);
 
-  // 6. Products (estoque lavajato)
+  // 7. Products (estoque lavajato)
   const produtos = [
     { nome: 'Shampoo Automotivo', descricao: 'Shampoo concentrado para lavagem externa', unidade: 'litro', quantidadeAtual: 20, estoqueMinimo: 5, custoUnitario: 25.00 },
     { nome: 'Cera Líquida', descricao: 'Cera protetora com brilho intenso', unidade: 'litro', quantidadeAtual: 10, estoqueMinimo: 3, custoUnitario: 45.00 },

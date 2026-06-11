@@ -6,14 +6,6 @@
       <h1 class="dash-title">Dashboard</h1>
       <p class="dash-subtitle">Resumo operacional em tempo real</p>
     </div>
-    <div class="dash-header-actions">
-      <a routerLink="/admin/clientes" class="btn-secondary">
-        <i class="pi pi-user-plus" aria-hidden="true"></i> Novo Cliente
-      </a>
-      <a routerLink="/lavajato/agendamento" class="btn-primary">
-        <i class="pi pi-calendar-plus" aria-hidden="true"></i> Agendar
-      </a>
-    </div>
   </div>
 
   <!-- ─── KPI skeleton ───────────────────────────────────────────── -->
@@ -92,6 +84,10 @@
         <i class="pi pi-plus-circle" aria-hidden="true"></i>
         <span>Novo Veículo</span>
       </a>
+    <a routerLink="/admin/clientes" class="quick-action">
+        <i class="pi pi-plus-circle" aria-hidden="true"></i>
+        <span>Novo Cliente</span>
+    </a>
       <a routerLink="/admin/estoque" class="quick-action">
         <i class="pi pi-box" aria-hidden="true"></i>
         <span>Estoque</span>
@@ -103,6 +99,10 @@
       <a routerLink="/aluguel/contratos" class="quick-action">
         <i class="pi pi-file-edit" aria-hidden="true"></i>
         <span>Contratos</span>
+      </a>
+      <a routerLink="/lavajato/agendamento" class="quick-action">
+        <i class="pi pi-calendar-plus" aria-hidden="true"></i>
+        <span>Agendar</span>
       </a>
       <a routerLink="/lavajato/fila" class="quick-action">
         <i class="pi pi-list-check" aria-hidden="true"></i>

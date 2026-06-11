@@ -54,6 +54,7 @@ type DashboardChartsPeriod = '7d' | '30d' | 'month';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export default class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly api = inject(ApiService);

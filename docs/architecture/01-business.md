@@ -17,6 +17,7 @@ Ambos são gerenciados por um painel administrativo unificado: **RCar Admin**.
 |----------------|------------------------------------------------------------------|
 | `gestor_geral` | Sócios/gestores — acesso total a módulos, relatórios e configs   |
 | `operador`     | Funcionários — visualiza agendamentos, fila, contratos ativos    |
+| `operador_leitura` | Funcionários com acesso somente leitura — visualiza fluxos de serviços sem poder criar/editar/concluir |
 | `cliente`      | Cliente final — reserva, acompanha histórico, envia documentos   |
 
 > Inicialmente 3 funcionários. A estrutura de permissões deve ser extensível via banco de dados.
@@ -113,6 +114,28 @@ Cliente devolve → Vistoria de chegada (checklist + fotos)
 - Alertas de devolução: D-1, no dia, atrasado.
 - Extensão de prazo deve ser registrada com novo valor calculado.
 - Ocorrências (sinistro, multa, avaria) vinculadas ao contrato.
+
+### Operação em Lote e Cobrança Recorrente
+
+```
+Gestor cadastra acordo em lote → Seleciona cliente com múltiplos veículos
+→ Define veículos vinculados, modalidade e recorrência (mensal/anual)
+→ Sistema cria contrato-mestre + vínculos individuais por veículo
+→ A cada ciclo, gera cobrança recorrente consolidada
+→ Cliente pode solicitar troca de veículo dentro do pool disponível na renovação
+→ Gestor aprova ajustes, extensões e reemissão de cobrança quando necessário
+```
+
+#### Regras de Negócio
+
+- Apenas `gestor_geral` pode criar, editar e encerrar acordos em lote.
+- O cliente final pode apenas consultar seus acordos ativos e solicitar troca de veículo na renovação.
+- Cada acordo em lote pertence a um único cliente e pode conter múltiplos veículos ativos ao mesmo tempo.
+- A cobrança é recorrente e consolidada por período, com geração de uma referência financeira por ciclo.
+- A operação deve suportar recorrência mensal e anual no primeiro momento; outras frequências ficam para expansão futura.
+- A troca de veículo só pode ocorrer com veículos disponíveis no momento da renovação e deve preservar histórico do acordo.
+- Vínculos, extensões e substituições devem manter rastreabilidade por veículo, período e usuário responsável.
+- Descontos por volume não entram na primeira versão; a precificação segue a tabela normal da locação, com possibilidade de extensão futura.
 
 ---
 

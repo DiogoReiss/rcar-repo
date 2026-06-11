@@ -1,0 +1,231 @@
+// Dark theme specific component improvements
+@use 'variables' as *;
+
+body[data-theme='dark'] {
+  // Card improvements
+  .card,
+  .panel,
+  .widget {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+    box-shadow: var(--lync-shadow-sm);
+  }
+
+  // Charts and visualizations
+  canvas {
+    filter: brightness(0.95);
+  }
+
+  // Code blocks and pre-formatted text
+  pre,
+  code {
+    background: var(--lync-input-bg);
+    border-color: var(--lync-border);
+    color: var(--lync-text);
+  }
+
+  // Links within dark surfaces
+  .surface-card a,
+  .form-card a,
+  .table-wrapper a {
+    color: var(--lync-link);
+
+    &:hover {
+      color: var(--lync-link-hover);
+    }
+  }
+
+  // Status indicators
+  .status-dot {
+    &.success { background: #10b981; box-shadow: 0 0 8px rgba(#10b981, 0.4); }
+    &.warning { background: #f59e0b; box-shadow: 0 0 8px rgba(#f59e0b, 0.4); }
+    &.danger { background: #ef4444; box-shadow: 0 0 8px rgba(#ef4444, 0.4); }
+    &.info { background: #3b82f6; box-shadow: 0 0 8px rgba(#3b82f6, 0.4); }
+  }
+
+  // Empty states
+  .empty-state {
+    background: var(--lync-surface);
+    border-color: var(--lync-border);
+  }
+
+  // Loading skeletons
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--lync-surface) 25%,
+      var(--lync-surface-elevated) 50%,
+      var(--lync-surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  // Progress bars
+  .progress-bar {
+    background: var(--lync-surface-muted);
+
+    .progress-fill {
+      background: linear-gradient(90deg, $color-primary-light, $color-primary);
+      box-shadow: 0 0 12px rgba($color-primary-light, 0.3);
+    }
+  }
+
+  // Dropdown menus
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23a0abbe' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    appearance: none;
+  }
+
+  // Focus states - enhanced for dark theme
+  *:focus-visible {
+    outline-color: $color-primary-light;
+    outline-offset: 2px;
+  }
+
+  // Scrollbar enhancement for dark theme
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: var(--lync-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--lync-scroll-thumb);
+    border-radius: 999px;
+    border: 2px solid var(--lync-surface);
+
+    &:hover {
+      background: color-mix(in srgb, var(--lync-scroll-thumb) 80%, #{$color-primary-lighter} 20%);
+    }
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--lync-scroll-track);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--lync-surface);
+  }
+
+  // Tab components
+  .tabs {
+    border-bottom-color: var(--lync-border);
+
+    .tab {
+      color: var(--lync-text-muted);
+
+      &:hover {
+        color: var(--lync-text);
+        background: rgba($color-primary-light, 0.05);
+      }
+
+      &.active {
+        color: $color-primary-lighter;
+        border-bottom-color: $color-primary-light;
+      }
+    }
+  }
+
+  // Modals and overlays
+  .modal-backdrop,
+  .overlay {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+  }
+
+  // Search inputs
+  .search-input,
+  input[type="search"] {
+    &::placeholder {
+      color: var(--lync-text-muted);
+      opacity: 0.6;
+    }
+  }
+
+  // Disabled states - better visibility in dark mode
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  .disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: color-mix(in srgb, var(--lync-input-bg) 80%, var(--lync-text-muted) 5%);
+  }
+
+  // Checkboxes and radio buttons (if custom styled)
+  input[type="checkbox"],
+  input[type="radio"] {
+    &:checked {
+      background: $color-primary-light;
+      border-color: $color-primary-light;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba($color-primary-light, 0.2);
+    }
+  }
+
+  // Form validation states
+  .form-field {
+    &.error {
+      input,
+      select,
+      textarea {
+        border-color: $color-danger-light;
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba($color-danger-light, 0.15);
+        }
+      }
+    }
+
+    &.success {
+      input,
+      select,
+      textarea {
+        border-color: $color-success-light;
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba($color-success-light, 0.15);
+        }
+      }
+    }
+  }
+
+  // Improved text contrast for better readability
+  small,
+  .small-text,
+  .caption {
+    color: var(--lync-text-muted);
+  }
+
+  strong,
+  .bold,
+  b {
+    color: var(--lync-heading);
+    font-weight: 600;
+  }
+
+  // Image brightness adjustment for dark theme
+  img:not(.no-dark-filter) {
+    filter: brightness(0.92) contrast(1.05);
+  }
+
+  // Avatar improvements
+  .avatar {
+    border: 2px solid var(--lync-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+

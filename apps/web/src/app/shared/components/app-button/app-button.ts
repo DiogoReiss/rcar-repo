@@ -14,7 +14,8 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
   templateUrl: './app-button.html',
   styleUrl: './app-button.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display:contents' },
+  host: {style: 'display:contents'},
+  standalone: true
 })
 export default class AppButtonComponent {
   readonly label    = input.required<string>();

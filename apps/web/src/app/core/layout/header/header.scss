@@ -16,9 +16,15 @@
   height: $header-height;
   padding: 0 $spacing-lg;
   background: color-mix(in srgb, var(--lync-surface, #fff) 92%, transparent 8%);
-  border-bottom: 1px solid rgba($color-primary, 0.16);
-  box-shadow: 0 6px 20px rgba($color-primary-dark, 0.08);
+  border-bottom: 1px solid var(--lync-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(6px);
+}
+
+// Dark theme adjustments for header
+:host-context(body[data-theme='dark']) .header {
+  background: color-mix(in srgb, var(--lync-surface) 95%, transparent 5%);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 // ─── Left ────────────────────────────────────────────────────────────────────
@@ -124,7 +130,7 @@
 .header-divider {
   width: 1px;
   height: 28px;
-  background: $color-neutral-200;
+  background: color-mix(in srgb, var(--lync-text-muted) 30%, transparent 70%);
   margin: 0 $spacing-xs;
   flex-shrink: 0;
 }

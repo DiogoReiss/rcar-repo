@@ -16,6 +16,7 @@ datasource db {
 enum UserRole {
   GESTOR_GERAL
   OPERADOR
+  OPERADOR_LEITURA
   CLIENTE
 }
 

@@ -23,6 +23,7 @@ import AppButtonComponent from '@shared/components/app-button/app-button';
   templateUrl: './entity-dialog.html',
   styleUrl: './entity-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export default class EntityDialogComponent {
   readonly title   = input.required<string>();

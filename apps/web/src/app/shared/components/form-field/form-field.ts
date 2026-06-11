@@ -13,7 +13,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   templateUrl: './form-field.html',
   styleUrl: './form-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.full]': 'full()' },
+  host: {'[class.full]': 'full()'},
+  standalone: true
 })
 export default class FormFieldComponent {
   readonly label        = input.required<string>();

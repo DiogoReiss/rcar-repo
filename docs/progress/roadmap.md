@@ -2,7 +2,7 @@
 
 **Status:** 🟡 Mixed — base funcional entregue, lacunas críticas ainda abertas
 **Fonte de verdade detalhada:** `docs/architecture/05-todo.md`
-**Última sincronização:** 2026-05-09
+**Última sincronização:** 2026-06-11
 
 ### Status da ordem ativa (5 -> 2 -> 3 -> 4 -> 1)
 
@@ -41,6 +41,7 @@
 - Financeiro ponta a ponta (quick wins): endpoints e UI de DRE, receivables, manutenção e custo de estoque.
 - Financeiro (frontend) evoluído com presets de período, KPIs adicionais e novos blocos analíticos (aging/top pendências/top rentabilidade).
 - Qualidade inicial: testes unitários em api (documents/reports/storage/users/customers/fleet/wash/templates/payments/inventory/rental/lavajato/mail/jobs/queue-events) e web (`app`, `dashboard`, `financeiro.service`, `api.service`, `auth.service`, `storage.service`, `sse.service`, `users.service`, `clientes.service`, `servicos.service`, `frota.service`, `agendamento.service`, `fila.service`).
+- **RBAC expandido (2026-06-11)**: nova role `OPERADOR_LEITURA` para funcionários com acesso somente leitura aos fluxos de serviços (schema + shared-types + migration + docs + enforcement completo nos guards backend + seed com usuário de teste + testes unitários e E2E).
 
 ---
 
@@ -120,3 +121,6 @@
 - Multi-unidade.
 - DETRAN.
 - App mobile (se necessário).
+- Bulk operations para clientes com múltiplos veículos.
+- Cobrança recorrente consolidada por acordo mestre.
+- Troca de veículo na renovação com pool disponível.

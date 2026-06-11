@@ -11,7 +11,7 @@
 
 // ─── Enums ──────────────────────────────────────────────────────────────────
 
-export type UserRole = 'GESTOR_GERAL' | 'OPERADOR' | 'CLIENTE';
+export type UserRole = 'GESTOR_GERAL' | 'OPERADOR' | 'OPERADOR_LEITURA' | 'CLIENTE';
 export type CustomerType = 'PF' | 'PJ';
 export type VehicleStatus = 'DISPONIVEL' | 'ALUGADO' | 'MANUTENCAO' | 'INATIVO';
 export type VehicleCategory = 'ECONOMICO' | 'INTERMEDIARIO' | 'SUV' | 'EXECUTIVO' | 'UTILITARIO';

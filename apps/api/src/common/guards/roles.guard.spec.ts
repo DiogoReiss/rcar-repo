@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard.js';
@@ -63,5 +62,37 @@ describe('RolesGuard', () => {
       .mockReturnValue(['GESTOR_GERAL']);
     const ctx = createMockContext(null);
     expect(guard.canActivate(ctx)).toBe(false);
+  });
+
+  it('should allow OPERADOR_LEITURA when included in required roles', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['OPERADOR', 'OPERADOR_LEITURA']);
+    const ctx = createMockContext({ role: 'OPERADOR_LEITURA' });
+    expect(guard.canActivate(ctx)).toBe(true);
+  });
+
+  it('should deny OPERADOR_LEITURA when only OPERADOR is required', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['OPERADOR']);
+    const ctx = createMockContext({ role: 'OPERADOR_LEITURA' });
+    expect(guard.canActivate(ctx)).toBe(false);
+  });
+
+  it('should allow OPERADOR when both OPERADOR and OPERADOR_LEITURA are required', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['OPERADOR', 'OPERADOR_LEITURA']);
+    const ctx = createMockContext({ role: 'OPERADOR' });
+    expect(guard.canActivate(ctx)).toBe(true);
+  });
+
+  it('should allow GESTOR_GERAL when multiple roles including GESTOR_GERAL are required', () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['GESTOR_GERAL', 'OPERADOR']);
+    const ctx = createMockContext({ role: 'GESTOR_GERAL' });
+    expect(guard.canActivate(ctx)).toBe(true);
   });
 });

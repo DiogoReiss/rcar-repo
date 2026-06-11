@@ -13,6 +13,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   templateUrl: './page-header.html',
   styleUrl: './page-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export default class PageHeaderComponent {
   readonly title = input.required<string>();

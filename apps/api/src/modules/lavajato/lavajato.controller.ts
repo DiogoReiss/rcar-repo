@@ -28,13 +28,15 @@ import {
   CreateQueueEntryDto,
   CreatePaymentDto,
 } from './dto/create-queue-entry.dto.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '@common/decorators/roles.decorator';
 import { QueueEventsService } from './queue-events.service.js';
 import { from } from 'rxjs';
 
 @ApiTags('Lavajato')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('lavajato')
 export class LavajatoController {
   constructor(
@@ -45,6 +47,7 @@ export class LavajatoController {
   // ─── Schedules ──────────────────────────────────────────────────────────
 
   @Get('schedules/availability')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({
     summary: 'Retorna slots disponíveis para um dia (lógica sem sobreposição)',
   })
@@ -62,6 +65,7 @@ export class LavajatoController {
   }
 
   @Get('schedules')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({ summary: 'Lista agendamentos (filtro por data ou mês)' })
   @ApiQuery({ name: 'date', required: false, example: '2026-05-10' })
   @ApiQuery({
@@ -75,12 +79,14 @@ export class LavajatoController {
   }
 
   @Post('schedules')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Cria agendamento' })
   createSchedule(@Body() dto: CreateScheduleDto) {
     return this.lavajatoService.createSchedule(dto);
   }
 
   @Patch('schedules/:id/status')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Atualiza status do agendamento' })
   updateScheduleStatus(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
@@ -90,6 +96,7 @@ export class LavajatoController {
   }
 
   @Delete('schedules/:id')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Cancela agendamento' })
   async cancelSchedule(
@@ -101,18 +108,21 @@ export class LavajatoController {
   // ─── Queue ──────────────────────────────────────────────────────────────
 
   @Get('queue')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({ summary: 'Retorna fila de atendimento atual' })
   getQueue() {
     return this.lavajatoService.getQueue();
   }
 
   @Post('queue')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Adiciona cliente à fila' })
   addToQueue(@Body() dto: CreateQueueEntryDto) {
     return this.lavajatoService.addToQueue(dto);
   }
 
   @Patch('queue/:id/advance')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({
     summary: 'Avança status na fila (aguardando → em atendimento → concluído)',
   })
@@ -121,6 +131,7 @@ export class LavajatoController {
   }
 
   @Delete('queue/:id')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove/conclui entrada da fila' })
   async removeFromQueue(
@@ -130,6 +141,7 @@ export class LavajatoController {
   }
 
   @Sse('queue/stream')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({
     summary:
       'SSE: stream de atualizações da fila (push on change, not polling)',
@@ -150,6 +162,7 @@ export class LavajatoController {
   // ─── Atendimentos do dia ─────────────────────────────────────────────────
 
   @Get('atendimentos')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({ summary: 'Atendimentos concluídos no dia' })
   @ApiQuery({ name: 'date', required: false })
   getAtendimentos(@Query('date') date?: string) {
@@ -159,6 +172,7 @@ export class LavajatoController {
   // ─── Payments ───────────────────────────────────────────────────────────
 
   @Post('schedules/:id/payment')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Registra pagamento de agendamento' })
   paySchedule(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
@@ -168,6 +182,7 @@ export class LavajatoController {
   }
 
   @Post('queue/:id/payment')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
   @ApiOperation({ summary: 'Registra pagamento de atendimento na fila' })
   payQueue(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,

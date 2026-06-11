@@ -126,16 +126,21 @@ apps/
         │   │   ├── controllers/
         │   │   │   ├── reservation.controller.ts
         │   │   │   ├── contract.controller.ts
+        │   │   │   ├── bulk-agreement.controller.ts
         │   │   │   └── return.controller.ts
         │   │   ├── services/
         │   │   │   ├── reservation.service.ts
         │   │   │   ├── contract.service.ts
+        │   │   │   ├── bulk-agreement.service.ts
+        │   │   │   └── recurring-billing.service.ts
         │   │   │   ├── inspection.service.ts
         │   │   │   └── pricing.service.ts
         │   │   └── dto/
         │   │       ├── create-reservation.dto.ts
         │   │       ├── open-contract.dto.ts
         │   │       ├── close-contract.dto.ts
+        │   │       ├── create-bulk-agreement.dto.ts
+        │   │       ├── extend-bulk-agreement.dto.ts
         │   │       └── inspection.dto.ts
         │   │
         │   ├── documents/
@@ -283,6 +288,31 @@ POST   /api/rental/contracts/:id/incident    # Registra ocorrência
 POST   /api/rental/contracts/:id/close       # Fecha/devolve
 ```
 
+### Rental — Acordos em Lote e Cobrança Recorrente
+
+> Status (2026-06-09): proposta de expansão para clientes com múltiplos veículos, com criação e gestão restritas a `gestor_geral`.
+
+```
+GET    /api/rental/bulk-agreements                 # Lista acordos em lote (filtro: cliente, status)
+POST   /api/rental/bulk-agreements                 # Cria acordo em lote (gestor_geral)
+GET    /api/rental/bulk-agreements/:id             # Detalhe do acordo + veículos vinculados
+PATCH  /api/rental/bulk-agreements/:id             # Atualiza dados do acordo
+PATCH  /api/rental/bulk-agreements/:id/extend      # Estende período/recorrência do acordo
+POST   /api/rental/bulk-agreements/:id/swap-vehicle # Solicita/troca veículo dentro do pool disponível
+GET    /api/rental/bulk-agreements/:id/contracts   # Contratos-filho gerados pelo acordo
+POST   /api/rental/bulk-agreements/:id/finalize    # Encerra o acordo em lote
+```
+
+#### Regras de implementação
+
+- Criação, edição e encerramento dos acordos em lote devem usar `@Roles('gestor_geral')`.
+- O contrato-mestre consolida datas, recorrência, veículos associados e status do pacote.
+- Os contratos individuais continuam sendo a base para status operacional de cada veículo, mas passam a ser gerados/administrados a partir do acordo em lote.
+- Um serviço de recorrência deve calcular o próximo ciclo e gerar a cobrança consolidada do período.
+- A troca de veículo deve validar disponibilidade no momento da renovação e preservar o histórico de substituições.
+- Jobs assíncronos devem ser usados para geração de cobranças recorrentes, notificações e reconciliação de pagamentos pendentes.
+- O módulo deve expor eventos/consultas para dashboard financeiro acompanhar receita recorrente e próximos vencimentos.
+
 ### Documents
 
 ```
@@ -347,6 +377,13 @@ export class UsersController { ... }
 
 // Guard verifica: request.user.role inclui a role exigida?
 ```
+
+**Roles disponíveis:**
+
+- `GESTOR_GERAL` — acesso total ao sistema
+- `OPERADOR` — funcionários operacionais (criar/editar agendamentos, fila, contratos)
+- `OPERADOR_LEITURA` — funcionários somente leitura (visualiza fluxos sem permissão de edição)
+- `CLIENTE` — cliente final (acesso ao portal do cliente)
 
 ---
 
