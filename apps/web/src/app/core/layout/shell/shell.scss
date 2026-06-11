@@ -37,6 +37,12 @@
     var(--lync-bg-soft, #f3f6fb);
 }
 
+:host-context(body[data-theme='dark']) .shell-content {
+  background:
+    linear-gradient(180deg, rgba(#f5a63e, 0.04), rgba(#0a0e14, 0.9) 35%),
+    var(--lync-bg, #0a0e14);
+}
+
 @media (max-width: $breakpoint-md) {
   .shell-content {
     padding: $spacing-md;
