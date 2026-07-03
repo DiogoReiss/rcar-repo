@@ -6,6 +6,8 @@ import { PAYMENT_GATEWAY } from './payment-gateway.js';
 import { FakePaymentGateway } from './fake-payment.gateway.js';
 import { PayableRegistry } from './payable-registry.js';
 import { ContractClosedListener } from './contract-closed.listener.js';
+import { PaymentsRepository } from './payments.repository.js';
+import { PrismaPaymentsRepository } from './prisma-payments.repository.js';
 
 @Module({
   controllers: [PaymentsController, PaymentWebhookController],
@@ -14,6 +16,7 @@ import { ContractClosedListener } from './contract-closed.listener.js';
     PayableRegistry,
     ContractClosedListener,
     { provide: PAYMENT_GATEWAY, useClass: FakePaymentGateway },
+    { provide: PaymentsRepository, useClass: PrismaPaymentsRepository },
   ],
   exports: [PaymentsService, PAYMENT_GATEWAY, PayableRegistry],
 })

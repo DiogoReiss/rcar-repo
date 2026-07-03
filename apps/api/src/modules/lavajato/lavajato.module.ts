@@ -4,6 +4,8 @@ import { LavajatoService } from './lavajato.service.js';
 import { QueueEventsService } from './queue-events.service.js';
 import { WashSchedulePayableStrategy } from './wash-schedule-payable.strategy.js';
 import { WashQueuePayableStrategy } from './wash-queue-payable.strategy.js';
+import { LavajatoRepository } from './lavajato.repository.js';
+import { PrismaLavajatoRepository } from './prisma-lavajato.repository.js';
 import { PaymentsModule } from '../payments/payments.module.js';
 
 @Module({
@@ -14,6 +16,7 @@ import { PaymentsModule } from '../payments/payments.module.js';
     QueueEventsService,
     WashSchedulePayableStrategy,
     WashQueuePayableStrategy,
+    { provide: LavajatoRepository, useClass: PrismaLavajatoRepository },
   ],
   exports: [LavajatoService, QueueEventsService],
 })

@@ -3,8 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma, WashScheduleStatus, WashQueueStatus } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service.js';
+import { Prisma, WashQueueStatus, WashScheduleStatus } from '@prisma/client';
 import { CreateScheduleDto } from './dto/create-schedule.dto.js';
 import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
 import {
@@ -17,11 +16,12 @@ import {
   ATENDIMENTO_CONCLUIDO,
   AtendimentoConcluidoEvent,
 } from './lavajato.events.js';
+import { DateRange, LavajatoRepository } from './lavajato.repository.js';
 
 @Injectable()
 export class LavajatoService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly repo: LavajatoRepository,
     private readonly queueEvents: QueueEventsService,
     private readonly events: DomainEventsService,
   ) {}
@@ -29,28 +29,28 @@ export class LavajatoService {
   // ─── Schedules ────────────────────────────────────────────────────────────
 
   async getSchedules(date?: string, month?: string) {
-    const where: Prisma.WashScheduleWhereInput = {};
+    return this.repo.listSchedules(this.resolveScheduleRange(date, month));
+  }
+
+  private resolveScheduleRange(
+    date?: string,
+    month?: string,
+  ): DateRange | undefined {
     if (date) {
       const start = new Date(date);
       start.setHours(0, 0, 0, 0);
       const end = new Date(date);
       end.setHours(23, 59, 59, 999);
-      where.dataHora = { gte: start, lte: end };
-    } else if (month) {
+      return { start, end };
+    }
+    if (month) {
       // month format: YYYY-MM
       const [y, m] = month.split('-').map(Number);
       const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
       const end = new Date(y, m, 0, 23, 59, 59, 999);
-      where.dataHora = { gte: start, lte: end };
+      return { start, end };
     }
-    return this.prisma.washSchedule.findMany({
-      where,
-      include: {
-        service: true,
-        customer: { select: { id: true, nome: true, telefone: true } },
-      },
-      orderBy: { dataHora: 'asc' },
-    });
+    return undefined;
   }
 
   // ─── Availability ─────────────────────────────────────────────────────────
@@ -63,22 +63,14 @@ export class LavajatoService {
 
     let duration = DEFAULT_DURATION;
     if (serviceId) {
-      const svc = await this.prisma.washService.findUnique({
-        where: { id: serviceId },
-      });
+      const svc = await this.repo.findService(serviceId);
       if (svc) duration = svc.duracaoMin;
     }
 
     // All non-cancelled schedules for the requested day, with their service durations
     const start = new Date(`${date}T00:00:00`);
     const end = new Date(`${date}T23:59:59`);
-    const existing = await this.prisma.washSchedule.findMany({
-      where: {
-        dataHora: { gte: start, lte: end },
-        status: { not: 'CANCELADO' },
-      },
-      include: { service: true },
-    });
+    const existing = await this.repo.listActiveSchedulesInRange({ start, end });
 
     const totalMinutes = (CLOSE_HOUR - OPEN_HOUR) * 60;
     const slots: {
@@ -117,40 +109,24 @@ export class LavajatoService {
     if (!dto.customerId && !dto.nomeAvulso) {
       throw new BadRequestException('Informe customerId ou nomeAvulso');
     }
-    const service = await this.prisma.washService.findUnique({
-      where: { id: dto.serviceId },
-    });
+    const service = await this.repo.findService(dto.serviceId);
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
-    return this.prisma.washSchedule.create({
-      data: {
-        customerId: dto.customerId,
-        nomeAvulso: dto.nomeAvulso,
-        telefone: dto.telefone,
-        serviceId: dto.serviceId,
-        dataHora: new Date(dto.dataHora),
-        observacoes: dto.observacoes,
-      },
-      include: {
-        service: true,
-        customer: { select: { id: true, nome: true } },
-      },
+    return this.repo.createSchedule({
+      customerId: dto.customerId,
+      nomeAvulso: dto.nomeAvulso,
+      telefone: dto.telefone,
+      serviceId: dto.serviceId,
+      dataHora: new Date(dto.dataHora),
+      observacoes: dto.observacoes,
     });
   }
 
   async updateScheduleStatus(id: string, dto: UpdateScheduleDto) {
-    const schedule = await this.prisma.washSchedule.findUnique({
-      where: { id },
-    });
+    const schedule = await this.repo.findSchedule(id);
     if (!schedule) throw new NotFoundException('Agendamento não encontrado');
 
-    const updated = await this.prisma.washSchedule.update({
-      where: { id },
-      data: dto,
-      include: {
-        service: { include: { products: { include: { product: true } } } },
-      },
-    });
+    const updated = await this.repo.updateSchedule(id, dto);
 
     // Emit AtendimentoConcluido — stock deduction is the inventory module's concern.
     if (dto.status === WashScheduleStatus.CONCLUIDO) {
@@ -161,74 +137,37 @@ export class LavajatoService {
   }
 
   async cancelSchedule(id: string) {
-    const schedule = await this.prisma.washSchedule.findUnique({
-      where: { id },
-    });
+    const schedule = await this.repo.findSchedule(id);
     if (!schedule) throw new NotFoundException('Agendamento não encontrado');
-    return this.prisma.washSchedule.update({
-      where: { id },
-      data: { status: 'CANCELADO' },
-    });
+    return this.repo.cancelSchedule(id);
   }
 
   // ─── Queue ────────────────────────────────────────────────────────────────
 
   async getQueue() {
-    return this.prisma.washQueue.findMany({
-      where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
-      include: {
-        service: true,
-        customer: { select: { id: true, nome: true } },
-      },
-      orderBy: { posicao: 'asc' },
-    });
+    return this.repo.listActiveQueue();
   }
 
   async addToQueue(dto: CreateQueueEntryDto) {
     if (!dto.customerId && !dto.nomeAvulso) {
       throw new BadRequestException('Informe customerId ou nomeAvulso');
     }
-    const service = await this.prisma.washService.findUnique({
-      where: { id: dto.serviceId },
-    });
+    const service = await this.repo.findService(dto.serviceId);
     if (!service) throw new NotFoundException('Serviço não encontrado');
 
-    // D2: Use serializable transaction to prevent duplicate queue positions
-    const result = await this.prisma.$transaction(
-      async (tx) => {
-        const lastEntry = await tx.washQueue.findFirst({
-          where: { status: { in: ['AGUARDANDO', 'EM_ATENDIMENTO'] } },
-          orderBy: { posicao: 'desc' },
-        });
-        const posicao = (lastEntry?.posicao ?? 0) + 1;
-
-        return tx.washQueue.create({
-          data: {
-            customerId: dto.customerId,
-            nomeAvulso: dto.nomeAvulso,
-            serviceId: dto.serviceId,
-            veiculoPlaca: dto.veiculoPlaca,
-            posicao,
-          },
-          include: {
-            service: true,
-            customer: { select: { id: true, nome: true } },
-          },
-        });
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+    // D2: Serializable position assignment lives in the repository.
+    const result = await this.repo.addToQueueExclusive({
+      customerId: dto.customerId,
+      nomeAvulso: dto.nomeAvulso,
+      serviceId: dto.serviceId,
+      veiculoPlaca: dto.veiculoPlaca,
+    });
     this.queueEvents.emit_queueChanged();
     return result;
   }
 
   async advanceQueue(id: string) {
-    const entry = await this.prisma.washQueue.findUnique({
-      where: { id },
-      include: {
-        service: { include: { products: { include: { product: true } } } },
-      },
-    });
+    const entry = await this.repo.findQueueEntryWithProducts(id);
     if (!entry) throw new NotFoundException('Entrada na fila não encontrada');
 
     let newStatus: WashQueueStatus;
@@ -245,10 +184,9 @@ export class LavajatoService {
       throw new BadRequestException('Entrada já concluída');
     }
 
-    const result = await this.prisma.washQueue.update({
-      where: { id },
-      data: { status: newStatus, ...(concluidoAt && { concluidoAt }) },
-      include: { service: true },
+    const result = await this.repo.updateQueueStatus(id, {
+      status: newStatus,
+      concluidoAt,
     });
     if (concluido) {
       this.emitAtendimentoConcluido(id, entry.service.products);
@@ -258,12 +196,9 @@ export class LavajatoService {
   }
 
   async removeFromQueue(id: string) {
-    const entry = await this.prisma.washQueue.findUnique({ where: { id } });
+    const entry = await this.repo.findQueueEntry(id);
     if (!entry) throw new NotFoundException('Entrada na fila não encontrada');
-    const result = await this.prisma.washQueue.update({
-      where: { id },
-      data: { status: 'CONCLUIDO', concluidoAt: new Date() },
-    });
+    const result = await this.repo.completeQueueEntry(id);
     this.queueEvents.emit_queueChanged();
     return result;
   }
@@ -274,24 +209,7 @@ export class LavajatoService {
     const end = new Date(target);
     end.setHours(23, 59, 59, 999);
 
-    const [schedules, queues] = await Promise.all([
-      this.prisma.washSchedule.findMany({
-        where: { dataHora: { gte: target, lte: end }, status: 'CONCLUIDO' },
-        include: {
-          service: true,
-          customer: { select: { id: true, nome: true } },
-        },
-      }),
-      this.prisma.washQueue.findMany({
-        where: { concluidoAt: { gte: target, lte: end } },
-        include: {
-          service: true,
-          customer: { select: { id: true, nome: true } },
-        },
-      }),
-    ]);
-
-    return { schedules, queues };
+    return this.repo.listAtendimentosDia({ start: target, end });
   }
 
   // ─── Payments ─────────────────────────────────────────────────────────────
@@ -303,48 +221,32 @@ export class LavajatoService {
   ) {
     // D5: Check for existing payment (idempotency) via unique scheduleId/queueId FK
     if (refType === 'WASH_SCHEDULE') {
-      const existing = await this.prisma.payment.findUnique({
-        where: { scheduleId: refId },
-      });
+      const existing = await this.repo.findPaymentBySchedule(refId);
       if (existing) return existing;
 
-      const s = await this.prisma.washSchedule.findUnique({
-        where: { id: refId },
-        include: { service: true },
-      });
+      const s = await this.repo.findScheduleWithService(refId);
       if (!s) throw new NotFoundException('Agendamento não encontrado');
-      return this.prisma.payment.create({
-        data: {
-          refType: 'WASH_SCHEDULE',
-          scheduleId: refId,
-          customerId: s.customerId,
-          valor: s.service.preco,
-          metodo: dto.metodo,
-          status: 'CONFIRMADO',
-          observacoes: dto.observacoes,
-        },
+      return this.repo.createWashPayment({
+        refType: 'WASH_SCHEDULE',
+        scheduleId: refId,
+        customerId: s.customerId,
+        valor: s.service.preco,
+        metodo: dto.metodo,
+        observacoes: dto.observacoes,
       });
     } else {
-      const existing = await this.prisma.payment.findUnique({
-        where: { queueId: refId },
-      });
+      const existing = await this.repo.findPaymentByQueue(refId);
       if (existing) return existing;
 
-      const q = await this.prisma.washQueue.findUnique({
-        where: { id: refId },
-        include: { service: true },
-      });
+      const q = await this.repo.findQueueWithService(refId);
       if (!q) throw new NotFoundException('Entrada na fila não encontrada');
-      return this.prisma.payment.create({
-        data: {
-          refType: 'WASH_QUEUE',
-          queueId: refId,
-          customerId: q.customerId,
-          valor: q.service.preco,
-          metodo: dto.metodo,
-          status: 'CONFIRMADO',
-          observacoes: dto.observacoes,
-        },
+      return this.repo.createWashPayment({
+        refType: 'WASH_QUEUE',
+        queueId: refId,
+        customerId: q.customerId,
+        valor: q.service.preco,
+        metodo: dto.metodo,
+        observacoes: dto.observacoes,
       });
     }
   }
