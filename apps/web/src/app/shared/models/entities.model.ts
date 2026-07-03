@@ -36,7 +36,7 @@ export type {
   StockMovement,
   RentalContract,
   Inspection,
-  Payment,
+  PaymentDTO,
   Template,
   AvailabilitySlot,
   AvailabilityResponse,

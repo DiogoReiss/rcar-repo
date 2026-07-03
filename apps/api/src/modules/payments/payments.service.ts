@@ -28,6 +28,7 @@ import {
 } from './payment-gateway.js';
 import { PayableRegistry } from './payable-registry.js';
 import { PayableInfo } from './payable-strategy.js';
+import { toPaymentDTO } from './payment.mapper.js';
 
 interface ActingUser {
   id?: string;
@@ -370,17 +371,6 @@ export class PaymentsService {
     const [data, total] = await Promise.all([
       this.prisma.payment.findMany({
         where,
-        include: {
-          customer: { select: { id: true, nome: true, cpfCnpj: true } },
-          contract: {
-            select: {
-              id: true,
-              vehicle: { select: { placa: true, modelo: true } },
-            },
-          },
-          schedule: { select: { id: true, dataHora: true } },
-          queue: { select: { id: true, createdAt: true } },
-        },
         orderBy: { createdAt: 'desc' },
         skip: (safePage - 1) * perPage,
         take: perPage,
@@ -389,7 +379,7 @@ export class PaymentsService {
     ]);
 
     return {
-      data,
+      data: data.map(toPaymentDTO),
       total,
       page: safePage,
       perPage,

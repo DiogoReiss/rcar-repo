@@ -17,7 +17,8 @@
     "paths": {
       "@common/*": ["src/common/*"],
       "@modules/*": ["src/modules/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@rcar/shared-types": ["../../packages/shared-types/src/index.ts"]
     },
     "incremental": true,
     "skipLibCheck": true,

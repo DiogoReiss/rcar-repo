@@ -8,8 +8,9 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
+import type { PaymentDTO } from '@rcar/shared-types';
 import { ApiService } from '@core/services/api.service';
-import { Payment } from '@shared/models/entities.model';
+import { Payment, fromPaymentDTO } from './payment.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 
 @Component({
@@ -55,11 +56,11 @@ export default class MeusPagamentosComponent {
 
   constructor() {
     this.api
-      .get<Payment[]>('/portal/my-payments')
+      .get<PaymentDTO[]>('/portal/my-payments')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (list) => {
-          this.payments.set(list);
+          this.payments.set(list.map(fromPaymentDTO));
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -82,8 +83,8 @@ export default class MeusPagamentosComponent {
     return 'warning';
   }
 
-  formatDate(d: string): string {
-    return new Date(d).toLocaleDateString('pt-BR');
+  formatDate(d: Date): string {
+    return d.toLocaleDateString('pt-BR');
   }
 
   formatMoney(v: number): string {

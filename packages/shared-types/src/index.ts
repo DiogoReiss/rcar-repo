@@ -1,12 +1,19 @@
 /**
  * @rcar/shared-types
  *
- * Single source of truth for all domain types shared between the API and the web app.
- * API Prisma models and frontend Angular models should both align with these definitions.
+ * Shared vocabulary between the API and the web app.
+ *
+ * This package owns the *cross-boundary contract*: enums, constants, and the
+ * explicit request/response DTOs exchanged over the wire (e.g. {@link PaymentDTO}).
+ * It intentionally does NOT own each side's internal shape — the backend keeps its
+ * Prisma models, and the frontend keeps its own domain models. Adapters at each
+ * seam (`toPaymentDTO` on the API response, `fromPaymentDTO` in the frontend store)
+ * translate between those internal shapes and the DTO, so a DB/schema change is
+ * absorbed by an adapter instead of leaking straight into the other side.
  *
  * ─── Usage ────────────────────────────────────────────────────────────────────
- * API:   import type { UserDto } from '@rcar/shared-types';
- * Web:   import type { User } from '@rcar/shared-types';
+ * API:   import type { PaymentDTO } from '@rcar/shared-types';
+ * Web:   import type { PaymentDTO } from '@rcar/shared-types';
  */
 
 // ─── Enums ──────────────────────────────────────────────────────────────────
@@ -19,9 +26,18 @@ export type WashScheduleStatus = 'AGENDADO' | 'EM_ATENDIMENTO' | 'CONCLUIDO' | '
 export type WashQueueStatus = 'AGUARDANDO' | 'EM_ATENDIMENTO' | 'CONCLUIDO';
 export type RentalModality = 'DIARIA' | 'SEMANAL' | 'MENSAL';
 export type ContractStatus = 'RESERVADO' | 'ATIVO' | 'ENCERRADO' | 'CANCELADO';
-export type PaymentMethod = 'DINHEIRO' | 'PIX' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO';
+export type PaymentMethod =
+  | 'DINHEIRO'
+  | 'PIX'
+  | 'CARTAO_CREDITO'
+  | 'CARTAO_DEBITO'
+  | 'BOLETO';
 export type PaymentStatus = 'PENDENTE' | 'CONFIRMADO' | 'CANCELADO';
-export type PaymentRefType = 'WASH_SCHEDULE' | 'WASH_QUEUE' | 'RENTAL_CONTRACT';
+export type PaymentRefType =
+  | 'WASH_SCHEDULE'
+  | 'WASH_QUEUE'
+  | 'RENTAL_CONTRACT'
+  | 'MASTER_AGREEMENT';
 export type StockMovementType = 'ENTRADA' | 'SAIDA' | 'AJUSTE';
 export type InspectionType = 'SAIDA' | 'CHEGADA';
 export type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LAVAGEM' | 'RECIBO_LOCACAO' | 'VISTORIA' | 'TERMO_RESPONSABILIDADE';
@@ -211,7 +227,7 @@ export interface RentalContract {
   customer?: Pick<Customer, 'id' | 'nome' | 'cpfCnpj'>;
   vehicle?: Pick<Vehicle, 'id' | 'placa' | 'modelo' | 'kmAtual'>;
   inspections?: Inspection[];
-  payments?: Payment[];
+  payments?: PaymentDTO[];
 }
 
 export interface Inspection {
@@ -226,7 +242,17 @@ export interface Inspection {
 
 // ─── Payments ────────────────────────────────────────────────────────────────
 
-export interface Payment {
+/**
+ * The explicit API contract for a payment — the shape sent over the wire.
+ *
+ * This is deliberately NOT the Prisma model and NOT the frontend domain model.
+ * The backend maps its Prisma row to this DTO (`toPaymentDTO`), and the frontend
+ * maps this DTO into its own domain model (`fromPaymentDTO`). Internal columns
+ * (e.g. `pagarmeTxId`, `unidadeId`, `updatedAt`) are not part of the contract, so
+ * renaming or adding a DB column is absorbed at the adapter instead of breaking
+ * the other side. `valor` is a JSON number and `createdAt` an ISO-8601 string.
+ */
+export interface PaymentDTO {
   id: string;
   refType: PaymentRefType;
   scheduleId?: string;
@@ -300,7 +326,7 @@ export interface RentalReceivableRow {
   faturado: number;
   pago: number;
   pendente: number;
-  payments: Array<Pick<Payment, 'id' | 'valor' | 'metodo' | 'createdAt'>>;
+  payments: Array<Pick<PaymentDTO, 'id' | 'valor' | 'metodo' | 'createdAt'>>;
 }
 
 export interface RentalReceivablesReport {
