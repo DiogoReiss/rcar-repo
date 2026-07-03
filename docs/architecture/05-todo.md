@@ -72,7 +72,7 @@ Consolidações mantidas:
 
 ### P2 — Fechamento funcional de produto
 
-1. Completar lacunas remanescentes no fluxo de aluguel frontend.
+1. ✅ Fluxo principal de aluguel no frontend concluído (disponibilidade, reserva, abertura, devolução com incidentes/fotos e fechamento).
 2. Evoluir portal do cliente com maior profundidade de dados/documentos.
 3. Melhorias de responsividade/mobile e polimento de UX.
 

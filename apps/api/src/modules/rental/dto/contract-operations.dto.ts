@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsInt, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsInt,
+  Min,
+  IsArray,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class ContractIncidentDto {
@@ -37,6 +44,15 @@ export class OpenContractDto {
   @ApiPropertyOptional({ description: 'Checklist de vistoria de saída (JSON)' })
   @IsOptional()
   checklist?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Fotos da vistoria de saída (object keys/URLs)',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  fotos?: string[];
 }
 
 export class CloseContractDto {
@@ -53,6 +69,15 @@ export class CloseContractDto {
   @ApiPropertyOptional()
   @IsOptional()
   checklist?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Fotos da vistoria de chegada (object keys/URLs)',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  fotos?: string[];
 
   @ApiPropertyOptional()
   @IsString()

@@ -14,6 +14,7 @@ import {
 import ConfirmDialogComponent from '@shared/components/confirm-dialog/confirm-dialog';
 import EntityDialogComponent from '@shared/components/entity-dialog/entity-dialog';
 import FormFieldComponent from '@shared/components/form-field/form-field';
+import FileUploadComponent from '@shared/components/file-upload/file-upload';
 import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import RowMenuComponent from '@shared/components/row-menu/row-menu';
@@ -24,10 +25,18 @@ import DateBrPipe from '@shared/pipes/date-br.pipe';
 
 type TabKey = 'TODOS' | 'RESERVADO' | 'ATIVO' | 'HISTORICO';
 type TemplateType = 'CONTRATO_LOCACAO' | 'RECIBO_LOCACAO';
+type IncidentType = 'SINISTRO' | 'AVARIA' | 'MULTA' | 'KM_EXCEDENTE' | 'COMBUSTIVEL' | 'OUTRO';
 
 interface TemplateRef {
   id: string;
   tipo: string;
+}
+
+interface ReturnIncidentForm {
+  tipo: IncidentType;
+  descricao: string;
+  valor: number;
+  cobradoCliente: boolean;
 }
 
 @Component({
@@ -35,6 +44,7 @@ interface TemplateRef {
   imports: [
     FormsModule,
     ConfirmDialogComponent, EntityDialogComponent, FormFieldComponent,
+    FileUploadComponent,
     PaymentDialogComponent, PageHeaderComponent, RowMenuComponent,
     WizardDialogComponent, AppButtonComponent, CurrencyBrlPipe, DateBrPipe, Dialog,
   ],
@@ -89,10 +99,12 @@ export default class ContratoListComponent implements OnInit {
   // ── Abertura dialog ───────────────────────────────────────────────────────
   readonly aberturaTarget   = signal<string | null>(null);
   readonly aberturaLoading  = signal(false);
+  readonly aberturaError    = signal<string | null>(null);
   readonly kmRetirada       = signal(0);
   readonly combustivelSaida = signal('CHEIO');
   readonly entregaChecklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
   readonly entregaChecklist = signal<Record<string, boolean>>({});
+  readonly entregaFotos = signal<string[]>([]);
 
   // ── Payment dialog ────────────────────────────────────────────────────────
   readonly payingId   = signal<string | null>(null);
@@ -116,6 +128,17 @@ export default class ContratoListComponent implements OnInit {
   readonly devolucaoObs = signal('');
   readonly checklistItems = ['Lataria', 'Para-choque', 'Retrovisores', 'Vidros', 'Pneus', 'Interior', 'Documentos'];
   readonly checklist = signal<Record<string, boolean>>({});
+  readonly devolucaoFotos = signal<string[]>([]);
+  readonly incidents = signal<ReturnIncidentForm[]>([]);
+  readonly incidentTypes: IncidentType[] = ['SINISTRO', 'AVARIA', 'MULTA', 'KM_EXCEDENTE', 'COMBUSTIVEL', 'OUTRO'];
+  readonly incidentTypeLabels: Record<IncidentType, string> = {
+    SINISTRO: 'Sinistro',
+    AVARIA: 'Avaria',
+    MULTA: 'Multa',
+    KM_EXCEDENTE: 'KM excedente',
+    COMBUSTIVEL: 'Combustível',
+    OUTRO: 'Outro',
+  };
 
   // ── Cancel confirm ────────────────────────────────────────────────────────
   readonly cancelTarget = signal<string | null>(null);
@@ -130,6 +153,7 @@ export default class ContratoListComponent implements OnInit {
   readonly searching = signal(false);
   readonly available = signal<Vehicle[]>([]);
   readonly searched  = signal(false);
+  readonly availableError = signal<string | null>(null);
 
   readonly selectedVehicle = signal<Vehicle | null>(null);
 
@@ -156,6 +180,14 @@ export default class ContratoListComponent implements OnInit {
       case 2: return !!this.customerId() && this.valorDiaria() > 0;
       default: return false;
     }
+  });
+
+  readonly valorTotalRealEstimado = computed(() => {
+    const base = this.devolucaoData()?.valorTotal ?? 0;
+    const totalIncidentes = this.incidents()
+      .filter((incident) => incident.cobradoCliente)
+      .reduce((sum, incident) => sum + Number(incident.valor || 0), 0);
+    return base + totalIncidentes;
   });
 
   // ── Status display ────────────────────────────────────────────────────────
@@ -329,6 +361,8 @@ export default class ContratoListComponent implements OnInit {
     this.checklist.set(initial);
     this.combustivelChegada.set('CHEIO');
     this.devolucaoObs.set('');
+    this.devolucaoFotos.set([]);
+    this.incidents.set([]);
 
     try {
       const res = await firstValueFrom(this.api.get<RentalContract>(`/rental/contracts/${id}`));
@@ -345,10 +379,68 @@ export default class ContratoListComponent implements OnInit {
     this.devolucaoId.set(null);
     this.devolucaoData.set(null);
     this.devolucaoError.set(null);
+    this.devolucaoFotos.set([]);
+    this.incidents.set([]);
   }
 
   toggleChecklist(item: string) {
     this.checklist.update((c) => ({ ...c, [item]: !c[item] }));
+  }
+
+  onDevolucaoFotoUploaded(objectKey: string | null) {
+    if (!objectKey) return;
+    this.devolucaoFotos.update((current) => {
+      if (current.includes(objectKey)) return current;
+      return [...current, objectKey];
+    });
+  }
+
+  removeDevolucaoFoto(objectKey: string) {
+    this.devolucaoFotos.update((current) => current.filter((item) => item !== objectKey));
+  }
+
+  addIncident() {
+    this.incidents.update((current) => [
+      ...current,
+      { tipo: 'AVARIA', descricao: '', valor: 0, cobradoCliente: true },
+    ]);
+  }
+
+  removeIncident(index: number) {
+    this.incidents.update((current) => current.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  updateIncidentType(index: number, tipo: string) {
+    this.incidents.update((current) =>
+      current.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, tipo: tipo as IncidentType } : item,
+      ),
+    );
+  }
+
+  updateIncidentDescription(index: number, descricao: string) {
+    this.incidents.update((current) =>
+      current.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, descricao } : item,
+      ),
+    );
+  }
+
+  updateIncidentValue(index: number, valor: number) {
+    const safeValue = Number.isFinite(valor) ? Math.max(0, valor) : 0;
+    this.incidents.update((current) =>
+      current.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, valor: safeValue } : item,
+      ),
+    );
+  }
+
+  updateIncidentCharged(index: number, cobradoCliente: boolean) {
+    this.incidents.update((current) =>
+      current.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, cobradoCliente } : item,
+      ),
+    );
   }
 
   async onSubmitDevolucao() {
@@ -357,10 +449,23 @@ export default class ContratoListComponent implements OnInit {
     this.devolucaoSaving.set(true);
     this.devolucaoError.set(null);
     try {
+      const incidentes = this.incidents();
+      const hasInvalidIncident = incidentes.some((incident) => !incident.descricao.trim());
+      if (hasInvalidIncident) {
+        this.devolucaoError.set('Preencha a descrição de todos os incidentes.');
+        return;
+      }
       await firstValueFrom(this.api.patch(`/rental/contracts/${id}/close`, {
         kmDevolucao: this.kmDevolucao(),
         combustivelChegada: this.combustivelChegada(),
         checklist: this.checklist(),
+        fotos: this.devolucaoFotos(),
+        incidents: incidentes.map((incident) => ({
+          tipo: incident.tipo,
+          descricao: incident.descricao.trim(),
+          valor: incident.valor,
+          cobradoCliente: incident.cobradoCliente,
+        })),
         observacoes: this.devolucaoObs() || undefined,
       }));
       this.toast.add({ severity: 'success', summary: 'Devolução registrada', life: 3000 });
@@ -376,30 +481,48 @@ export default class ContratoListComponent implements OnInit {
   // ── Abertura ──────────────────────────────────────────────────────────────
   openAbertura(id: string) {
     this.aberturaTarget.set(id);
+    this.aberturaError.set(null);
     this.kmRetirada.set(0);
     this.combustivelSaida.set('CHEIO');
     const initial: Record<string, boolean> = {};
     this.entregaChecklistItems.forEach((item) => { initial[item] = true; });
     this.entregaChecklist.set(initial);
+    this.entregaFotos.set([]);
   }
 
   toggleEntregaChecklist(item: string) {
     this.entregaChecklist.update((current) => ({ ...current, [item]: !current[item] }));
   }
 
+  onEntregaFotoUploaded(objectKey: string | null) {
+    if (!objectKey) return;
+    this.entregaFotos.update((current) => {
+      if (current.includes(objectKey)) return current;
+      return [...current, objectKey];
+    });
+  }
+
+  removeEntregaFoto(objectKey: string) {
+    this.entregaFotos.update((current) => current.filter((item) => item !== objectKey));
+  }
+
   async onAbertura() {
     const id = this.aberturaTarget();
     if (!id) return;
     this.aberturaLoading.set(true);
+    this.aberturaError.set(null);
     try {
       await firstValueFrom(this.api.patch(`/rental/contracts/${id}/open`, {
         kmRetirada: this.kmRetirada(),
         combustivelSaida: this.combustivelSaida(),
         checklist: this.entregaChecklist(),
+        fotos: this.entregaFotos(),
       }));
       this.toast.add({ severity: 'success', summary: 'Contrato aberto', life: 3000 });
       this.aberturaTarget.set(null);
       await this.load();
+    } catch (e: any) {
+      this.aberturaError.set(e?.error?.message ?? 'Erro ao abrir contrato.');
     } finally { this.aberturaLoading.set(false); }
   }
 
@@ -430,6 +553,7 @@ export default class ContratoListComponent implements OnInit {
   openWizard() {
     this.wizardStep.set(0);
     this.searched.set(false); this.available.set([]); this.selectedVehicle.set(null);
+    this.availableError.set(null);
     this.customerId.set(''); this.modalidade.set('DIARIA'); this.valorDiaria.set(0);
     this.seguro.set(false); this.valorSeguro.set(0); this.kmLimite.set(undefined);
     this.obs.set(''); this.wizardError.set(null);
@@ -446,12 +570,15 @@ export default class ContratoListComponent implements OnInit {
 
   async onSearch() {
     if (!this.dateFrom() || !this.dateTo()) return;
-    this.searching.set(true); this.available.set([]); this.searched.set(false);
+    this.searching.set(true); this.available.set([]); this.searched.set(false); this.availableError.set(null);
     try {
       const res = await firstValueFrom(this.api.get<Vehicle[]>(
         `/rental/available?dataRetirada=${this.dateFrom()}T00:00:00Z&dataDevolucao=${this.dateTo()}T23:59:59Z`,
       ));
       this.available.set(Array.isArray(res) ? res : (res as any).data ?? []);
+      this.searched.set(true);
+    } catch (e: any) {
+      this.availableError.set(e?.error?.message ?? 'Erro ao consultar disponibilidade.');
       this.searched.set(true);
     } finally { this.searching.set(false); }
   }

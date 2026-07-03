@@ -67,3 +67,11 @@ Padrão esperado:
 - CI e CD existem em `.github/workflows/ci.yml` e `.github/workflows/cd.yml`.
 - Swagger ativo em ambiente local.
 - Testes unitários e E2E já presentes, com cobertura ainda parcial para cenários avançados.
+
+---
+
+## Destaques recentes — Rental
+
+- `PATCH /rental/contracts/:id/open` e `PATCH /rental/contracts/:id/close` aceitam `fotos?: string[]` nas DTOs de operação.
+- `openContract` e `closeContract` persistem `Inspection.fotos` com os anexos enviados no payload.
+- `closeContract` mantém a regra de cálculo de `valorTotalReal` somando incidentes com `cobradoCliente !== false`.

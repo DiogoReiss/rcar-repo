@@ -91,3 +91,12 @@ Regra prática: `OPERADOR_LEITURA` visualiza páginas operacionais, mas não exe
 - Estado local preferencialmente com `signal()` em componentes/services.
 - NgRx Signals para estado global entre features.
 - Páginas com loading/empty/error explícitos.
+
+---
+
+## Destaques recentes — Fluxo de aluguel
+
+- A tela `aluguel/contratos/contrato-list` cobre o fluxo completo: disponibilidade → reserva → abertura (vistoria de saída) → devolução (vistoria de chegada) → fechamento.
+- A devolução permite registrar incidentes (`SINISTRO`, `AVARIA`, `MULTA`, `KM_EXCEDENTE`, `COMBUSTIVEL`, `OUTRO`) com `cobradoCliente` e projeção de `valorTotalReal`.
+- Vistorias de saída e chegada aceitam anexos de fotos via `lync-file-upload` + `StorageService` (object keys no payload).
+- Estados explícitos de loading/empty/error foram reforçados no list, busca de disponibilidade e dialogs principais.

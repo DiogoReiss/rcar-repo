@@ -62,7 +62,7 @@
 
 // ─── State hints ─────────────────────────────────────────────────────────────
 .loading-hint { color: $color-neutral-400; padding: $spacing-md; font-size: 0.875rem; display: flex; align-items: center; gap: $spacing-xs; }
-.error-hint   { padding: $spacing-md; color: #dc2626; background: #fef2f2; border-radius: 8px; }
+.error-hint   { padding: $spacing-md; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; }
 
 .form-grid--spaced { margin-top: $spacing-md; }
 
@@ -192,6 +192,107 @@
   color: $color-neutral-500;
 }
 
+.photo-list {
+  margin-top: $spacing-sm;
+  display: grid;
+  gap: $spacing-xs;
+}
+
+.photo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
+  border: 1px solid var(--lync-border);
+  border-radius: 8px;
+  padding: $spacing-xs $spacing-sm;
+  background: var(--lync-surface-muted);
+  font-size: 0.8125rem;
+}
+
+.btn-link {
+  border: 0;
+  background: transparent;
+  color: $color-primary;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.btn-link--danger {
+  color: #b91c1c;
+}
+
+.incident-block {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.incident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--lync-text);
+  }
+}
+
+.incident-list {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.incident-row {
+  border: 1px solid var(--lync-border);
+  border-radius: 10px;
+  background: var(--lync-surface-muted);
+  padding: $spacing-sm;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-sm;
+
+  .btn-link--danger {
+    justify-self: flex-end;
+    align-self: end;
+  }
+}
+
+.projected-total {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid var(--lync-tag-border);
+  border-radius: 8px;
+  background: var(--lync-tag-bg);
+  color: var(--lync-text);
+
+  span {
+    font-size: 0.8125rem;
+    color: var(--lync-text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  strong {
+    font-size: 1rem;
+    color: #065f46;
+  }
+}
+
 .detail-footer {
   display: flex;
   gap: $spacing-sm;
@@ -230,6 +331,11 @@
 
   &--ok   { background: #eff6ff; color: #1d4ed8; }
   &--warn { background: #fff7ed; color: #c2410c; }
+  &--error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+  }
 }
 
 // ─── Vehicle grid ─────────────────────────────────────────────────────────────
@@ -311,10 +417,25 @@
 
   .step-info--ok,
   .step-info--warn,
+  .step-info--error,
   .form-error,
   .checklist-item.ok,
   .checklist-item.nok {
     border-color: var(--lync-tag-border);
+  }
+
+  .error-hint {
+    background: color-mix(in srgb, var(--lync-surface) 86%, #fca5a5 14%);
+    border-color: var(--lync-tag-border);
+    color: var(--lync-text);
+  }
+
+  .btn-link--danger {
+    color: #fca5a5;
+  }
+
+  .projected-total strong {
+    color: #6ee7b7;
   }
 }
 

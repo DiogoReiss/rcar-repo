@@ -95,6 +95,9 @@
   (cancelled)="aberturaTarget.set(null)"
   (visibleChange)="!$event && aberturaTarget.set(null)"
 >
+  @if (aberturaError()) {
+    <div class="error-hint">{{ aberturaError() }}</div>
+  }
   <div class="form-grid">
     <lync-form-field label="KM na Retirada" [required]="true">
       <input type="number" [ngModel]="kmRetirada()" (ngModelChange)="kmRetirada.set(+$event)" name="km" min="0" />
@@ -117,6 +120,23 @@
           </label>
         }
       </div>
+    </lync-form-field>
+    <lync-form-field label="Fotos da Vistoria de Saída" [full]="true">
+      <lync-file-upload
+        folder="rental/inspections"
+        accept="image/*"
+        (valueChange)="onEntregaFotoUploaded($event)"
+      />
+      @if (entregaFotos().length) {
+        <div class="photo-list">
+          @for (foto of entregaFotos(); track foto) {
+            <div class="photo-item">
+              <span>{{ foto }}</span>
+              <button type="button" class="btn-link" (click)="removeEntregaFoto(foto)">Remover</button>
+            </div>
+          }
+        </div>
+      }
     </lync-form-field>
   </div>
 </lync-entity-dialog>
@@ -190,6 +210,11 @@
         </dl>
       </section>
     </div>
+  } @else {
+    <div class="empty-state">
+      <i class="pi pi-inbox empty-icon"></i>
+      <p>Nenhum detalhe disponível para este contrato.</p>
+    </div>
   }
 
   <ng-template #footer>
@@ -215,6 +240,8 @@
 >
   @if (devolucaoLoading()) {
     <div class="loading-hint"><i class="pi pi-spin pi-spinner"></i>&nbsp;Carregando contrato...</div>
+  } @else if (devolucaoError() && !devolucaoData()) {
+    <div class="error-hint">{{ devolucaoError() }}</div>
   } @else if (devolucaoData(); as c) {
     <div class="contract-summary">
       <div class="summary-item"><span>Cliente</span><strong>{{ c.customer?.nome }}</strong></div>
@@ -253,9 +280,101 @@
         </div>
       </lync-form-field>
 
+      <lync-form-field label="Fotos da Vistoria de Chegada" [full]="true">
+        <lync-file-upload
+          folder="rental/inspections"
+          accept="image/*"
+          (valueChange)="onDevolucaoFotoUploaded($event)"
+        />
+        @if (devolucaoFotos().length) {
+          <div class="photo-list">
+            @for (foto of devolucaoFotos(); track foto) {
+              <div class="photo-item">
+                <span>{{ foto }}</span>
+                <button type="button" class="btn-link" (click)="removeDevolucaoFoto(foto)">Remover</button>
+              </div>
+            }
+          </div>
+        }
+      </lync-form-field>
+
+      <div class="incident-block">
+        <div class="incident-header">
+          <h3>Incidentes na devolução</h3>
+          <lync-btn
+            label="Adicionar incidente"
+            variant="secondary"
+            icon="pi pi-plus"
+            (clicked)="addIncident()"
+          />
+        </div>
+        @if (!incidents().length) {
+          <div class="step-info">Nenhum incidente adicionado.</div>
+        } @else {
+          <div class="incident-list">
+            @for (incident of incidents(); track $index) {
+              <div class="incident-row">
+                <lync-form-field label="Tipo" [required]="true">
+                  <select
+                    [ngModel]="incident.tipo"
+                    (ngModelChange)="updateIncidentType($index, $event)"
+                    [name]="'incident-type-' + $index"
+                  >
+                    @for (tipo of incidentTypes; track tipo) {
+                      <option [value]="tipo">{{ incidentTypeLabels[tipo] }}</option>
+                    }
+                  </select>
+                </lync-form-field>
+                <lync-form-field label="Descrição" [required]="true">
+                  <input
+                    [ngModel]="incident.descricao"
+                    (ngModelChange)="updateIncidentDescription($index, $event)"
+                    [name]="'incident-description-' + $index"
+                  />
+                </lync-form-field>
+                <lync-form-field label="Valor (R$)">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [ngModel]="incident.valor"
+                    (ngModelChange)="updateIncidentValue($index, +$event)"
+                    [name]="'incident-value-' + $index"
+                  />
+                </lync-form-field>
+                <lync-form-field label="Cobrar cliente?">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      [ngModel]="incident.cobradoCliente"
+                      (ngModelChange)="updateIncidentCharged($index, $event)"
+                      [name]="'incident-charge-' + $index"
+                    />
+                    Sim
+                  </label>
+                </lync-form-field>
+                <button type="button" class="btn-link btn-link--danger" (click)="removeIncident($index)">
+                  Remover
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="projected-total">
+        <span>Valor total real estimado</span>
+        <strong>{{ formatPrice(valorTotalRealEstimado()) }}</strong>
+      </div>
+
       <lync-form-field label="Observações" [full]="true">
         <textarea [ngModel]="devolucaoObs()" (ngModelChange)="devolucaoObs.set($event)" name="devolucaoObs" rows="2"></textarea>
       </lync-form-field>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <i class="pi pi-inbox empty-icon"></i>
+      <p>Nenhum contrato disponível para devolução.</p>
     </div>
   }
 
@@ -311,7 +430,9 @@
         </div>
       </div>
       @if (searched()) {
-        @if (!available().length) {
+        @if (availableError()) {
+          <div class="step-info step-info--error">{{ availableError() }}</div>
+        } @else if (!available().length) {
           <div class="step-info step-info--warn">Nenhum veículo disponível para o período selecionado.</div>
         } @else {
           <div class="step-info step-info--ok">
@@ -325,20 +446,31 @@
   <!-- Step 2 – Veículo -->
   @if (wizardStep() === 1) {
     <div class="step-section">
-      <div class="vehicle-grid">
-        @for (v of available(); track v.id) {
-          <button
-            type="button"
-            class="vehicle-card"
-            [class.selected]="selectedVehicle()?.id === v.id"
-            (click)="selectVehicle(v)"
-          >
-            <div class="vehicle-plate">{{ v.placa }}</div>
-            <div class="vehicle-model">{{ v.modelo }}</div>
-            <div class="vehicle-meta">{{ v.ano }} · {{ v.cor }} · {{ catLabel(v.categoria) }}</div>
-          </button>
-        }
-      </div>
+      @if (searching()) {
+        <div class="loading-hint"><i class="pi pi-spin pi-spinner"></i>&nbsp;Buscando veículos...</div>
+      } @else if (availableError()) {
+        <div class="error-hint">{{ availableError() }}</div>
+      } @else if (!available().length) {
+        <div class="empty-state">
+          <i class="pi pi-inbox empty-icon"></i>
+          <p>Nenhum veículo disponível para este período.</p>
+        </div>
+      } @else {
+        <div class="vehicle-grid">
+          @for (v of available(); track v.id) {
+            <button
+              type="button"
+              class="vehicle-card"
+              [class.selected]="selectedVehicle()?.id === v.id"
+              (click)="selectVehicle(v)"
+            >
+              <div class="vehicle-plate">{{ v.placa }}</div>
+              <div class="vehicle-model">{{ v.modelo }}</div>
+              <div class="vehicle-meta">{{ v.ano }} · {{ v.cor }} · {{ catLabel(v.categoria) }}</div>
+            </button>
+          }
+        </div>
+      }
     </div>
   }
 
@@ -390,4 +522,3 @@
     </div>
   }
 </lync-wizard-dialog>
-

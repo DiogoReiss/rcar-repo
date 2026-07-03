@@ -82,6 +82,10 @@ Operador vincula veículo, executa vistoria de saída e gera documentação.
 
 Vistoria de chegada, apuração de extras e fechamento financeiro.
 
+- Registro operacional de incidentes na devolução (ex.: avaria, multa, km excedente, combustível), com marcação se é cobrado do cliente.
+- `valorTotalReal` considera os incidentes cobrados no fechamento.
+- Vistorias de saída e chegada permitem checklist + fotos anexadas ao contrato.
+
 ### Regras
 
 - Caução/seguro fazem parte do contrato.

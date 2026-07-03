@@ -182,14 +182,14 @@ export class RentalService {
         where: { id: contract.vehicleId },
         data: { status: 'ALUGADO' },
       }),
-      ...(dto.checklist
+      ...(dto.checklist || dto.fotos?.length
         ? [
             this.prisma.inspection.create({
               data: {
                 contractId: id,
                 tipo: 'SAIDA',
                 checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
-                fotos: [],
+                fotos: dto.fotos ?? [],
               },
             }),
           ]
@@ -260,14 +260,14 @@ export class RentalService {
         where: { id: contract.vehicleId },
         data: { status: 'DISPONIVEL', kmAtual: dto.kmDevolucao },
       }),
-      ...(dto.checklist
+      ...(dto.checklist || dto.fotos?.length
         ? [
             this.prisma.inspection.create({
               data: {
                 contractId: id,
                 tipo: 'CHEGADA',
                 checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
-                fotos: [],
+                fotos: dto.fotos ?? [],
               },
             }),
           ]
