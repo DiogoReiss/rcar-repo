@@ -124,6 +124,16 @@ enum StockMovementType {
   AJUSTE
 }
 
+enum BillingCycle {
+  SEMANAL
+  MENSAL
+}
+
+enum MasterAgreementStatus {
+  ATIVO
+  ENCERRADO
+}
+
 // ─── MODELS ─────────────────────────────────────────────────────────────────
 
 model User {
@@ -169,6 +179,7 @@ model Customer {
   washQueues      WashQueue[]
   rentalContracts RentalContract[]
   payments        Payment[]
+  masterAgreements MasterAgreement[]
 
   @@map("customers")
 }
@@ -189,6 +200,7 @@ model Vehicle {
 
   maintenances    VehicleMaintenance[]
   rentalContracts RentalContract[]
+  masterAgreementItems MasterAgreementItem[]
 
   @@index([status])
   @@map("vehicles")
@@ -450,4 +462,41 @@ model PasswordResetToken {
 
   @@index([token])
   @@map("password_reset_tokens")
+}
+
+// ─── ACORDOS EM LOTE (CONTRATO-MESTRE) ──────────────────────────────────────
+
+model MasterAgreement {
+  id            String                @id @default(uuid())
+  customerId    String                @map("customer_id")
+  descricao     String?
+  ciclo         BillingCycle
+  status        MasterAgreementStatus @default(ATIVO)
+  diaVencimento Int?                  @map("dia_vencimento")
+  proximoCiclo  DateTime?             @map("proximo_ciclo")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  customer Customer               @relation(fields: [customerId], references: [id])
+  items    MasterAgreementItem[]
+
+  @@index([customerId, status])
+  @@map("master_agreements")
+}
+
+model MasterAgreementItem {
+  id             String    @id @default(uuid())
+  agreementId    String    @map("agreement_id")
+  vehicleId      String    @map("vehicle_id")
+  contractId     String?   @map("contract_id")
+  valorCiclo     Decimal   @db.Decimal(10, 2) @map("valor_ciclo")
+  ativo          Boolean   @default(true)
+  vinculadoEm    DateTime  @default(now()) @map("vinculado_em")
+  desvinculadoEm DateTime? @map("desvinculado_em")
+
+  agreement MasterAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle         @relation(fields: [vehicleId], references: [id])
+
+  @@index([agreementId, ativo])
+  @@map("master_agreement_items")
 }

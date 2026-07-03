@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuditModule } from './common/audit/audit.module.js';
 import { SignaturesModule } from './modules/signatures/signatures.module.js';
+import { MasterAgreementsModule } from './modules/master-agreements/master-agreements.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { InventoryModule } from './modules/inventory/inventory.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -47,6 +48,7 @@ import { HealthModule } from './modules/health/health.module.js';
     DocumentsModule,
     StorageModule,
     SignaturesModule,
+    MasterAgreementsModule,
     HealthModule,
   ],
   controllers: [],
