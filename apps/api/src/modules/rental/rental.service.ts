@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ConflictException,
@@ -12,10 +13,16 @@ import {
   CloseContractDto,
 } from './dto/contract-operations.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { PaymentsService } from '../payments/payments.service.js';
 
 @Injectable()
 export class RentalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payments: PaymentsService,
+  ) {}
+
+  private readonly logger = new Logger(RentalService.name);
 
   // ─── Availability ─────────────────────────────────────────────────────────
 
@@ -280,6 +287,23 @@ export class RentalService {
         : []),
       ...incidentCreates,
     ]);
+
+    // Auto-charge the outstanding balance on close (best-effort; failures here
+    // must not roll back the settled return).
+    try {
+      const balance = await this.payments.getBalance('RENTAL_CONTRACT', id);
+      if (balance.saldo > 0) {
+        await this.payments.startCharge({
+          refType: 'RENTAL_CONTRACT',
+          refId: id,
+          metodo: 'PIX',
+        });
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Auto-cobrança do contrato ${id} falhou: ${(err as Error).message}`,
+      );
+    }
 
     return this.findOne(id);
   }

@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { PaymentRefType } from '@prisma/client';
 import { PaymentsService } from './payments.service.js';
 import { QueryPaymentsDto } from './dto/query-payments.dto.js';
 import { CreateChargeDto } from './dto/create-charge.dto.js';
@@ -57,6 +58,29 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Comprovante de um pagamento confirmado' })
   receipt(@Param('id', ParseUUIDPipe) id: string) {
     return this.paymentsService.getReceipt(id);
+  }
+
+  @Get('balance')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
+  @ApiOperation({ summary: 'Saldo em aberto de um recurso pagável' })
+  @ApiQuery({ name: 'refType', required: true })
+  @ApiQuery({ name: 'refId', required: true })
+  balance(
+    @Query('refType') refType: PaymentRefType,
+    @Query('refId', ParseUUIDPipe) refId: string,
+  ) {
+    return this.paymentsService.getBalance(refType, refId);
+  }
+
+  @Post('charges/:id/refund')
+  @Roles('GESTOR_GERAL')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Estorna/cancela um pagamento confirmado' })
+  refund(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { id?: string; role?: string },
+  ) {
+    return this.paymentsService.refundCharge(id, user);
   }
 
   @Get()

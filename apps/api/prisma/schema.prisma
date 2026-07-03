@@ -107,6 +107,7 @@ enum PaymentMethod {
   PIX
   CARTAO_CREDITO
   CARTAO_DEBITO
+  BOLETO
 }
 
 enum PaymentStatus {

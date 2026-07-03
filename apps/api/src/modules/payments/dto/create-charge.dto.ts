@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsPositive, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PaymentRefType } from '@prisma/client';
 
 /** Online charge methods supported by the gateway port. */
@@ -29,4 +30,13 @@ export class CreateChargeDto {
   @ApiPropertyOptional({ description: 'Vencimento do boleto (ISO)' })
   @IsOptional()
   dueDate?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Valor parcial a cobrar (BRL). Se omitido, cobra o saldo em aberto.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsPositive()
+  valor?: number;
 }

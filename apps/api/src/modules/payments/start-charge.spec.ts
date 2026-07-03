@@ -15,6 +15,7 @@ describe('PaymentsService.startCharge', () => {
     rentalContract: { findUnique: jest.fn().mockResolvedValue(contract) },
     payment: {
       findFirst: jest.fn().mockResolvedValue(null),
+      aggregate: jest.fn().mockResolvedValue({ _sum: { valor: 0 } }),
       create: jest
         .fn()
         .mockImplementation(({ data }: never) =>

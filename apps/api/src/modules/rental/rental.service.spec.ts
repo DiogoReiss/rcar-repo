@@ -27,7 +27,13 @@ describe('RentalService', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('rejects contract creation with invalid date interval', async () => {
-    const service = new RentalService(prisma as never);
+    const service = new RentalService(
+      prisma as never,
+      {
+        getBalance: jest.fn().mockResolvedValue({ saldo: 0 }),
+        startCharge: jest.fn(),
+      } as never,
+    );
 
     await expect(
       service.create({
@@ -52,7 +58,13 @@ describe('RentalService', () => {
       id: 'p1',
       status: 'CONFIRMADO',
     });
-    const service = new RentalService(prisma as never);
+    const service = new RentalService(
+      prisma as never,
+      {
+        getBalance: jest.fn().mockResolvedValue({ saldo: 0 }),
+        startCharge: jest.fn(),
+      } as never,
+    );
 
     const result = await service.registerPayment('rc1', 'PIX');
 
@@ -66,7 +78,13 @@ describe('RentalService', () => {
       status: 'ATIVO',
       vehicleId: 'v1',
     });
-    const service = new RentalService(prisma as never);
+    const service = new RentalService(
+      prisma as never,
+      {
+        getBalance: jest.fn().mockResolvedValue({ saldo: 0 }),
+        startCharge: jest.fn(),
+      } as never,
+    );
 
     await expect(service.cancelContract('rc1')).rejects.toBeInstanceOf(
       BadRequestException,
@@ -75,7 +93,13 @@ describe('RentalService', () => {
 
   it('throws when paying an unknown contract', async () => {
     prisma.rentalContract.findUnique.mockResolvedValue(null);
-    const service = new RentalService(prisma as never);
+    const service = new RentalService(
+      prisma as never,
+      {
+        getBalance: jest.fn().mockResolvedValue({ saldo: 0 }),
+        startCharge: jest.fn(),
+      } as never,
+    );
 
     await expect(
       service.registerPayment('missing', 'PIX'),

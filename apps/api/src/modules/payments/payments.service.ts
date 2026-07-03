@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -41,6 +42,10 @@ interface PayableInfo {
 }
 
 const WEBHOOK_SOURCE = 'PAYMENT';
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
 
 @Injectable()
 export class PaymentsService {
@@ -109,25 +114,40 @@ export class PaymentsService {
   /**
    * Starts an online charge for a payable resource through the
    * {@link PaymentGateway} port, creating a PENDENTE Payment that records the
-   * external transaction id. Idempotent per payable + method.
+   * external transaction id. When `dto.valor` is omitted the outstanding
+   * balance is charged and the call is idempotent per payable + method; when a
+   * partial `dto.valor` is given, multiple partial charges are allowed.
    */
   async startCharge(dto: CreateChargeDto, user?: ActingUser) {
     const method: GatewayChargeMethod = dto.metodo ?? 'PIX';
     const payable = await this.resolvePayable(dto.refType, dto.refId);
 
-    const existing = await this.prisma.payment.findFirst({
-      where: {
-        refType: dto.refType,
-        status: 'PENDENTE',
-        ...(payable.contractId ? { contractId: payable.contractId } : {}),
-        ...(payable.scheduleId ? { scheduleId: payable.scheduleId } : {}),
-        ...(payable.queueId ? { queueId: payable.queueId } : {}),
-      },
-    });
-    if (existing) return existing;
+    const pago = await this.sumConfirmed(payable);
+    const saldo = round2(payable.valor - pago);
+    const amount = dto.valor ?? saldo;
+    if (amount <= 0) {
+      throw new BadRequestException('Não há saldo em aberto para cobrança.');
+    }
+    if (amount > saldo + 0.001) {
+      throw new BadRequestException(
+        `Valor (R$ ${amount.toFixed(2)}) excede o saldo em aberto (R$ ${saldo.toFixed(2)}).`,
+      );
+    }
+
+    // Idempotency only for full-balance charges; partials may coexist.
+    if (dto.valor === undefined) {
+      const existing = await this.prisma.payment.findFirst({
+        where: {
+          refType: dto.refType,
+          status: 'PENDENTE',
+          ...this.payableWhere(payable),
+        },
+      });
+      if (existing) return existing;
+    }
 
     const charge = await this.gateway.createCharge({
-      amount: payable.valor,
+      amount,
       method,
       description: `Cobrança ${dto.refType} ${dto.refId}`,
       customerName: payable.customerName ?? undefined,
@@ -142,8 +162,8 @@ export class PaymentsService {
         scheduleId: payable.scheduleId ?? null,
         queueId: payable.queueId ?? null,
         customerId: payable.customerId,
-        valor: new Prisma.Decimal(payable.valor),
-        metodo: method as PaymentMethod,
+        valor: new Prisma.Decimal(amount),
+        metodo: method,
         status: 'PENDENTE',
         pagarmeTxId: charge.externalId,
       },
@@ -159,7 +179,8 @@ export class PaymentsService {
         refId: dto.refId,
         metodo: method,
         externalId: charge.externalId,
-        valor: payable.valor,
+        valor: amount,
+        parcial: dto.valor !== undefined,
       },
     });
 
@@ -168,6 +189,67 @@ export class PaymentsService {
       pixQrCode: charge.pixQrCode,
       boletoUrl: charge.boletoUrl,
     };
+  }
+
+  /** Outstanding balance for a payable: total, confirmed amount and remaining. */
+  async getBalance(refType: PaymentRefType, refId: string) {
+    const payable = await this.resolvePayable(refType, refId);
+    const pago = await this.sumConfirmed(payable);
+    const total = round2(payable.valor);
+    return {
+      refType,
+      refId,
+      total,
+      pago: round2(pago),
+      saldo: round2(total - pago),
+      quitado: round2(total - pago) <= 0,
+    };
+  }
+
+  /**
+   * Refunds/cancels a confirmed payment through the gateway. Idempotent: an
+   * already-cancelled payment is returned as-is.
+   */
+  async refundCharge(id: string, user?: ActingUser) {
+    const payment = await this.prisma.payment.findUnique({ where: { id } });
+    if (!payment) throw new NotFoundException('Pagamento não encontrado');
+    if (payment.status === 'CANCELADO') return payment;
+    if (payment.status !== 'CONFIRMADO') {
+      throw new BadRequestException(
+        'Somente pagamentos confirmados podem ser estornados.',
+      );
+    }
+    if (payment.pagarmeTxId) {
+      await this.gateway.refund(payment.pagarmeTxId);
+    }
+    const updated = await this.prisma.payment.update({
+      where: { id },
+      data: { status: 'CANCELADO' },
+    });
+    await this.audit.record({
+      userId: user?.id ?? null,
+      acao: 'PAYMENT_REFUNDED',
+      entidade: 'Payment',
+      entidadeId: id,
+      detalhes: { externalId: payment.pagarmeTxId },
+    });
+    return updated;
+  }
+
+  private payableWhere(payable: PayableInfo) {
+    return {
+      ...(payable.contractId ? { contractId: payable.contractId } : {}),
+      ...(payable.scheduleId ? { scheduleId: payable.scheduleId } : {}),
+      ...(payable.queueId ? { queueId: payable.queueId } : {}),
+    };
+  }
+
+  private async sumConfirmed(payable: PayableInfo): Promise<number> {
+    const agg = await this.prisma.payment.aggregate({
+      where: { status: 'CONFIRMADO', ...this.payableWhere(payable) },
+      _sum: { valor: true },
+    });
+    return Number(agg._sum.valor ?? 0);
   }
 
   async findCharge(id: string) {
@@ -387,6 +469,7 @@ export class PaymentsService {
       PIX: { metodo: 'PIX', quantidade: 0, valor: 0 },
       CARTAO_CREDITO: { metodo: 'CARTAO_CREDITO', quantidade: 0, valor: 0 },
       CARTAO_DEBITO: { metodo: 'CARTAO_DEBITO', quantidade: 0, valor: 0 },
+      BOLETO: { metodo: 'BOLETO', quantidade: 0, valor: 0 },
     };
 
     for (const row of rows) {

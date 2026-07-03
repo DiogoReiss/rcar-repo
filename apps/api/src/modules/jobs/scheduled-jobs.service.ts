@@ -80,4 +80,62 @@ export class ScheduledJobsService {
     }
     this.logger.log(`Sent ${schedules.length} reminders`);
   }
+
+  /**
+   * Flags overdue receivables (inadimplência): closed contracts that still have
+   * an outstanding balance (a PENDENTE payment) past a grace window, alerting
+   * both the manager and the customer.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
+  async checkOverduePayments() {
+    this.logger.log('Checking overdue payments (inadimplência)…');
+    const graceDays = Number(process.env.PAYMENT_GRACE_DAYS ?? 3);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - graceDays);
+
+    const overdue = await this.prisma.payment.findMany({
+      where: {
+        status: 'PENDENTE',
+        createdAt: { lt: cutoff },
+      },
+      include: {
+        customer: {
+          select: {
+            nome: true,
+            email: true,
+            telefone: true,
+            canalPreferido: true,
+          },
+        },
+      },
+    });
+
+    for (const payment of overdue) {
+      if (!payment.customer) continue;
+      await this.notifications.notify(payment.customer.canalPreferido, {
+        recipient: {
+          nome: payment.customer.nome,
+          email: payment.customer.email,
+          phone: payment.customer.telefone,
+        },
+        subject: '⚠️ Pagamento em aberto — RCar',
+        text: `Olá ${payment.customer.nome}, consta um pagamento de R$ ${Number(
+          payment.valor,
+        ).toFixed(2)} em aberto. Regularize para evitar bloqueios.`,
+        html: `<p>Olá <strong>${payment.customer.nome}</strong>, consta um pagamento de <strong>R$ ${Number(
+          payment.valor,
+        ).toFixed(2)}</strong> em aberto.</p>`,
+      });
+    }
+
+    if (overdue.length > 0) {
+      await this.emailQueue.add('send', {
+        to: process.env.ALERT_EMAIL ?? 'admin@rcar.com.br',
+        subject: `⚠️ Inadimplência: ${overdue.length} pagamento(s) em aberto`,
+        html: `<p>${overdue.length} pagamento(s) pendente(s) há mais de ${graceDays} dias.</p>`,
+      });
+      this.logger.warn(`Overdue payments: ${overdue.length}`);
+    }
+    this.logger.log(`Overdue check complete (${overdue.length})`);
+  }
 }

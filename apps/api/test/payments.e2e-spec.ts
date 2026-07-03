@@ -21,6 +21,7 @@ import { RolesGuard } from '../src/common/guards/roles.guard';
 
 const OK_CONTRACT = 'aaaa1234-0000-4000-8000-000000000000';
 const REFUSE_CONTRACT = 'bbbb1234-0000-4000-8000-000000000000';
+const REFUND_PAYMENT = 'cccc1234-0000-4000-8000-000000000000';
 const WEBHOOK_SECRET = 'dev-payment-secret';
 
 describe('Payments boundary (e2e)', () => {
@@ -76,9 +77,22 @@ describe('Payments boundary (e2e)', () => {
         }
         return Promise.resolve(null);
       }),
-      update: jest.fn(({ data }: { data: { status: string } }) => {
-        pendingPayment.status = data.status;
-        return Promise.resolve({ id: 'pay-webhook', ...data });
+      aggregate: jest.fn().mockResolvedValue({ _sum: { valor: 0 } }),
+      findUnique: jest.fn(({ where }: { where: { id: string } }) => {
+        if (where.id === REFUND_PAYMENT) {
+          return Promise.resolve({
+            id: REFUND_PAYMENT,
+            status: 'CONFIRMADO',
+            pagarmeTxId: 'tx-refund',
+          });
+        }
+        return Promise.resolve(null);
+      }),
+      update: jest.fn(({ where, data }: { where: { id: string }; data: { status: string } }) => {
+        if (where.id !== REFUND_PAYMENT) {
+          pendingPayment.status = data.status;
+        }
+        return Promise.resolve({ id: where.id, ...data });
       }),
       create: jest.fn(({ data }: never) =>
         Promise.resolve({ id: 'pay1', ...(data as object) }),
@@ -187,6 +201,32 @@ describe('Payments boundary (e2e)', () => {
         .send(dto)
         .expect(200);
       expect(res.body.duplicate).toBe(true);
+    });
+  });
+
+  describe('balance and refund', () => {
+    it('returns the outstanding balance of a payable', async () => {
+      actingRole.value = 'OPERADOR';
+      const res = await request(app.getHttpServer())
+        .get('/payments/balance')
+        .query({ refType: 'RENTAL_CONTRACT', refId: OK_CONTRACT })
+        .expect(200);
+      expect(res.body).toMatchObject({ total: 300, pago: 0, saldo: 300 });
+    });
+
+    it('GESTOR_GERAL refunds a confirmed payment', async () => {
+      actingRole.value = 'GESTOR_GERAL';
+      const res = await request(app.getHttpServer())
+        .post(`/payments/charges/${REFUND_PAYMENT}/refund`)
+        .expect(200);
+      expect(res.body.status).toBe('CANCELADO');
+    });
+
+    it('OPERADOR cannot refund a payment (403)', async () => {
+      actingRole.value = 'OPERADOR';
+      await request(app.getHttpServer())
+        .post(`/payments/charges/${REFUND_PAYMENT}/refund`)
+        .expect(403);
     });
   });
 });

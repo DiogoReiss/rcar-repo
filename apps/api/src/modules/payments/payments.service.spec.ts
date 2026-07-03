@@ -123,4 +123,74 @@ describe('PaymentsService', () => {
       expect(update).not.toHaveBeenCalled();
     });
   });
+
+  describe('getBalance', () => {
+    it('computes total, pago and saldo from confirmed payments', async () => {
+      const prismaMock = {
+        rentalContract: {
+          findUnique: jest.fn().mockResolvedValue({
+            id: 'c1',
+            customerId: 'cust1',
+            valorTotal: 300,
+            valorTotalReal: null,
+            customer: { id: 'cust1', nome: 'Cliente' },
+          }),
+        },
+        payment: {
+          aggregate: jest.fn().mockResolvedValue({ _sum: { valor: 120 } }),
+        },
+      };
+      const service = makeService({ prisma: prismaMock });
+
+      const balance = await service.getBalance('RENTAL_CONTRACT', 'c1');
+
+      expect(balance).toMatchObject({
+        total: 300,
+        pago: 120,
+        saldo: 180,
+        quitado: false,
+      });
+    });
+  });
+
+  describe('refundCharge', () => {
+    it('refunds a confirmed payment via the gateway', async () => {
+      const refund = jest.fn();
+      const update = jest
+        .fn()
+        .mockResolvedValue({ id: 'p1', status: 'CANCELADO' });
+      const prismaMock = {
+        payment: {
+          findUnique: jest.fn().mockResolvedValue({
+            id: 'p1',
+            status: 'CONFIRMADO',
+            pagarmeTxId: 'tx-1',
+          }),
+          update,
+        },
+      };
+      const service = makeService({
+        prisma: prismaMock,
+        gateway: { refund },
+      });
+
+      const result = await service.refundCharge('p1');
+
+      expect(refund).toHaveBeenCalledWith('tx-1');
+      expect(result.status).toBe('CANCELADO');
+    });
+
+    it('rejects refunding a non-confirmed payment', async () => {
+      const prismaMock = {
+        payment: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValue({ id: 'p1', status: 'PENDENTE' }),
+        },
+      };
+      const service = makeService({ prisma: prismaMock });
+
+      await expect(service.refundCharge('p1')).rejects.toThrow();
+    });
+  });
 });
