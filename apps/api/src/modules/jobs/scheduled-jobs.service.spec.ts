@@ -12,6 +12,10 @@ describe('ScheduledJobsService', () => {
     add: jest.fn(),
   };
 
+  const notifications = {
+    notify: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,6 +27,7 @@ describe('ScheduledJobsService', () => {
     const service = new ScheduledJobsService(
       prisma as never,
       emailQueue as never,
+      notifications as never,
     );
 
     await service.checkLowStock();
@@ -35,28 +40,32 @@ describe('ScheduledJobsService', () => {
     );
   });
 
-  it('enqueues daily reminders for schedules with customer email', async () => {
+  it('sends daily reminders through the notifications service by preference', async () => {
     prisma.washSchedule.findMany.mockResolvedValue([
       {
-        customer: { email: 'c@x.com', nome: 'Cliente' },
+        customer: {
+          email: 'c@x.com',
+          telefone: '+5511999999999',
+          nome: 'Cliente',
+          canalPreferido: 'WHATSAPP',
+        },
         service: { nome: 'Lavagem Completa' },
-      },
-      {
-        customer: { email: null, nome: 'Sem Email' },
-        service: { nome: 'Lavagem Simples' },
       },
     ]);
     const service = new ScheduledJobsService(
       prisma as never,
       emailQueue as never,
+      notifications as never,
     );
 
     await service.sendDailyReminders();
 
-    expect(emailQueue.add).toHaveBeenCalledTimes(1);
-    expect(emailQueue.add).toHaveBeenCalledWith(
-      'send',
-      expect.objectContaining({ to: 'c@x.com' }),
+    expect(notifications.notify).toHaveBeenCalledTimes(1);
+    expect(notifications.notify).toHaveBeenCalledWith(
+      'WHATSAPP',
+      expect.objectContaining({
+        recipient: expect.objectContaining({ phone: '+5511999999999' }),
+      }),
     );
   });
 });

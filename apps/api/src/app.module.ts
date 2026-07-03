@@ -19,6 +19,7 @@ import { DocumentsModule } from './modules/documents/documents.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { MailModule } from './modules/mail/mail.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 
@@ -33,6 +34,7 @@ import { HealthModule } from './modules/health/health.module.js';
     PrismaModule,
     AuditModule,
     MailModule,
+    NotificationsModule,
     JobsModule,
     AuthModule,
     InventoryModule,

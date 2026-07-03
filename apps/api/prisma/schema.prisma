@@ -25,6 +25,11 @@ enum CustomerType {
   PJ
 }
 
+enum NotificationPreference {
+  EMAIL
+  WHATSAPP
+}
+
 enum VehicleStatus {
   DISPONIVEL
   ALUGADO
@@ -160,6 +165,7 @@ model Customer {
   cpfCnpj     String       @unique @map("cpf_cnpj")
   email       String?
   telefone    String?
+  canalPreferido NotificationPreference @default(EMAIL) @map("canal_preferido")
   endereco    Json?
   // PF fields
   cnh         String?

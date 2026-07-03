@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class ScheduledJobsService {
@@ -11,6 +12,7 @@ export class ScheduledJobsService {
   constructor(
     private readonly prisma: PrismaService,
     @InjectQueue('email') private readonly emailQueue: Queue,
+    private readonly notifications: NotificationsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
@@ -51,19 +53,30 @@ export class ScheduledJobsService {
     const schedules = await this.prisma.washSchedule.findMany({
       where: { dataHora: { gte: today, lte: end }, status: 'AGENDADO' },
       include: {
-        customer: { select: { email: true, nome: true } },
+        customer: {
+          select: {
+            email: true,
+            telefone: true,
+            nome: true,
+            canalPreferido: true,
+          },
+        },
         service: { select: { nome: true } },
       },
     });
 
     for (const s of schedules) {
-      if (s.customer?.email) {
-        await this.emailQueue.add('send', {
-          to: s.customer.email,
-          subject: `🔔 Lembrete: ${s.service.nome} hoje`,
-          html: `<p>Olá <strong>${s.customer.nome}</strong>, lembrete do seu agendamento de <strong>${s.service.nome}</strong> hoje.</p>`,
-        });
-      }
+      if (!s.customer) continue;
+      await this.notifications.notify(s.customer.canalPreferido, {
+        recipient: {
+          nome: s.customer.nome,
+          email: s.customer.email,
+          phone: s.customer.telefone,
+        },
+        subject: `🔔 Lembrete: ${s.service.nome} hoje`,
+        text: `Olá ${s.customer.nome}, lembrete do seu agendamento de ${s.service.nome} hoje.`,
+        html: `<p>Olá <strong>${s.customer.nome}</strong>, lembrete do seu agendamento de <strong>${s.service.nome}</strong> hoje.</p>`,
+      });
     }
     this.logger.log(`Sent ${schedules.length} reminders`);
   }
