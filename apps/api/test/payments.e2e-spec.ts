@@ -88,12 +88,20 @@ describe('Payments boundary (e2e)', () => {
         }
         return Promise.resolve(null);
       }),
-      update: jest.fn(({ where, data }: { where: { id: string }; data: { status: string } }) => {
-        if (where.id !== REFUND_PAYMENT) {
-          pendingPayment.status = data.status;
-        }
-        return Promise.resolve({ id: where.id, ...data });
-      }),
+      update: jest.fn(
+        ({
+          where,
+          data,
+        }: {
+          where: { id: string };
+          data: { status: string };
+        }) => {
+          if (where.id !== REFUND_PAYMENT) {
+            pendingPayment.status = data.status;
+          }
+          return Promise.resolve({ id: where.id, ...data });
+        },
+      ),
       create: jest.fn(({ data }: never) =>
         Promise.resolve({ id: 'pay1', ...(data as object) }),
       ),

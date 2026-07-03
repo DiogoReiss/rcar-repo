@@ -19,6 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: rcar
+          POSTGRES_PASSWORD: rcar
+          POSTGRES_DB: rcar_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rcar"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://rcar:rcar@localhost:5432/rcar_test?schema=public
+      RUN_DB_E2E: 'true'
+
     steps:
       - uses: actions/checkout@v4
 
@@ -42,15 +61,8 @@ jobs:
       - name: Validate Prisma schema
         run: pnpm --filter api exec prisma validate
 
-      - name: Deploy Prisma migrations (if DATABASE_URL is set)
-        env:
-          DATABASE_URL: ${{ secrets.API_DATABASE_URL }}
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "::notice::API_DATABASE_URL is not configured. Skipping prisma migrate deploy."
-            exit 0
-          fi
-          pnpm --filter api exec prisma migrate deploy
+      - name: Deploy Prisma migrations
+        run: pnpm --filter api exec prisma migrate deploy
 
       - name: Lint (API)
         run: pnpm --filter api lint
@@ -61,7 +73,7 @@ jobs:
       - name: Unit tests (API)
         run: pnpm --filter api test
 
-      - name: Happy-path E2E tests (API)
+      - name: E2E tests (API)
         run: pnpm --filter api test:e2e
 
   build-web:

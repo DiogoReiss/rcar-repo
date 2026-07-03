@@ -5,7 +5,13 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
-describe('Roles & Permissions (e2e)', () => {
+// This suite boots the full AppModule and hits a real database. It only runs
+// when RUN_DB_E2E=true is set (e.g. CI with a Postgres service); otherwise it
+// is skipped so the happy-path e2e run never hangs waiting for a DB. A plain
+// DATABASE_URL is not enough — a local .env may point at an unreachable DB.
+const describeDb = process.env.RUN_DB_E2E === 'true' ? describe : describe.skip;
+
+describeDb('Roles & Permissions (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let gestorToken: string;
