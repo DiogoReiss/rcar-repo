@@ -1,0 +1,19 @@
+{
+  "name": "RCar — Portal do Cliente",
+  "short_name": "RCar",
+  "description": "Portal do cliente RCar: reservas, agendamentos, documentos e histórico, com acesso básico offline.",
+  "start_url": "/portal-cliente",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ec8609",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

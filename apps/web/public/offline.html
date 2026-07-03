@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>RCar — Offline</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ec8609">
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #ffffff;
+      color: #1f2937;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #111827; color: #f3f4f6; }
+    }
+    .card { text-align: center; padding: 2rem; max-width: 22rem; }
+    .badge {
+      width: 72px; height: 72px; border-radius: 18px;
+      background: #ec8609; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; font-weight: 700; margin: 0 auto 1.25rem;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    p { margin: 0 0 1.5rem; line-height: 1.5; }
+    button {
+      background: #ec8609; color: #fff; border: 0;
+      padding: .75rem 1.5rem; border-radius: 8px;
+      font-size: 1rem; cursor: pointer;
+    }
+    button:focus-visible { outline: 3px solid #f5a63e; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="badge" aria-hidden="true">R</div>
+    <h1>Você está offline</h1>
+    <p>Não foi possível carregar novos dados. Verifique sua conexão e tente novamente — as informações já visitadas continuam disponíveis.</p>
+    <button type="button" onclick="location.reload()">Tentar novamente</button>
+  </main>
+</body>
+</html>
