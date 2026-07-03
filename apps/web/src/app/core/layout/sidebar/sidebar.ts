@@ -65,6 +65,7 @@ export default class SidebarComponent {
         { label: 'Agendamentos', icon: 'pi pi-calendar',   route: '/portal/meus-agendamentos' },
         { label: 'Reservas',     icon: 'pi pi-car',        route: '/portal/minhas-reservas' },
         { label: 'Documentos',   icon: 'pi pi-file',       route: '/portal/meus-documentos' },
+        { label: 'Pagamentos',   icon: 'pi pi-wallet',     route: '/portal/meus-pagamentos' },
         { label: 'Histórico',    icon: 'pi pi-history',    route: '/portal/historico' },
       ],
     },

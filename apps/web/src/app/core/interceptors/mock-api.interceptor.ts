@@ -599,6 +599,12 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (method === 'GET' && path === '/portal/available-vehicles') return ok(paginated(MOCK_VEHICLES.filter(v => v.status === 'DISPONIVEL')));
 
+  if (method === 'GET' && path === '/portal/my-payments') return ok([
+    { id: 'pay-c-1', refType: 'RENTAL_CONTRACT', contractId: 'rc-1', customerId: CLIENT_CUSTOMER_ID, valor: 900, metodo: 'PIX', status: 'CONFIRMADO', createdAt: `${daysAgo(6)}T10:00:00Z` },
+    { id: 'pay-c-2', refType: 'WASH_SCHEDULE', scheduleId: 'sch-1', customerId: CLIENT_CUSTOMER_ID, valor: 60, metodo: 'CARTAO_CREDITO', status: 'CONFIRMADO', createdAt: `${daysAgo(3)}T14:30:00Z` },
+    { id: 'pay-c-3', refType: 'RENTAL_CONTRACT', contractId: 'rc-2', customerId: CLIENT_CUSTOMER_ID, valor: 450, metodo: 'BOLETO', status: 'PENDENTE', createdAt: `${daysAgo(1)}T09:00:00Z` },
+  ]);
+
   // ── Rental contracts ────────────────────────────────────────────────────────────────────────────
   if (method === 'GET' && path.match(/\/rental\/contracts\/[^/]+$/)) { const id = path.split('/rental/contracts/')[1]; return ok(mockContracts.find(c => c['id'] === id) ?? { ...mockContracts[0], inspections: [], payments: [] }); }
   if (method === 'PATCH' && path.match(/\/rental\/contracts\/[^/]+\/close/))   { const id = path.split('/')[3]; const c = mockContracts.find(x => x['id'] === id); if (c) c['status'] = 'ENCERRADO';  return ok(c ?? {}); }

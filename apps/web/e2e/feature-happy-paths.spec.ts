@@ -35,6 +35,7 @@ test.describe('Feature happy paths', () => {
       '/portal/meus-agendamentos',
       '/portal/minhas-reservas',
       '/portal/meus-documentos',
+      '/portal/meus-pagamentos',
       '/portal/historico',
     ];
 

@@ -1,0 +1,48 @@
+<section class="page">
+  <lync-page-header title="Meus Pagamentos" />
+
+  @if (loading()) {
+    <div class="portal-loading"><i class="pi pi-spin pi-spinner"></i> Carregando...</div>
+  } @else if (!payments().length) {
+    <div class="portal-empty">
+      <i class="pi pi-wallet"></i>
+      <p>Nenhum pagamento registrado ainda.</p>
+    </div>
+  } @else {
+    <div class="pay-summary">
+      <div class="pay-summary__item">
+        <span class="pay-summary__label">Total pago</span>
+        <strong class="pay-summary__value pay-summary__value--ok">{{ formatMoney(totalPago()) }}</strong>
+      </div>
+      <div class="pay-summary__item">
+        <span class="pay-summary__label">Em aberto</span>
+        <strong class="pay-summary__value pay-summary__value--pending">{{ formatMoney(totalPendente()) }}</strong>
+      </div>
+    </div>
+
+    <div class="pay-list">
+      @for (p of payments(); track p.id) {
+        <div class="pay-card">
+          <div class="pay-icon">
+            <i class="pi pi-money-bill" aria-hidden="true"></i>
+          </div>
+          <div class="pay-body">
+            <strong class="pay-title">{{ formatMoney(p.valor) }}</strong>
+            <span class="pay-sub">{{ metodoLabel[p.metodo] }}</span>
+            <span class="pay-date">{{ formatDate(p.createdAt) }}</span>
+          </div>
+          <div class="pay-side">
+            <span class="badge badge--{{ badgeModifier(p.status) }}">
+              {{ statusLabel[p.status] }}
+            </span>
+            @if (p.status === 'CONFIRMADO') {
+              <button class="pay-btn" (click)="baixarComprovante(p)" aria-label="Baixar comprovante">
+                <i class="pi pi-download" aria-hidden="true"></i> Comprovante
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
