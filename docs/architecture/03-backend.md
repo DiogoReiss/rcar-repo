@@ -48,6 +48,9 @@ Padrão esperado:
 - Endpoints de leitura: permitem `GESTOR_GERAL`, `OPERADOR` e `OPERADOR_LEITURA` (conforme domínio).
 - Endpoints de escrita: restritos a `GESTOR_GERAL` e `OPERADOR`.
 - Portal do cliente: restrição por `CLIENTE` + escopo do próprio recurso.
+- Endpoints internos também podem exigir `features` por módulo via `RequiresFeatures` + `FeaturesGuard`.
+- `GESTOR_GERAL` faz bypass de `features`; `CLIENTE` não acessa módulos internos.
+- JWT carrega `features` e o refresh recalcula a lista a partir do banco para refletir mudanças administrativas.
 
 ---
 

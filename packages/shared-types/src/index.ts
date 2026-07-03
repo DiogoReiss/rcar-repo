@@ -42,11 +42,23 @@ export interface LoginCredentials {
 
 // ─── Users ───────────────────────────────────────────────────────────────────
 
+export type Feature =
+  | 'LAVAJATO'
+  | 'ALUGUEL'
+  | 'ADMIN_USUARIOS'
+  | 'ADMIN_FROTA'
+  | 'ADMIN_ESTOQUE'
+  | 'ADMIN_CLIENTES'
+  | 'ADMIN_FINANCEIRO'
+  | 'ADMIN_TEMPLATES'
+  | 'ADMIN_SERVICOS';
+
 export interface User {
   id: string;
   nome: string;
   email: string;
   role: UserRole;
+  features: Feature[];
   ativo: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -356,4 +368,3 @@ export interface PaginatedResponse<T> {
   perPage: number;
   totalPages: number;
 }
-

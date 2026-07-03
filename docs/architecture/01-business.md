@@ -24,6 +24,13 @@ Administração centralizada no **RCar Admin**.
 
 Regras de autorização devem permanecer em RBAC (backend + frontend), com separação clara entre leitura e escrita.
 
+### Feature flags por usuário interno
+
+- Usuários internos (`GESTOR_GERAL`, `OPERADOR`, `OPERADOR_LEITURA`) possuem lista de funcionalidades (`features`) para acesso modular.
+- `GESTOR_GERAL` mantém bypass total de checagem de funcionalidades.
+- `CLIENTE` não participa de módulos internos.
+- `OPERADOR` e `OPERADOR_LEITURA` devem ter ao menos 1 funcionalidade atribuída para acesso operacional.
+
 ---
 
 ## Módulo: RCar Admin

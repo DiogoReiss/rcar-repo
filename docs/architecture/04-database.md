@@ -61,3 +61,4 @@ enum UserRole {
 - Pagamentos são centralizados no model `Payment` com referência polimórfica.
 - Estoque suporta custo médio ponderado via movimentações.
 - `PasswordResetToken` sustenta o fluxo de recuperação de senha no módulo de auth.
+- `User.features` (`String[]`, default `[]`) armazena feature flags por usuário interno para autorização modular.

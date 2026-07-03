@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -17,6 +18,7 @@ export class UsersService {
     nome: true,
     email: true,
     role: true,
+    features: true,
     ativo: true,
     createdAt: true,
     updatedAt: true,
@@ -40,6 +42,16 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
+    // Validate: OPERADOR/OPERADOR_LEITURA must have at least 1 feature
+    if (
+      (dto.role === 'OPERADOR' || dto.role === 'OPERADOR_LEITURA') &&
+      (!dto.features || dto.features.length === 0)
+    ) {
+      throw new BadRequestException(
+        'Operadores devem ter ao menos uma funcionalidade atribuída.',
+      );
+    }
+
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -47,7 +59,13 @@ export class UsersService {
 
     const senhaHash = await bcrypt.hash(dto.senha, 12); // S8: consistent 12 rounds
     return this.prisma.user.create({
-      data: { nome: dto.nome, email: dto.email, senhaHash, role: dto.role },
+      data: {
+        nome: dto.nome,
+        email: dto.email,
+        senhaHash,
+        role: dto.role,
+        features: dto.features ?? [],
+      },
       select: this.select,
     });
   }

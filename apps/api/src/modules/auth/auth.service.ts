@@ -128,7 +128,12 @@ export class AuthService {
     // Success — clear failure counter
     this.loginAttempts.clearAttempts(dto.email);
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      features: user.features,
+    };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
       payload,
@@ -144,6 +149,7 @@ export class AuthService {
         nome: user.nome,
         email: user.email,
         role: user.role,
+        features: user.features,
       },
       // Also return tokens in body for Swagger/non-browser clients
       accessToken,
@@ -155,7 +161,19 @@ export class AuthService {
     user: { id: string; email: string; role: string },
     res: Response,
   ) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    // Fetch fresh features from DB for the new token
+    const dbUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { features: true },
+    });
+    const features = dbUser?.features ?? [];
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      features,
+    };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
       payload,

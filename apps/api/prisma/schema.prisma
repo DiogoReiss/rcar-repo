@@ -150,6 +150,7 @@ model User {
   senhaHash  String   @map("senha_hash")
   role       UserRole
   unidadeId  String?  @map("unidade_id")
+  features   String[] @default([])
   ativo      Boolean  @default(true)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")

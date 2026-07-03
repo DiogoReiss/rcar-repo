@@ -27,12 +27,15 @@ import { CreateStockMovementDto } from './dto/create-stock-movement.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
+import { FeaturesGuard } from '../../common/guards/features.guard.js';
+import { RequiresFeatures } from '../../common/decorators/features.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @ApiTags('Inventory')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeaturesGuard)
+@RequiresFeatures('ADMIN_ESTOQUE')
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}

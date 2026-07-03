@@ -9,6 +9,7 @@ interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  features?: string[];
 }
 
 /** S5/S6: Extract JWT from cookie, Authorization header, or ?token= query param (SSE) */
@@ -47,6 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         nome: true,
         email: true,
         role: true,
+        features: true,
         unidadeId: true,
         ativo: true,
       },

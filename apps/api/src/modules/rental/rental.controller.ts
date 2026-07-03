@@ -25,11 +25,14 @@ import {
   CloseContractDto,
 } from './dto/contract-operations.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { FeaturesGuard } from '../../common/guards/features.guard.js';
+import { RequiresFeatures } from '../../common/decorators/features.decorator.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @ApiTags('Rental')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, FeaturesGuard)
+@RequiresFeatures('ALUGUEL')
 @Controller('rental')
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}

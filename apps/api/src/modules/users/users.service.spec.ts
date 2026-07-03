@@ -1,4 +1,8 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
@@ -28,6 +32,7 @@ describe('UsersService', () => {
         nome: true,
         email: true,
         role: true,
+        features: true,
         ativo: true,
         createdAt: true,
         updatedAt: true,
@@ -80,8 +85,23 @@ describe('UsersService', () => {
         nome: 'Maria',
         email: 'm@x.com',
         senha: '12345678',
-        role: 'OPERADOR',
+        role: 'GESTOR_GERAL',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('requires at least one feature for operador roles', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    const service = new UsersService(prisma as never);
+
+    await expect(
+      service.create({
+        nome: 'Maria',
+        email: 'm@x.com',
+        senha: '12345678',
+        role: 'OPERADOR',
+        features: [],
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

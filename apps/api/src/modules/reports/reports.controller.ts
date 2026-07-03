@@ -9,11 +9,14 @@ import { ReportsService } from './reports.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
+import { FeaturesGuard } from '../../common/guards/features.guard.js';
+import { RequiresFeatures } from '../../common/decorators/features.decorator.js';
 
 @ApiTags('Reports')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeaturesGuard)
 @Roles('GESTOR_GERAL')
+@RequiresFeatures('ADMIN_FINANCEIRO')
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

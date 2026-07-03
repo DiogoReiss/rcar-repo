@@ -71,9 +71,12 @@ Padrões:
 
 - `auth.guard`: autenticação
 - `role.guard`: autorização por perfil
+- `feature.guard`: autorização por funcionalidades do usuário interno
 - `*lyncHasRole`: controle de visibilidade/habilitação de ações no template
 
 Regra prática: `OPERADOR_LEITURA` visualiza páginas operacionais, mas não executa ações mutáveis.
+- Navegação lateral e rotas de `lavajato`, `aluguel` e áreas administrativas são filtradas por `features`.
+- `GESTOR_GERAL` tem acesso total independentemente da lista de funcionalidades.
 
 ---
 

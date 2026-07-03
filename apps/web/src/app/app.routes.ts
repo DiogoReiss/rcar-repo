@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from '@core/auth/guards/auth.guard';
+import { featureGuard } from '@core/auth/guards/feature.guard';
 
 export const routes: Routes = [
   {
@@ -23,10 +24,12 @@ export const routes: Routes = [
       },
       {
         path: 'lavajato',
+        canActivate: [featureGuard('LAVAJATO')],
         loadChildren: () => import('@lavajato/lavajato.routes').then((m) => m.lavajatoRoutes),
       },
       {
         path: 'aluguel',
+        canActivate: [featureGuard('ALUGUEL')],
         loadChildren: () => import('@aluguel/aluguel.routes').then((m) => m.aluguelRoutes),
       },
       {

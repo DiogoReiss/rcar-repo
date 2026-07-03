@@ -31,12 +31,15 @@ import {
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
+import { FeaturesGuard } from '@common/guards/features.guard';
+import { RequiresFeatures } from '@common/decorators/features.decorator';
 import { QueueEventsService } from './queue-events.service.js';
 import { from } from 'rxjs';
 
 @ApiTags('Lavajato')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, FeaturesGuard)
+@RequiresFeatures('LAVAJATO')
 @Controller('lavajato')
 export class LavajatoController {
   constructor(

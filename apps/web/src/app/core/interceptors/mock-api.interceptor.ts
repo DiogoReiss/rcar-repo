@@ -67,9 +67,45 @@ const MOCK_PRODUCTS = [
 ];
 
 // ─── Users ────────────────────────────────────────────────────────────────────────────────
-const MOCK_ADMIN_USER    = { id: 'u1', nome: 'Administrador Geral', email: 'admin@rcar.dev',    role: 'GESTOR_GERAL' as const, ativo: true,  createdAt: '2025-01-01T00:00:00Z' };
-const MOCK_OPERADOR_USER = { id: 'u2', nome: 'Rodrigo Silva',       email: 'operador@rcar.dev', role: 'OPERADOR'     as const, ativo: true,  createdAt: '2025-02-01T00:00:00Z' };
-const MOCK_CLIENT_USER   = { id: 'u3', nome: 'Carlos Andrade',      email: 'cliente@rcar.dev',  role: 'CLIENTE'      as const, ativo: true,  createdAt: '2025-01-10T00:00:00Z' };
+const ALL_FEATURES = [
+  'LAVAJATO',
+  'ALUGUEL',
+  'ADMIN_USUARIOS',
+  'ADMIN_FROTA',
+  'ADMIN_ESTOQUE',
+  'ADMIN_CLIENTES',
+  'ADMIN_FINANCEIRO',
+  'ADMIN_TEMPLATES',
+  'ADMIN_SERVICOS',
+] as const;
+
+const MOCK_ADMIN_USER = {
+  id: 'u1',
+  nome: 'Administrador Geral',
+  email: 'admin@rcar.dev',
+  role: 'GESTOR_GERAL' as const,
+  features: [] as string[],
+  ativo: true,
+  createdAt: '2025-01-01T00:00:00Z',
+};
+const MOCK_OPERADOR_USER = {
+  id: 'u2',
+  nome: 'Rodrigo Silva',
+  email: 'operador@rcar.dev',
+  role: 'OPERADOR' as const,
+  features: [...ALL_FEATURES] as string[],
+  ativo: true,
+  createdAt: '2025-02-01T00:00:00Z',
+};
+const MOCK_CLIENT_USER = {
+  id: 'u3',
+  nome: 'Carlos Andrade',
+  email: 'cliente@rcar.dev',
+  role: 'CLIENTE' as const,
+  features: [] as string[],
+  ativo: true,
+  createdAt: '2025-01-10T00:00:00Z',
+};
 
 let mockCurrentUser: typeof MOCK_ADMIN_USER | typeof MOCK_OPERADOR_USER | typeof MOCK_CLIENT_USER = MOCK_ADMIN_USER;
 const CLIENT_CUSTOMER_ID = 'c1';
@@ -77,8 +113,24 @@ const CLIENT_CUSTOMER_ID = 'c1';
 const MOCK_USERS_LIST: Record<string, unknown>[] = [
   MOCK_ADMIN_USER,
   MOCK_OPERADOR_USER,
-  { id: 'u4', nome: 'Patrícia Nunes',  email: 'patricia.n@rcar.dev', role: 'OPERADOR'     as const, ativo: true,  createdAt: '2025-03-15T00:00:00Z' },
-  { id: 'u5', nome: 'Diego Carvalho',  email: 'diego@rcar.dev',      role: 'GESTOR_GERAL' as const, ativo: false, createdAt: '2025-04-01T00:00:00Z' },
+  {
+    id: 'u4',
+    nome: 'Patrícia Nunes',
+    email: 'patricia.n@rcar.dev',
+    role: 'OPERADOR' as const,
+    features: [...ALL_FEATURES],
+    ativo: true,
+    createdAt: '2025-03-15T00:00:00Z',
+  },
+  {
+    id: 'u5',
+    nome: 'Diego Carvalho',
+    email: 'diego@rcar.dev',
+    role: 'GESTOR_GERAL' as const,
+    features: [],
+    ativo: false,
+    createdAt: '2025-04-01T00:00:00Z',
+  },
 ];
 
 // ─── Mutable schedules ──────────────────────────────────────────────────────────────────

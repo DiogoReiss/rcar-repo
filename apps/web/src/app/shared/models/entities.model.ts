@@ -6,6 +6,7 @@
  * New code should import directly from '@rcar/shared-types'.
  */
 export type {
+  Feature,
   UserRole,
   CustomerType,
   VehicleStatus,

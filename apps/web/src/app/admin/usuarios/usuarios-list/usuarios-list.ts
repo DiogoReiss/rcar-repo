@@ -82,6 +82,7 @@ export default class UsuariosListComponent {
         await firstValueFrom(this.usersService.create({
           nome: this.fNome(), email: this.fEmail(),
           senha: this.fSenha(), role: this.fRole(), ativo: true,
+          features: this.fRole() === 'GESTOR_GERAL' ? [] : ['LAVAJATO'],
         }));
         this.toast.add({ severity: 'success', summary: 'Usuário criado', detail: 'Usuário cadastrado com sucesso.', life: 3000 });
       }

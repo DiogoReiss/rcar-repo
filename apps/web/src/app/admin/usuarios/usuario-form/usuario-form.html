@@ -32,8 +32,28 @@
         </select>
       </div>
 
+      @if (!isGestorGeral()) {
+        <div class="form-field full">
+          <label>Funcionalidades *</label>
+          <div class="features-grid">
+            @for (f of allFeatures; track f.value) {
+              <label class="feature-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="features().includes(f.value)"
+                  (change)="toggleFeature(f.value)" />
+                {{ f.label }}
+              </label>
+            }
+          </div>
+          @if (features().length === 0) {
+            <span class="field-error">Selecione ao menos uma funcionalidade</span>
+          }
+        </div>
+      }
+
       <div class="form-actions full">
-        <button type="submit" class="btn-primary" [disabled]="loading()">
+        <button type="submit" class="btn-primary" [disabled]="loading() || (!isGestorGeral() && features().length === 0)">
           {{ loading() ? 'Salvando...' : 'Salvar' }}
         </button>
         <a class="btn-secondary" routerLink="/admin/usuarios">Cancelar</a>
@@ -41,4 +61,3 @@
     </form>
   </div>
 </section>
-
