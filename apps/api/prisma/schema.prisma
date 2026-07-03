@@ -147,15 +147,38 @@ model User {
   email      String   @unique
   senhaHash  String   @map("senha_hash")
   role       UserRole
+  unidadeId  String?  @map("unidade_id")
   ativo      Boolean  @default(true)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
+  unidade             OperationalUnit? @relation(fields: [unidadeId], references: [id])
   auditLogs           AuditLog[]
   passwordResetTokens PasswordResetToken[]
 
+  @@index([unidadeId])
   @@map("users")
+}
+
+model OperationalUnit {
+  id        String   @id @default(uuid())
+  nome      String
+  codigo    String   @unique
+  endereco  Json?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users           User[]
+  vehicles        Vehicle[]
+  washSchedules   WashSchedule[]
+  washQueues      WashQueue[]
+  rentalContracts RentalContract[]
+  payments        Payment[]
+
+  @@map("operational_units")
 }
 
 model Customer {
@@ -200,15 +223,18 @@ model Vehicle {
   status    VehicleStatus   @default(DISPONIVEL)
   fotos     String[]
   kmAtual   Int             @default(0) @map("km_atual")
+  unidadeId String?         @map("unidade_id")
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
   deletedAt DateTime?       @map("deleted_at")
 
+  unidade         OperationalUnit? @relation(fields: [unidadeId], references: [id])
   maintenances    VehicleMaintenance[]
   rentalContracts RentalContract[]
   masterAgreementItems MasterAgreementItem[]
 
   @@index([status])
+  @@index([unidadeId])
   @@map("vehicles")
 }
 
@@ -254,14 +280,17 @@ model WashSchedule {
   dataHora    DateTime           @map("data_hora")
   status      WashScheduleStatus @default(AGENDADO)
   observacoes String?
+  unidadeId   String?            @map("unidade_id")
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
   customer Customer?   @relation(fields: [customerId], references: [id])
   service  WashService @relation(fields: [serviceId], references: [id])
+  unidade  OperationalUnit? @relation(fields: [unidadeId], references: [id])
   payment  Payment?
 
   @@index([dataHora, status])
+  @@index([unidadeId])
   @@map("wash_schedules")
 }
 
@@ -273,15 +302,18 @@ model WashQueue {
   veiculoPlaca String?         @map("veiculo_placa")
   status       WashQueueStatus @default(AGUARDANDO)
   posicao      Int
+  unidadeId    String?         @map("unidade_id")
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
   concluidoAt  DateTime?       @map("concluido_at")
 
   customer Customer?   @relation(fields: [customerId], references: [id])
   service  WashService @relation(fields: [serviceId], references: [id])
+  unidade  OperationalUnit? @relation(fields: [unidadeId], references: [id])
   payment  Payment?
 
   @@index([posicao])
+  @@index([unidadeId])
   @@map("wash_queues")
 }
 
@@ -308,16 +340,19 @@ model RentalContract {
   pdfUrl          String?        @map("pdf_url")
   d4signId        String?        @map("d4sign_id")
   d4signStatus    String?        @map("d4sign_status")
+  unidadeId       String?        @map("unidade_id")
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
   customer    Customer          @relation(fields: [customerId], references: [id])
   vehicle     Vehicle           @relation(fields: [vehicleId], references: [id])
+  unidade     OperationalUnit?  @relation(fields: [unidadeId], references: [id])
   inspections Inspection[]
   incidents   ContractIncident[]
   payments    Payment[]
 
   @@index([status, customerId])
+  @@index([unidadeId])
   @@map("rental_contracts")
 }
 
@@ -363,6 +398,7 @@ model Payment {
   status      PaymentStatus  @default(PENDENTE)
   pagarmeTxId String?        @map("pagarme_tx_id")
   observacoes String?
+  unidadeId   String?        @map("unidade_id")
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
 
@@ -370,8 +406,10 @@ model Payment {
   queue    WashQueue?     @relation(fields: [queueId], references: [id])
   contract RentalContract? @relation(fields: [contractId], references: [id])
   customer Customer?      @relation(fields: [customerId], references: [id])
+  unidade  OperationalUnit? @relation(fields: [unidadeId], references: [id])
 
   @@index([refType])
+  @@index([unidadeId])
   @@map("payments")
 }
 
