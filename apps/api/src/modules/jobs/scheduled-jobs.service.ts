@@ -4,6 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
+import { BillingService } from '../master-agreements/billing.service.js';
 
 @Injectable()
 export class ScheduledJobsService {
@@ -13,7 +14,22 @@ export class ScheduledJobsService {
     private readonly prisma: PrismaService,
     @InjectQueue('email') private readonly emailQueue: Queue,
     private readonly notifications: NotificationsService,
+    private readonly billing: BillingService,
   ) {}
+
+  /**
+   * Recurring consolidated billing: raises one consolidated charge per due
+   * MasterAgreement cycle. Idempotent per (agreement, cycle) so a re-run in the
+   * same window never double-bills.
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_6AM)
+  async runRecurringBilling() {
+    this.logger.log('Running recurring consolidated billing…');
+    const summary = await this.billing.runCycle(new Date());
+    this.logger.log(
+      `Recurring billing: ${summary.faturas} invoice(s) for R$ ${summary.totalValor.toFixed(2)}`,
+    );
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async checkLowStock() {

@@ -100,6 +100,7 @@ enum PaymentRefType {
   WASH_SCHEDULE
   WASH_QUEUE
   RENTAL_CONTRACT
+  MASTER_AGREEMENT
 }
 
 enum PaymentMethod {
@@ -395,6 +396,8 @@ model Payment {
   scheduleId  String?        @unique @map("schedule_id")
   queueId     String?        @unique @map("queue_id")
   contractId  String?        @map("contract_id")
+  masterAgreementId String?  @map("master_agreement_id")
+  cicloReferencia   DateTime? @map("ciclo_referencia")
   customerId  String?        @map("customer_id")
   valor       Decimal        @db.Decimal(10, 2)
   metodo      PaymentMethod
@@ -408,9 +411,11 @@ model Payment {
   schedule WashSchedule?  @relation(fields: [scheduleId], references: [id])
   queue    WashQueue?     @relation(fields: [queueId], references: [id])
   contract RentalContract? @relation(fields: [contractId], references: [id])
+  masterAgreement MasterAgreement? @relation(fields: [masterAgreementId], references: [id])
   customer Customer?      @relation(fields: [customerId], references: [id])
   unidade  OperationalUnit? @relation(fields: [unidadeId], references: [id])
 
+  @@unique([masterAgreementId, cicloReferencia])
   @@index([refType])
   @@index([unidadeId])
   @@map("payments")
@@ -540,6 +545,7 @@ model MasterAgreement {
 
   customer Customer               @relation(fields: [customerId], references: [id])
   items    MasterAgreementItem[]
+  payments Payment[]
 
   @@index([customerId, status])
   @@map("master_agreements")

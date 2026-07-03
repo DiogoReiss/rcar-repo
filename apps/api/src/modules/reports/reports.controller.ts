@@ -84,6 +84,18 @@ export class ReportsController {
     return this.reportsService.getRentalReceivables();
   }
 
+  @Get('recurring-revenue')
+  @ApiOperation({
+    summary:
+      'Receita recorrente (acordos-mestre) e alerta de próximo vencimento',
+  })
+  @ApiQuery({ name: 'alertDays', required: false, type: Number })
+  recurringRevenue(@Query('alertDays') alertDays?: number) {
+    return this.reportsService.getRecurringRevenue(
+      alertDays ? Number(alertDays) : undefined,
+    );
+  }
+
   @Get('fleet/maintenance-costs')
   @ApiOperation({ summary: 'Custos de manutenção por veículo e por período' })
   @ApiQuery({ name: 'from', required: false, example: '2026-05-01' })

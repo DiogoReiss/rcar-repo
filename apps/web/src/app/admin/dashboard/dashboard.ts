@@ -39,6 +39,27 @@ interface MonthlyStat {
   novosContratos: number;
 }
 
+interface RecurringVencimento {
+  agreementId: string;
+  customer: { id: string; nome: string } | null;
+  ciclo: string;
+  proximoCiclo: string | null;
+  valorCiclo: number;
+  atrasado: boolean;
+}
+
+interface RecurringRevenue {
+  acordosAtivos: number;
+  receitaRecorrenteMensal: number;
+  porCiclo: { SEMANAL: number; MENSAL: number };
+  alertaProximoVencimento: {
+    janelaDias: number;
+    total: number;
+    valorTotal: number;
+    data: RecurringVencimento[];
+  };
+}
+
 interface ChartsData {
   weeklyServices: { labels: string[]; data: number[] };
   rushHour: { labels: string[]; data: number[] };
@@ -93,6 +114,10 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
   readonly monthlyStat    = signal<MonthlyStat | null>(null);
   readonly monthlyLoading = signal(true);
 
+  // Recurring consolidated billing (contrato-mestre)
+  readonly recurringRevenue = signal<RecurringRevenue | null>(null);
+  readonly recurringLoading = signal(true);
+
   private chartsData: ChartsData | null = null;
   private viewReady = false;
 
@@ -134,6 +159,14 @@ export default class DashboardComponent implements OnInit, AfterViewInit, OnDest
           }
         },
         error: () => this.monthlyLoading.set(false),
+      });
+
+    // Recurring consolidated billing metrics + upcoming-cycle alert
+    this.api.get<RecurringRevenue>('/reports/recurring-revenue')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (r) => { this.recurringRevenue.set(r); this.recurringLoading.set(false); },
+        error: ()  => this.recurringLoading.set(false),
       });
   }
 

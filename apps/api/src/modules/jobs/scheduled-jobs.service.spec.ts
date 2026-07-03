@@ -16,6 +16,14 @@ describe('ScheduledJobsService', () => {
     notify: jest.fn(),
   };
 
+  const billing = {
+    runCycle: jest.fn().mockResolvedValue({
+      processados: 0,
+      faturas: 0,
+      totalValor: 0,
+    }),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -28,6 +36,7 @@ describe('ScheduledJobsService', () => {
       prisma as never,
       emailQueue as never,
       notifications as never,
+      billing as never,
     );
 
     await service.checkLowStock();
@@ -56,6 +65,7 @@ describe('ScheduledJobsService', () => {
       prisma as never,
       emailQueue as never,
       notifications as never,
+      billing as never,
     );
 
     await service.sendDailyReminders();
@@ -67,5 +77,18 @@ describe('ScheduledJobsService', () => {
         recipient: expect.objectContaining({ phone: '+5511999999999' }),
       }),
     );
+  });
+
+  it('delegates recurring billing to the BillingService', async () => {
+    const service = new ScheduledJobsService(
+      prisma as never,
+      emailQueue as never,
+      notifications as never,
+      billing as never,
+    );
+
+    await service.runRecurringBilling();
+
+    expect(billing.runCycle).toHaveBeenCalledTimes(1);
   });
 });

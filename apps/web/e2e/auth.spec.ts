@@ -43,6 +43,18 @@ test.describe('Login flow', () => {
     await page.getByRole('button', { name: /entrar/i }).click();
     await expect(page).toHaveURL(/\/admin/, { timeout: 10000 });
   });
+
+  test('dashboard surfaces recurring revenue cards', async ({ page }) => {
+    await page.getByLabel(/e-mail/i).fill('admin@rcar.com.br');
+    await page.getByLabel(/senha/i).fill('admin123');
+    await page.getByRole('button', { name: /entrar/i }).click();
+    await expect(page).toHaveURL(/\/admin/, { timeout: 10000 });
+    await expect(
+      page.getByRole('heading', { name: /Receita Recorrente/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/Receita Recorrente \(MRR\)/i)).toBeVisible();
+    await expect(page.getByText(/Ciclos a Vencer/i)).toBeVisible();
+  });
 });
 
 test.describe('Auth guard', () => {

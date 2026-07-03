@@ -348,6 +348,37 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
       data,
     });
   }
+  if (method === 'GET' && path === '/reports/recurring-revenue') {
+    const data = [
+      {
+        agreementId: 'ma-1',
+        customer: { id: 'c1', nome: 'Frota Souza Ltda' },
+        ciclo: 'MENSAL',
+        proximoCiclo: `${daysFrom(3)}T00:00:00Z`,
+        valorCiclo: 4800,
+        atrasado: false,
+      },
+      {
+        agreementId: 'ma-2',
+        customer: { id: 'c3', nome: 'Lima Transportes' },
+        ciclo: 'SEMANAL',
+        proximoCiclo: `${daysAgo(1)}T00:00:00Z`,
+        valorCiclo: 1200,
+        atrasado: true,
+      },
+    ];
+    return ok({
+      acordosAtivos: 5,
+      receitaRecorrenteMensal: 27800,
+      porCiclo: { SEMANAL: 1200, MENSAL: 22600 },
+      alertaProximoVencimento: {
+        janelaDias: 7,
+        total: data.length,
+        valorTotal: data.reduce((a, r) => a + r.valorCiclo, 0),
+        data,
+      },
+    });
+  }
   if (method === 'GET' && path === '/reports/fleet/maintenance-costs') {
     return ok({
       periodo: { from: params.get('from') ?? daysAgo(30), to: params.get('to') ?? daysAgo(0) },

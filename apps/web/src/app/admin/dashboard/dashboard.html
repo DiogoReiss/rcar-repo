@@ -185,6 +185,60 @@
       }
     </div>
 
+    <!-- ─── Receita Recorrente (contrato-mestre) ──────────────────── -->
+    <div class="today-section">
+      <h2 class="today-label">
+        <i class="pi pi-sync" aria-hidden="true"></i> Receita Recorrente
+      </h2>
+      @if (recurringLoading()) {
+        <div class="today-grid">
+          @for (i of skeletons; track i) {
+            <div class="today-stat today-skeleton" aria-hidden="true"></div>
+          }
+        </div>
+      } @else if (recurringRevenue(); as r) {
+        <div class="today-grid">
+          <div class="today-stat">
+            <div class="today-stat-icon today-stat-icon--green">
+              <i class="pi pi-dollar" aria-hidden="true"></i>
+            </div>
+            <div class="today-stat-body">
+              <div class="today-stat-value today-stat-value--sm">{{ formatBRL(r.receitaRecorrenteMensal) }}</div>
+              <div class="today-stat-label">Receita Recorrente (MRR)</div>
+            </div>
+          </div>
+          <div class="today-stat">
+            <div class="today-stat-icon today-stat-icon--blue">
+              <i class="pi pi-briefcase" aria-hidden="true"></i>
+            </div>
+            <div class="today-stat-body">
+              <div class="today-stat-value">{{ r.acordosAtivos }}</div>
+              <div class="today-stat-label">Acordos Ativos</div>
+            </div>
+          </div>
+          <div class="today-stat">
+            <div class="today-stat-icon today-stat-icon--purple">
+              <i class="pi pi-calendar-clock" aria-hidden="true"></i>
+            </div>
+            <div class="today-stat-body">
+              <div class="today-stat-value">{{ r.alertaProximoVencimento.total }}</div>
+              <div class="today-stat-label">Ciclos a Vencer ({{ r.alertaProximoVencimento.janelaDias }}d)</div>
+            </div>
+          </div>
+          <div
+            [class]="r.alertaProximoVencimento.valorTotal > 0 ? 'today-stat today-stat--alert' : 'today-stat'">
+            <div class="today-stat-icon today-stat-icon--orange">
+              <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+            </div>
+            <div class="today-stat-body">
+              <div class="today-stat-value today-stat-value--sm">{{ formatBRL(r.alertaProximoVencimento.valorTotal) }}</div>
+              <div class="today-stat-label">A Vencer no Ciclo</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
     <!-- ─── Charts ────────────────────────────────────────────────── -->
     <div class="charts-toolbar" role="group" aria-label="Selecionar período dos gráficos">
       <span class="charts-toolbar-label">Período:</span>

@@ -823,4 +823,83 @@ export class ReportsService {
       lowStock,
     };
   }
+
+  /**
+   * Recurring revenue from active master agreements (contrato-mestre): the
+   * per-cycle amounts, a normalized monthly figure (MRR), and the upcoming
+   * cycles due within the alert window for the dashboard's "próximo
+   * vencimento" card.
+   */
+  async getRecurringRevenue(alertDays = 7) {
+    const agreements = await this.prisma.masterAgreement.findMany({
+      where: { status: 'ATIVO' },
+      include: {
+        customer: { select: { id: true, nome: true } },
+        items: {
+          where: { ativo: true },
+          select: { valorCiclo: true, vehicleId: true },
+        },
+      },
+    });
+
+    const now = new Date();
+    const alertLimit = new Date(now);
+    alertLimit.setDate(alertLimit.getDate() + alertDays);
+
+    let semanal = 0;
+    let mensal = 0;
+    const proximosVencimentos: Array<{
+      agreementId: string;
+      customer: { id: string; nome: string } | null;
+      ciclo: string;
+      proximoCiclo: Date | null;
+      valorCiclo: number;
+      atrasado: boolean;
+    }> = [];
+
+    for (const a of agreements) {
+      const valorCiclo = a.items.reduce((s, i) => s + Number(i.valorCiclo), 0);
+      if (a.ciclo === 'SEMANAL') semanal += valorCiclo;
+      else mensal += valorCiclo;
+
+      if (a.proximoCiclo && a.proximoCiclo <= alertLimit) {
+        proximosVencimentos.push({
+          agreementId: a.id,
+          customer: a.customer,
+          ciclo: a.ciclo,
+          proximoCiclo: a.proximoCiclo,
+          valorCiclo: Math.round(valorCiclo * 100) / 100,
+          atrasado: a.proximoCiclo < now,
+        });
+      }
+    }
+
+    proximosVencimentos.sort((x, y) => {
+      const tx = x.proximoCiclo ? x.proximoCiclo.getTime() : 0;
+      const ty = y.proximoCiclo ? y.proximoCiclo.getTime() : 0;
+      return tx - ty;
+    });
+
+    // Normalize weekly cycles to a monthly figure (52 weeks / 12 months).
+    const receitaRecorrenteMensal =
+      Math.round((mensal + semanal * (52 / 12)) * 100) / 100;
+
+    return {
+      acordosAtivos: agreements.length,
+      receitaRecorrenteMensal,
+      porCiclo: {
+        SEMANAL: Math.round(semanal * 100) / 100,
+        MENSAL: Math.round(mensal * 100) / 100,
+      },
+      alertaProximoVencimento: {
+        janelaDias: alertDays,
+        total: proximosVencimentos.length,
+        valorTotal:
+          Math.round(
+            proximosVencimentos.reduce((s, p) => s + p.valorCiclo, 0) * 100,
+          ) / 100,
+        data: proximosVencimentos,
+      },
+    };
+  }
 }
