@@ -1,23 +1,31 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MessageService } from 'primeng/api';
 import { ApiService } from '@core/services/api.service';
-import { FilaService } from '../fila.service';
+import { FilaQueueFacade } from '../fila-queue-facade';
 import FilaPainelComponent from './fila-painel';
 
 describe('FilaPainelComponent', () => {
-  const filaMock = {
+  const facadeMock = {
     queue: signal([]),
-    services: signal([]),
+    services: signal([{ id: 's1', nome: 'Lavagem', preco: 40 }]),
+    customers: signal([]),
     loading: signal(false),
-    loadServices: vi.fn(() => of({ data: [{ id: 's1', nome: 'Lavagem', preco: 40 }] })),
-    loadQueue: vi.fn(() => of({ data: [] })),
-    connectStream: vi.fn(() => of({ queue: [] })),
-    addToQueue: vi.fn(() => of({ id: 'q1' })),
-    advance: vi.fn(() => of({})),
-    pay: vi.fn(() => of({})),
+    lastUpdate: signal(''),
+    sseError: signal(false),
+    aguardando: signal([]),
+    emAtendimento: signal([]),
+    concluidos: signal([]),
+    init: vi.fn(),
+    reload: vi.fn(() => Promise.resolve()),
+    add: vi.fn(() => Promise.resolve()),
+    advance: vi.fn(() => Promise.resolve()),
+    pay: vi.fn(() => Promise.resolve()),
+    advanceTo: vi.fn(() => Promise.resolve(true)),
+    canAdvance: vi.fn(() => true),
+    canPay: vi.fn(() => false),
+    entry: vi.fn(),
   };
 
   const apiMock = {
@@ -35,10 +43,13 @@ describe('FilaPainelComponent', () => {
     TestBed.configureTestingModule({
       imports: [FilaPainelComponent],
       providers: [
-        { provide: FilaService, useValue: filaMock },
         { provide: ApiService, useValue: apiMock },
         { provide: MessageService, useValue: toastMock },
       ],
+    });
+
+    TestBed.overrideComponent(FilaPainelComponent, {
+      add: { providers: [{ provide: FilaQueueFacade, useValue: facadeMock }] },
     });
 
     component = TestBed.createComponent(FilaPainelComponent).componentInstance;
@@ -81,7 +92,7 @@ describe('FilaPainelComponent', () => {
     expect(component.addClienteId()).toBe('');
   });
 
-  it('onSubmitAdd should submit and close dialog when form is valid', async () => {
+  it('onSubmitAdd should dispatch to the facade and close dialog when valid', async () => {
     component.addServiceId.set('s1');
     component.addMode.set('avulso');
     component.addNome.set('Cliente Teste');
@@ -90,8 +101,7 @@ describe('FilaPainelComponent', () => {
 
     await component.onSubmitAdd();
 
-    expect(filaMock.addToQueue).toHaveBeenCalledOnce();
-    expect(filaMock.loadQueue).toHaveBeenCalled();
+    expect(facadeMock.add).toHaveBeenCalledOnce();
     expect(component.addDialogVisible()).toBe(false);
     expect(toastMock.add).toHaveBeenCalled();
   });
@@ -107,5 +117,3 @@ describe('FilaPainelComponent', () => {
     expect(component.detailCanGeneratePdf).toBe(true);
   });
 });
-
-

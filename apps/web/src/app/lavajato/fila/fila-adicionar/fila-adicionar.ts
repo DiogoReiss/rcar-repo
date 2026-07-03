@@ -5,8 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { FilaService } from '../fila.service';
-import { Customer, PaginatedResponse } from '@shared/models/entities.model';
-import { ApiService } from '@core/services/api.service';
+import { Customer, WashService as WashServiceModel } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import FormFieldComponent from '@shared/components/form-field/form-field';
 import AppButtonComponent from '@shared/components/app-button/app-button';
@@ -21,11 +20,10 @@ import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 })
 export default class FilaAdicionarComponent {
   private readonly filaService = inject(FilaService);
-  private readonly api         = inject(ApiService);
   private readonly router      = inject(Router);
   private readonly toast       = inject(MessageService);
 
-  readonly services   = this.filaService.services;
+  readonly services   = signal<WashServiceModel[]>([]);
   readonly customers  = signal<Customer[]>([]);
 
   // Form mode: 'avulso' (walk-in) or 'cadastrado' (registered customer)
@@ -41,10 +39,10 @@ export default class FilaAdicionarComponent {
   readonly fServiceId = signal('');
 
   constructor() {
-    this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe({
-      next: (res) => { if (res.data.length) this.fServiceId.set(res.data[0].id); },
+    this.filaService.fetchServices().pipe(takeUntilDestroyed()).subscribe({
+      next: (res) => { this.services.set(res.data); if (res.data.length) this.fServiceId.set(res.data[0].id); },
     });
-    this.api.get<PaginatedResponse<Customer>>('/customers').pipe(takeUntilDestroyed()).subscribe({
+    this.filaService.fetchCustomers().pipe(takeUntilDestroyed()).subscribe({
       next: (res) => this.customers.set(res.data ?? []),
     });
   }
@@ -60,7 +58,6 @@ export default class FilaAdicionarComponent {
         veiculoPlaca: this.fPlaca() || undefined,
       }));
       this.toast.add({ severity: 'success', summary: 'Adicionado à fila', detail: 'Cliente entrou na fila com sucesso.', life: 3000 });
-      await firstValueFrom(this.filaService.loadQueue());
       this.router.navigate(['/lavajato/fila']);
     } finally {
       this.saving.set(false);

@@ -1,19 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Dialog } from 'primeng/dialog';
-import { FilaService } from '../fila.service';
+import { FilaQueueFacade } from '../fila-queue-facade';
 import { ApiService } from '@core/services/api.service';
-import { Customer, PaginatedResponse, PaymentMethod, WashQueueEntry } from '@shared/models/entities.model';
+import { PaymentMethod, WashQueueEntry } from '@shared/models/entities.model';
 import PageHeaderComponent from '@shared/components/page-header/page-header';
 import PaymentDialogComponent from '@shared/components/payment-dialog/payment-dialog';
 import AppButtonComponent from '@shared/components/app-button/app-button';
 import FormFieldComponent from '@shared/components/form-field/form-field';
 import CurrencyBrlPipe from '@shared/pipes/currency-brl.pipe';
 
-const STATUS_ORDER = ['AGUARDANDO', 'EM_ATENDIMENTO', 'CONCLUIDO'] as const;
 type TemplateType = 'RECIBO_LAVAGEM';
 
 interface TemplateRef {
@@ -35,25 +33,18 @@ interface TemplateRef {
   templateUrl: './fila-painel.html',
   styleUrl: './fila-painel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [FilaQueueFacade],
 })
-export default class FilaPainelComponent implements OnDestroy {
-  private readonly filaService = inject(FilaService);
+export default class FilaPainelComponent {
+  protected readonly fila = inject(FilaQueueFacade);
   private readonly api = inject(ApiService);
   private readonly toast = inject(MessageService);
-  private sseSub?: Subscription;
-
-  readonly queue      = this.filaService.queue;
-  readonly services   = this.filaService.services;
-  readonly loading    = this.filaService.loading;
-  readonly lastUpdate = signal('');
-  readonly sseError   = signal(false);
 
   // Detail dialog
   readonly detailItem = signal<WashQueueEntry | null>(null);
 
   // Add dialog
   readonly addDialogVisible = signal(false);
-  readonly customers = signal<Customer[]>([]);
   readonly addMode = signal<'avulso' | 'cadastrado'>('avulso');
   readonly addSaving = signal(false);
   readonly addNome = signal('');
@@ -62,47 +53,27 @@ export default class FilaPainelComponent implements OnDestroy {
   readonly addServiceId = signal('');
 
   // Payment dialog
-  readonly payingId   = signal<string | null>(null);
+  readonly payingId = signal<string | null>(null);
   readonly payLoading = signal(false);
   readonly pdfLoadingId = signal<string | null>(null);
 
   // Drag state
-  private draggedId     = '';
+  private draggedId = '';
   private draggedStatus = '';
-  readonly dragOverCol  = signal<string | null>(null);
+  readonly dragOverCol = signal<string | null>(null);
   private readonly templateIdByType = new Map<TemplateType, string>();
 
-  readonly aguardando    = () => this.queue().filter(q => q.status === 'AGUARDANDO');
-  readonly emAtendimento = () => this.queue().filter(q => q.status === 'EM_ATENDIMENTO');
-  readonly concluidos    = () => this.queue().filter(q => q.status === 'CONCLUIDO');
-
   constructor() {
-    this.filaService.loadServices().pipe(takeUntilDestroyed()).subscribe({
-      next: (res) => {
-        if (res.data.length && !this.addServiceId()) this.addServiceId.set(res.data[0].id);
-      },
+    effect(() => {
+      const services = this.fila.services();
+      if (services.length && !untracked(this.addServiceId)) {
+        this.addServiceId.set(services[0].id);
+      }
     });
-    this.filaService.loadQueue().pipe(takeUntilDestroyed()).subscribe();
-    this.api.get<PaginatedResponse<Customer>>('/customers').pipe(takeUntilDestroyed()).subscribe({
-      next: (res) => this.customers.set(res.data ?? []),
-    });
-    this.connectSSE();
+    this.fila.init();
   }
 
-  ngOnDestroy() { this.sseSub?.unsubscribe(); }
-
-  private connectSSE() {
-    this.sseSub = this.filaService.connectStream().subscribe({
-      next: (payload) => {
-        if (payload?.queue) this.filaService.queue.set(payload.queue);
-        else this.filaService.loadQueue().pipe(takeUntilDestroyed()).subscribe();
-        this.lastUpdate.set(new Date().toLocaleTimeString('pt-BR'));
-        this.sseError.set(false);
-      },
-      error: () => this.sseError.set(true),
-    });
-  }
-
+  // ─── Add dialog ───────────────────────────────────────────────────
   openAddDialog() {
     this.addMode.set('avulso');
     this.addNome.set('');
@@ -124,13 +95,12 @@ export default class FilaPainelComponent implements OnDestroy {
     if (!this.canSubmitAdd) return;
     this.addSaving.set(true);
     try {
-      await firstValueFrom(this.filaService.addToQueue({
+      await this.fila.add({
         nomeAvulso: this.addMode() === 'avulso' ? this.addNome().trim() : undefined,
         customerId: this.addMode() === 'cadastrado' ? this.addClienteId() : undefined,
         serviceId: this.addServiceId(),
         veiculoPlaca: this.addPlaca().trim() || undefined,
-      }));
-      await firstValueFrom(this.filaService.loadQueue());
+      });
       this.toast.add({ severity: 'success', summary: 'Adicionado à fila', life: 3000 });
       this.closeAddDialog();
     } finally {
@@ -143,20 +113,23 @@ export default class FilaPainelComponent implements OnDestroy {
   closeDetail()                 { this.detailItem.set(null); }
 
   get detailCanAdvance(): boolean {
-    const s = this.detailItem()?.status;
-    return s === 'AGUARDANDO' || s === 'EM_ATENDIMENTO';
+    return this.fila.canAdvance(this.detailItem()?.status);
   }
 
   get detailCanPay(): boolean {
-    return this.detailItem()?.status === 'EM_ATENDIMENTO';
+    return this.fila.canPay(this.detailItem()?.status);
+  }
+
+  get detailCanGeneratePdf(): boolean {
+    const status = this.detailItem()?.status;
+    return status === 'EM_ATENDIMENTO' || status === 'CONCLUIDO';
   }
 
   async onAdvanceDetail() {
     const item = this.detailItem();
     if (!item) return;
     await this.onAdvance(item.id);
-    // Sync detail item with updated queue
-    const updated = this.queue().find(q => q.id === item.id);
+    const updated = this.fila.entry(item.id);
     if (updated) this.detailItem.set(updated); else this.closeDetail();
   }
 
@@ -165,11 +138,49 @@ export default class FilaPainelComponent implements OnDestroy {
     if (item) { this.payingId.set(item.id); this.closeDetail(); }
   }
 
-  get detailCanGeneratePdf(): boolean {
-    const item = this.detailItem();
-    return !!item && (item.status === 'EM_ATENDIMENTO' || item.status === 'CONCLUIDO');
+  // ─── Queue actions ────────────────────────────────────────────────
+  async onAdvance(id: string) {
+    await this.fila.advance(id);
+    this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
   }
 
+  async onPay(metodo: PaymentMethod) {
+    const id = this.payingId();
+    if (!id) return;
+    this.payLoading.set(true);
+    try {
+      await this.fila.pay(id, metodo);
+      this.payingId.set(null);
+      this.toast.add({ severity: 'success', summary: 'Pagamento registrado', life: 3000 });
+    } finally {
+      this.payLoading.set(false);
+    }
+  }
+
+  // ─── Drag & drop ─────────────────────────────────────────────────
+  onDragStart(event: DragEvent, q: WashQueueEntry) {
+    this.draggedId     = q.id;
+    this.draggedStatus = q.status;
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  onDragOver(event: DragEvent, col: string) {
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+    this.dragOverCol.set(col);
+  }
+
+  onDragLeave() { this.dragOverCol.set(null); }
+
+  async onDrop(event: DragEvent, targetStatus: string) {
+    event.preventDefault();
+    this.dragOverCol.set(null);
+    const moved = await this.fila.advanceTo(this.draggedId, this.draggedStatus, targetStatus);
+    if (moved) this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
+    this.draggedId = this.draggedStatus = '';
+  }
+
+  // ─── Receipt PDF ──────────────────────────────────────────────────
   private async resolveTemplateId(tipo: TemplateType): Promise<string | null> {
     const cached = this.templateIdByType.get(tipo);
     if (cached) return cached;
@@ -233,57 +244,6 @@ export default class FilaPainelComponent implements OnDestroy {
     } finally {
       this.pdfLoadingId.set(null);
     }
-  }
-
-  // ─── Queue actions ────────────────────────────────────────────────
-  async onAdvance(id: string) {
-    await firstValueFrom(this.filaService.advance(id));
-    await firstValueFrom(this.filaService.loadQueue());
-    this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
-  }
-
-  async onPay(metodo: PaymentMethod) {
-    const id = this.payingId();
-    if (!id) return;
-    this.payLoading.set(true);
-    try {
-      await firstValueFrom(this.filaService.pay(id, metodo));
-      this.payingId.set(null);
-      this.toast.add({ severity: 'success', summary: 'Pagamento registrado', life: 3000 });
-      await firstValueFrom(this.filaService.loadQueue());
-    } finally {
-      this.payLoading.set(false);
-    }
-  }
-
-  // ─── Drag & drop ─────────────────────────────────────────────────
-  onDragStart(event: DragEvent, q: WashQueueEntry) {
-    this.draggedId     = q.id;
-    this.draggedStatus = q.status;
-    event.dataTransfer!.effectAllowed = 'move';
-  }
-
-  onDragOver(event: DragEvent, col: string) {
-    event.preventDefault();
-    event.dataTransfer!.dropEffect = 'move';
-    this.dragOverCol.set(col);
-  }
-
-  onDragLeave() { this.dragOverCol.set(null); }
-
-  async onDrop(event: DragEvent, targetStatus: string) {
-    event.preventDefault();
-    this.dragOverCol.set(null);
-    const fromIdx = STATUS_ORDER.indexOf(this.draggedStatus as typeof STATUS_ORDER[number]);
-    const toIdx   = STATUS_ORDER.indexOf(targetStatus   as typeof STATUS_ORDER[number]);
-    if (toIdx <= fromIdx || fromIdx < 0 || toIdx < 0) return; // no-op for backwards/same
-    // advance N steps
-    for (let i = fromIdx; i < toIdx; i++) {
-      await firstValueFrom(this.filaService.advance(this.draggedId));
-    }
-    await firstValueFrom(this.filaService.loadQueue());
-    this.toast.add({ severity: 'success', summary: 'Status atualizado', life: 3000 });
-    this.draggedId = this.draggedStatus = '';
   }
 
   // ─── Formatters ───────────────────────────────────────────────────

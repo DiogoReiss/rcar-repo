@@ -1,10 +1,10 @@
 <section class="page">
   <lync-page-header title="Fila de Atendimento">
     <div class="header-actions">
-      <span class="sse-status" [class.sse-status--error]="sseError()">
+      <span class="sse-status" [class.sse-status--error]="fila.sseError()">
         <span class="sse-dot" aria-hidden="true"></span>
-        @if (sseError()) { Desconectado }
-        @else if (lastUpdate()) { Ao vivo · {{ lastUpdate() }} }
+        @if (fila.sseError()) { Desconectado }
+        @else if (fila.lastUpdate()) { Ao vivo · {{ fila.lastUpdate() }} }
         @else { Conectando... }
       </span>
       <button type="button" class="btn-primary" (click)="openAddDialog()">
@@ -64,7 +64,7 @@
           <lync-form-field label="Cliente" [required]="true" [full]="true">
             <select name="addCliente" [ngModel]="addClienteId()" (ngModelChange)="addClienteId.set($event)">
               <option value="">— Selecione —</option>
-              @for (c of customers(); track c.id) {
+              @for (c of fila.customers(); track c.id) {
                 <option [value]="c.id">{{ c.nome }} · {{ c.cpfCnpj }}</option>
               }
             </select>
@@ -77,7 +77,7 @@
         <div class="form-grid add-dialog-inline-grid">
           <lync-form-field label="Serviço" [required]="true">
             <select name="addService" [ngModel]="addServiceId()" (ngModelChange)="addServiceId.set($event)">
-              @for (s of services(); track s.id) {
+              @for (s of fila.services(); track s.id) {
                 <option [value]="s.id">{{ s.nome }} — {{ s.preco | currencyBrl }}</option>
               }
             </select>
@@ -115,7 +115,7 @@
   </p-dialog>
 
 
-  @if (loading()) {
+  @if (fila.loading()) {
     <div class="fila-loading">
       <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Carregando fila...
     </div>
@@ -126,7 +126,7 @@
     <!-- ─── Aguardando ─────────────────────────────────── -->
     <div class="board-col">
       <div class="board-col-header board-col-header--waiting">
-        <span class="board-col-count">{{ aguardando().length }}</span>
+        <span class="board-col-count">{{ fila.aguardando().length }}</span>
         <span class="board-col-title">Aguardando</span>
       </div>
       <div
@@ -136,7 +136,7 @@
         (dragleave)="onDragLeave()"
         (drop)="onDrop($event, 'AGUARDANDO')"
       >
-        @for (q of aguardando(); track q.id) {
+        @for (q of fila.aguardando(); track q.id) {
           <div
             class="queue-card queue-card--waiting"
             draggable="true"
@@ -156,7 +156,7 @@
             <i class="pi pi-grip-vertical queue-drag" aria-hidden="true"></i>
           </div>
         }
-        @if (!aguardando().length) {
+        @if (!fila.aguardando().length) {
           <div class="board-empty">
             <i class="pi pi-check-circle" aria-hidden="true"></i>
             <span>Fila vazia</span>
@@ -168,7 +168,7 @@
     <!-- ─── Em Atendimento ─────────────────────────────── -->
     <div class="board-col">
       <div class="board-col-header board-col-header--active">
-        <span class="board-col-count">{{ emAtendimento().length }}</span>
+        <span class="board-col-count">{{ fila.emAtendimento().length }}</span>
         <span class="board-col-title">Em Atendimento</span>
       </div>
       <div
@@ -178,7 +178,7 @@
         (dragleave)="onDragLeave()"
         (drop)="onDrop($event, 'EM_ATENDIMENTO')"
       >
-        @for (q of emAtendimento(); track q.id) {
+        @for (q of fila.emAtendimento(); track q.id) {
           <div
             class="queue-card queue-card--active"
             draggable="true"
@@ -198,7 +198,7 @@
             <i class="pi pi-grip-vertical queue-drag" aria-hidden="true"></i>
           </div>
         }
-        @if (!emAtendimento().length) {
+        @if (!fila.emAtendimento().length) {
           <div class="board-empty">
             <i class="pi pi-inbox" aria-hidden="true"></i>
             <span>Nenhum em atendimento</span>
@@ -210,7 +210,7 @@
     <!-- ─── Concluídos ─────────────────────────────────── -->
     <div class="board-col board-col--done">
       <div class="board-col-header board-col-header--done">
-        <span class="board-col-count">{{ concluidos().length }}</span>
+        <span class="board-col-count">{{ fila.concluidos().length }}</span>
         <span class="board-col-title">Concluídos</span>
       </div>
       <div
@@ -219,7 +219,7 @@
         (dragleave)="onDragLeave()"
         (drop)="onDrop($event, 'CONCLUIDO')"
       >
-        @for (q of concluidos(); track q.id) {
+        @for (q of fila.concluidos(); track q.id) {
           <div
             class="queue-card queue-card--done"
             tabindex="0"
@@ -238,7 +238,7 @@
             </div>
           </div>
         }
-        @if (!concluidos().length) {
+        @if (!fila.concluidos().length) {
           <div class="board-empty">
             <i class="pi pi-list" aria-hidden="true"></i>
             <span>Nenhum concluído ainda</span>

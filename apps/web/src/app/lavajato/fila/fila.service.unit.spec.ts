@@ -25,14 +25,15 @@ describe('FilaService', () => {
     });
   });
 
-  it('loads queue into signal', () => {
+  it('fetches the queue from the API', () => {
     const service = TestBed.inject(FilaService);
     api.get.mockReturnValue(of([{ id: 'q1' }]));
 
-    service.loadQueue().subscribe();
+    let result: unknown;
+    service.fetchQueue().subscribe((res) => (result = res));
 
-    expect(service.queue()).toEqual([{ id: 'q1' }]);
-    expect(service.loading()).toBe(false);
+    expect(api.get).toHaveBeenCalledWith('/lavajato/queue');
+    expect(result).toEqual([{ id: 'q1' }]);
   });
 
   it('connects to SSE queue stream', () => {
@@ -44,4 +45,3 @@ describe('FilaService', () => {
     expect(sse.connect).toHaveBeenCalledWith('/lavajato/queue/stream');
   });
 });
-
