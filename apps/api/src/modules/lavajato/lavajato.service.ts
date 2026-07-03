@@ -12,12 +12,18 @@ import {
   CreatePaymentDto,
 } from './dto/create-queue-entry.dto.js';
 import { QueueEventsService } from './queue-events.service.js';
+import { DomainEventsService } from '../../common/events/domain-events.service.js';
+import {
+  ATENDIMENTO_CONCLUIDO,
+  AtendimentoConcluidoEvent,
+} from './lavajato.events.js';
 
 @Injectable()
 export class LavajatoService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queueEvents: QueueEventsService,
+    private readonly events: DomainEventsService,
   ) {}
 
   // ─── Schedules ────────────────────────────────────────────────────────────
@@ -146,9 +152,9 @@ export class LavajatoService {
       },
     });
 
-    // Auto-debit stock when service is completed
+    // Emit AtendimentoConcluido — stock deduction is the inventory module's concern.
     if (dto.status === WashScheduleStatus.CONCLUIDO) {
-      await this.debitStock(id, updated.service.products);
+      this.emitAtendimentoConcluido(id, updated.service.products);
     }
 
     return updated;
@@ -227,13 +233,14 @@ export class LavajatoService {
 
     let newStatus: WashQueueStatus;
     let concluidoAt: Date | undefined;
+    let concluido = false;
 
     if (entry.status === 'AGUARDANDO') {
       newStatus = 'EM_ATENDIMENTO';
     } else if (entry.status === 'EM_ATENDIMENTO') {
       newStatus = 'CONCLUIDO';
       concluidoAt = new Date();
-      await this.debitStock(id, entry.service.products);
+      concluido = true;
     } else {
       throw new BadRequestException('Entrada já concluída');
     }
@@ -243,6 +250,9 @@ export class LavajatoService {
       data: { status: newStatus, ...(concluidoAt && { concluidoAt }) },
       include: { service: true },
     });
+    if (concluido) {
+      this.emitAtendimentoConcluido(id, entry.service.products);
+    }
     this.queueEvents.emit_queueChanged();
     return result;
   }
@@ -339,46 +349,22 @@ export class LavajatoService {
     }
   }
 
-  // ─── Stock auto-debit ─────────────────────────────────────────────────────
+  // ─── Stock auto-debit (via domain event) ──────────────────────────────────
 
-  // D1: Wrap ALL product debits in a single $transaction to prevent partial updates
-  // Q5: Use proper Prisma Decimal types instead of any
-  private async debitStock(
+  private emitAtendimentoConcluido(
     refId: string,
     serviceProducts: Array<{
       productId: string;
       quantidadePorUso: Prisma.Decimal;
-      product: { quantidadeAtual: Prisma.Decimal };
     }>,
   ) {
     if (!serviceProducts.length) return;
-
-    await this.prisma.$transaction(async (tx) => {
-      for (const sp of serviceProducts) {
-        const current = await tx.product.findUnique({
-          where: { id: sp.productId },
-          select: { quantidadeAtual: true },
-        });
-        if (!current) continue;
-
-        const currentQty = new Prisma.Decimal(current.quantidadeAtual);
-        const debitQty = new Prisma.Decimal(sp.quantidadePorUso);
-        const newQty = currentQty.sub(debitQty);
-        if (newQty.lessThan(0)) continue; // don't go negative
-
-        await tx.stockMovement.create({
-          data: {
-            productId: sp.productId,
-            tipo: 'SAIDA',
-            quantidade: debitQty,
-            motivo: `Saída automática — atendimento ${refId}`,
-          },
-        });
-        await tx.product.update({
-          where: { id: sp.productId },
-          data: { quantidadeAtual: newQty },
-        });
-      }
+    this.events.publish<AtendimentoConcluidoEvent>(ATENDIMENTO_CONCLUIDO, {
+      refId,
+      items: serviceProducts.map((sp) => ({
+        productId: sp.productId,
+        quantidade: sp.quantidadePorUso.toString(),
+      })),
     });
   }
 }

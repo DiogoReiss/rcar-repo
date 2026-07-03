@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { DomainEventsModule } from './common/events/domain-events.module.js';
 import { AuditModule } from './common/audit/audit.module.js';
 import { SignaturesModule } from './modules/signatures/signatures.module.js';
 import { MasterAgreementsModule } from './modules/master-agreements/master-agreements.module.js';
@@ -33,6 +34,7 @@ import { HealthModule } from './modules/health/health.module.js';
     // S1: Global rate limiting — 60 req/min per IP; login uses stricter override
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     PrismaModule,
+    DomainEventsModule,
     AuditModule,
     MailModule,
     NotificationsModule,

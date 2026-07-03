@@ -10,6 +10,7 @@ function makeService(
     notifications?: unknown;
     config?: unknown;
     gateway?: unknown;
+    payables?: unknown;
   } = {},
 ) {
   return new PaymentsService(
@@ -20,6 +21,7 @@ function makeService(
       get: (_k: string, def: string) => def,
     }) as never,
     (overrides.gateway ?? {}) as never,
+    (overrides.payables ?? { resolve: jest.fn() }) as never,
   );
 }
 
@@ -127,23 +129,23 @@ describe('PaymentsService', () => {
   describe('getBalance', () => {
     it('computes total, pago and saldo from confirmed payments', async () => {
       const prismaMock = {
-        rentalContract: {
-          findUnique: jest.fn().mockResolvedValue({
-            id: 'c1',
-            customerId: 'cust1',
-            valorTotal: 300,
-            valorTotalReal: null,
-            customer: { id: 'cust1', nome: 'Cliente' },
-          }),
-        },
         payment: {
           aggregate: jest.fn().mockResolvedValue({ _sum: { valor: 120 } }),
         },
       };
-      const service = makeService({ prisma: prismaMock });
+      const payables = {
+        resolve: jest.fn().mockResolvedValue({
+          valor: 300,
+          customerId: 'cust1',
+          customerName: 'Cliente',
+          contractId: 'c1',
+        }),
+      };
+      const service = makeService({ prisma: prismaMock, payables });
 
       const balance = await service.getBalance('RENTAL_CONTRACT', 'c1');
 
+      expect(payables.resolve).toHaveBeenCalledWith('RENTAL_CONTRACT', 'c1');
       expect(balance).toMatchObject({
         total: 300,
         pago: 120,

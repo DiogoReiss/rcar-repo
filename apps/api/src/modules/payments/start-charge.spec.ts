@@ -3,16 +3,7 @@ import { PaymentsService } from './payments.service';
 import { FakePaymentGateway } from './fake-payment.gateway';
 
 describe('PaymentsService.startCharge', () => {
-  const contract = {
-    id: 'c1',
-    customerId: 'cust1',
-    valorTotal: 300,
-    valorTotalReal: null,
-    customer: { id: 'cust1', nome: 'Cliente' },
-  };
-
   const makePrisma = (over: Record<string, unknown> = {}) => ({
-    rentalContract: { findUnique: jest.fn().mockResolvedValue(contract) },
     payment: {
       findFirst: jest.fn().mockResolvedValue(null),
       aggregate: jest.fn().mockResolvedValue({ _sum: { valor: 0 } }),
@@ -23,6 +14,15 @@ describe('PaymentsService.startCharge', () => {
         ),
     },
     ...over,
+  });
+
+  const makePayables = (customerName = 'Cliente') => ({
+    resolve: jest.fn().mockResolvedValue({
+      valor: 300,
+      customerId: 'cust1',
+      customerName,
+      contractId: 'c1',
+    }),
   });
 
   const audit = { record: jest.fn() };
@@ -37,6 +37,7 @@ describe('PaymentsService.startCharge', () => {
       { notify: jest.fn() } as never,
       { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
+      makePayables() as never,
     );
 
     const result = await service.startCharge({
@@ -65,6 +66,7 @@ describe('PaymentsService.startCharge', () => {
       { notify: jest.fn() } as never,
       { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
+      makePayables() as never,
     );
 
     const result = await service.startCharge({
@@ -77,19 +79,14 @@ describe('PaymentsService.startCharge', () => {
   });
 
   it('surfaces a clear error when the gateway refuses the charge', async () => {
-    const refused = {
-      ...contract,
-      customer: { id: 'cust1', nome: 'Cliente Recusa' },
-    };
-    const prisma = makePrisma({
-      rentalContract: { findUnique: jest.fn().mockResolvedValue(refused) },
-    });
+    const prisma = makePrisma();
     const service = new PaymentsService(
       prisma as never,
       audit as never,
       { notify: jest.fn() } as never,
       { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
+      makePayables('Cliente Recusa') as never,
     );
 
     await expect(

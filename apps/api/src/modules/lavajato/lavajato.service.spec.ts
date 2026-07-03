@@ -30,12 +30,21 @@ describe('LavajatoService', () => {
     emit_queueChanged: jest.fn(),
   };
 
+  const domainEvents = {
+    publish: jest.fn(),
+    subscribe: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('throws on schedule creation without customer or nomeAvulso', async () => {
-    const service = new LavajatoService(prisma as never, queueEvents as never);
+    const service = new LavajatoService(
+      prisma as never,
+      queueEvents as never,
+      domainEvents as never,
+    );
 
     await expect(
       service.createSchedule({
@@ -60,7 +69,11 @@ describe('LavajatoService', () => {
           },
         }),
     );
-    const service = new LavajatoService(prisma as never, queueEvents as never);
+    const service = new LavajatoService(
+      prisma as never,
+      queueEvents as never,
+      domainEvents as never,
+    );
 
     const result = await service.addToQueue({
       serviceId: 'svc-1',
@@ -76,7 +89,11 @@ describe('LavajatoService', () => {
       id: 'pay-1',
       scheduleId: 'sc-1',
     });
-    const service = new LavajatoService(prisma as never, queueEvents as never);
+    const service = new LavajatoService(
+      prisma as never,
+      queueEvents as never,
+      domainEvents as never,
+    );
 
     const result = await service.registerPayment('WASH_SCHEDULE', 'sc-1', {
       metodo: 'PIX',
@@ -89,7 +106,11 @@ describe('LavajatoService', () => {
   it('throws when queue entry does not exist for payment', async () => {
     prisma.payment.findUnique.mockResolvedValue(null);
     prisma.washQueue.findUnique.mockResolvedValue(null);
-    const service = new LavajatoService(prisma as never, queueEvents as never);
+    const service = new LavajatoService(
+      prisma as never,
+      queueEvents as never,
+      domainEvents as never,
+    );
 
     await expect(
       service.registerPayment('WASH_QUEUE', 'missing', {

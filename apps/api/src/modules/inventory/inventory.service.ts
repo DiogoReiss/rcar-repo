@@ -9,10 +9,15 @@ import { UpdateProductDto } from './dto/update-product.dto.js';
 import { CreateStockMovementDto } from './dto/create-stock-movement.dto.js';
 import { Prisma } from '@prisma/client';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { InventoryRepository } from './inventory.repository.js';
+import { calculateStockMovement } from './stock-movement-calculator.js';
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly repo: InventoryRepository,
+  ) {}
 
   async createProduct(dto: CreateProductDto) {
     return this.prisma.product.create({
@@ -98,74 +103,42 @@ export class InventoryService {
   ) {
     // D9: Idempotency — skip duplicate if same key already processed
     if (idempotencyKey) {
-      const existing = await this.prisma.stockMovement.findFirst({
-        where: { idempotencyKey } as any,
-      });
+      const existing =
+        await this.repo.findMovementByIdempotencyKey(idempotencyKey);
       if (existing) return existing;
     }
 
-    const product = await this.prisma.product.findUnique({
-      where: { id: dto.productId },
-    });
+    const product = await this.repo.findProduct(dto.productId);
     if (!product) throw new NotFoundException('Produto não encontrado');
 
-    let novaQuantidade: Prisma.Decimal;
-    let novoCustoUnitario = product.custoUnitario;
-    const currentQty = product.quantidadeAtual;
-    const movQty = new Prisma.Decimal(dto.quantidade);
+    const { novaQuantidade, novoCustoUnitario } = calculateStockMovement(
+      {
+        quantidadeAtual: product.quantidadeAtual,
+        custoUnitario: product.custoUnitario,
+      },
+      {
+        tipo: dto.tipo,
+        quantidade: dto.quantidade,
+        custoUnitario: dto.custoUnitario,
+      },
+    );
 
-    switch (dto.tipo) {
-      case 'ENTRADA':
-        novaQuantidade = currentQty.add(movQty);
-        if (dto.custoUnitario !== undefined && dto.custoUnitario !== null) {
-          const custoEntrada = new Prisma.Decimal(dto.custoUnitario);
-          const custoAtual = product.custoUnitario ?? new Prisma.Decimal(0);
-          // Weighted-average cost: ((qtyAtual * custoAtual) + (qtyEntrada * custoEntrada)) / qtyFinal
-          const valorAtual = currentQty.mul(custoAtual);
-          const valorEntrada = movQty.mul(custoEntrada);
-          novoCustoUnitario = novaQuantidade.greaterThan(0)
-            ? valorAtual.add(valorEntrada).div(novaQuantidade)
-            : custoEntrada;
-        }
-        break;
-      case 'SAIDA':
-        novaQuantidade = currentQty.sub(movQty);
-        if (novaQuantidade.lessThan(0)) {
-          throw new BadRequestException('Estoque insuficiente para esta saída');
-        }
-        break;
-      case 'AJUSTE':
-        novaQuantidade = movQty;
-        break;
-      default:
-        throw new BadRequestException('Tipo de movimentação inválido');
+    if (dto.tipo === 'SAIDA' && novaQuantidade.lessThan(0)) {
+      throw new BadRequestException('Estoque insuficiente para esta saída');
     }
 
-    const [movement] = await this.prisma.$transaction([
-      this.prisma.stockMovement.create({
-        data: {
-          productId: dto.productId,
-          tipo: dto.tipo,
-          quantidade: dto.quantidade,
-          custoUnitario: dto.custoUnitario,
-          motivo: dto.motivo,
-          userId,
-
-          ...(idempotencyKey && ({ idempotencyKey } as any)),
-        },
-      }),
-      this.prisma.product.update({
-        where: { id: dto.productId },
-        data: {
-          quantidadeAtual: novaQuantidade,
-          ...(dto.tipo === 'ENTRADA'
-            ? { custoUnitario: novoCustoUnitario }
-            : {}),
-        },
-      }),
-    ]);
-
-    return movement;
+    return this.repo.saveMovement({
+      productId: dto.productId,
+      tipo: dto.tipo,
+      quantidade: dto.quantidade,
+      custoUnitario: dto.custoUnitario,
+      motivo: dto.motivo,
+      userId,
+      idempotencyKey,
+      novaQuantidade,
+      novoCustoUnitario,
+      atualizarCusto: dto.tipo === 'ENTRADA',
+    });
   }
 
   async findMovements(productId?: string, pagination?: PaginationDto) {

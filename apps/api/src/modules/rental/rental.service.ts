@@ -1,28 +1,26 @@
 import {
   Injectable,
-  Logger,
   NotFoundException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
 import { Prisma, ContractStatus, PaymentMethod } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateContractDto } from './dto/create-contract.dto.js';
 import {
   OpenContractDto,
   CloseContractDto,
 } from './dto/contract-operations.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
-import { PaymentsService } from '../payments/payments.service.js';
+import { DomainEventsService } from '../../common/events/domain-events.service.js';
+import { RentalRepository } from './rental.repository.js';
+import { CONTRATO_FECHADO, ContratoFechadoEvent } from './rental.events.js';
 
 @Injectable()
 export class RentalService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly payments: PaymentsService,
+    private readonly repo: RentalRepository,
+    private readonly events: DomainEventsService,
   ) {}
-
-  private readonly logger = new Logger(RentalService.name);
 
   // ─── Availability ─────────────────────────────────────────────────────────
 
@@ -30,27 +28,8 @@ export class RentalService {
     const start = new Date(dataRetirada);
     const end = new Date(dataDevolucao);
 
-    // Find vehicle IDs already booked in this period
-    const busyContracts = await this.prisma.rentalContract.findMany({
-      where: {
-        status: { in: ['RESERVADO', 'ATIVO'] },
-        AND: [{ dataRetirada: { lt: end } }, { dataDevolucao: { gt: start } }],
-      },
-      select: { vehicleId: true },
-    });
-
-    const busyIds = busyContracts.map((c) => c.vehicleId);
-
-    const available = await this.prisma.vehicle.findMany({
-      where: {
-        status: 'DISPONIVEL',
-        deletedAt: null,
-        id: { notIn: busyIds },
-      },
-      orderBy: { modelo: 'asc' },
-    });
-
-    return available;
+    const busyIds = await this.repo.findBusyVehicleIds(start, end);
+    return this.repo.findAvailableVehicles(busyIds);
   }
 
   // ─── Contracts ────────────────────────────────────────────────────────────
@@ -62,23 +41,12 @@ export class RentalService {
   ) {
     const { page = 1, perPage = 20 } = pagination ?? {};
     const safePage = Math.max(1, page);
-    const where: Prisma.RentalContractWhereInput = {
-      ...(status && { status }),
-      ...(customerId && { customerId }),
-    };
-    const [data, total] = await Promise.all([
-      this.prisma.rentalContract.findMany({
-        where,
-        include: {
-          customer: { select: { id: true, nome: true, cpfCnpj: true } },
-          vehicle: { select: { id: true, placa: true, modelo: true } },
-        },
-        orderBy: { dataRetirada: 'desc' },
-        skip: (safePage - 1) * perPage,
-        take: perPage,
-      }),
-      this.prisma.rentalContract.count({ where }),
-    ]);
+    const { data, total } = await this.repo.listContracts(
+      status,
+      customerId,
+      (safePage - 1) * perPage,
+      perPage,
+    );
     return {
       data,
       total,
@@ -89,16 +57,7 @@ export class RentalService {
   }
 
   async findOne(id: string) {
-    const c = await this.prisma.rentalContract.findUnique({
-      where: { id },
-      include: {
-        customer: true,
-        vehicle: true,
-        inspections: { orderBy: { createdAt: 'asc' } },
-        incidents: true,
-        payments: true,
-      },
-    });
+    const c = await this.repo.findContractDetail(id);
     if (!c) throw new NotFoundException('Contrato não encontrado');
     return c;
   }
@@ -112,67 +71,42 @@ export class RentalService {
         'Data de devolução deve ser posterior à retirada',
       );
 
-    // D3: Wrap availability check + create in a serializable transaction to prevent double booking
-    return this.prisma.$transaction(
-      async (tx) => {
-        const conflict = await tx.rentalContract.findFirst({
-          where: {
-            vehicleId: dto.vehicleId,
-            status: { in: ['RESERVADO', 'ATIVO'] },
-            AND: [
-              { dataRetirada: { lt: end } },
-              { dataDevolucao: { gt: start } },
-            ],
-          },
-        });
-        if (conflict)
-          throw new ConflictException(
-            'Veículo indisponível para o período selecionado',
-          );
+    const diffMs = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const valorTotal = new Prisma.Decimal(dto.valorDiaria)
+      .mul(diffDays)
+      .add(
+        dto.seguro && dto.valorSeguro ? new Prisma.Decimal(dto.valorSeguro) : 0,
+      );
 
-        const diffMs = end.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        const valorTotal = new Prisma.Decimal(dto.valorDiaria)
-          .mul(diffDays)
-          .add(
-            dto.seguro && dto.valorSeguro
-              ? new Prisma.Decimal(dto.valorSeguro)
-              : 0,
-          );
-
-        return tx.rentalContract.create({
-          data: {
-            customerId: dto.customerId,
-            vehicleId: dto.vehicleId,
-            modalidade: dto.modalidade,
-            dataRetirada: start,
-            dataDevolucao: end,
-            valorDiaria: dto.valorDiaria,
-            valorTotal,
-            seguro: dto.seguro ?? false,
-            valorSeguro: dto.valorSeguro,
-            kmLimite: dto.kmLimite,
-            observacoes: dto.observacoes,
-          },
-          include: {
-            customer: { select: { id: true, nome: true } },
-            vehicle: { select: { id: true, placa: true, modelo: true } },
-          },
-        });
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+    // D3: Serializable booking prevents double-booking under concurrency.
+    const contract = await this.repo.createContractExclusive({
+      customerId: dto.customerId,
+      vehicleId: dto.vehicleId,
+      modalidade: dto.modalidade,
+      dataRetirada: start,
+      dataDevolucao: end,
+      valorDiaria: dto.valorDiaria,
+      valorTotal,
+      seguro: dto.seguro ?? false,
+      valorSeguro: dto.valorSeguro,
+      kmLimite: dto.kmLimite,
+      observacoes: dto.observacoes,
+    });
+    if (!contract)
+      throw new ConflictException(
+        'Veículo indisponível para o período selecionado',
+      );
+    return contract;
   }
 
   // ─── Open contract (vistoria de saída) ───────────────────────────────────
 
   async openContract(id: string, dto: OpenContractDto) {
-    const contract = await this.prisma.rentalContract.findUnique({
-      where: { id },
-    });
+    const contract = await this.repo.findContract(id);
     if (!contract) throw new NotFoundException('Contrato não encontrado');
-    // D8: Re-read status inside the transaction to avoid partially-applied state on concurrent calls
-    if (contract.status === 'ATIVO') return this.findOne(id); // already open — idempotent
+    // D8: Idempotent — already open.
+    if (contract.status === 'ATIVO') return this.findOne(id);
     if (contract.status !== 'RESERVADO')
       throw new BadRequestException('Contrato não está em status RESERVADO');
 
@@ -182,32 +116,17 @@ export class RentalService {
       );
     }
 
-    await this.prisma.$transaction([
-      this.prisma.rentalContract.update({
-        where: { id },
-        data: {
-          status: 'ATIVO',
-          kmRetirada: dto.kmRetirada,
-          combustivelSaida: dto.combustivelSaida,
-        },
-      }),
-      this.prisma.vehicle.update({
-        where: { id: contract.vehicleId },
-        data: { status: 'ALUGADO' },
-      }),
-      ...(dto.checklist || dto.fotos?.length
-        ? [
-            this.prisma.inspection.create({
-              data: {
-                contractId: id,
-                tipo: 'SAIDA',
-                checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
-                fotos: dto.fotos ?? [],
-              },
-            }),
-          ]
-        : []),
-    ]);
+    await this.repo.applyOpen(id, contract.vehicleId, {
+      kmRetirada: dto.kmRetirada,
+      combustivelSaida: dto.combustivelSaida,
+      inspection:
+        dto.checklist || dto.fotos?.length
+          ? {
+              checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
+              fotos: dto.fotos ?? [],
+            }
+          : undefined,
+    });
 
     return this.findOne(id);
   }
@@ -215,11 +134,9 @@ export class RentalService {
   // ─── Close contract (vistoria de chegada + devolução) ────────────────────
 
   async closeContract(id: string, dto: CloseContractDto) {
-    const contract = await this.prisma.rentalContract.findUnique({
-      where: { id },
-    });
+    const contract = await this.repo.findContract(id);
     if (!contract) throw new NotFoundException('Contrato não encontrado');
-    // D7: Guard against double-close — idempotent retry safety (must come before status check)
+    // D7: Guard against double-close (must come before status check).
     if (contract.status === 'ENCERRADO') return this.findOne(id);
     if (contract.status !== 'ATIVO')
       throw new BadRequestException('Contrato não está ATIVO');
@@ -232,126 +149,70 @@ export class RentalService {
       .add(contract.seguro && contract.valorSeguro ? contract.valorSeguro : 0);
 
     const incidents = dto.incidents ?? [];
-    const incidentesCobrados = incidents.filter(
-      (i) => i.cobradoCliente !== false,
-    );
-    const totalIncidentesCobrados = incidentesCobrados.reduce(
-      (a, i) => a + Number(i.valor ?? 0),
-      0,
-    );
+    const totalIncidentesCobrados = incidents
+      .filter((i) => i.cobradoCliente !== false)
+      .reduce((a, i) => a + Number(i.valor ?? 0), 0);
     const valorRealFinal = valorReal.add(
       new Prisma.Decimal(totalIncidentesCobrados),
     );
 
-    const incidentCreates = incidents.map((incident) =>
-      this.prisma.contractIncident.create({
-        data: {
-          contractId: id,
-          tipo: incident.tipo as Prisma.ContractIncidentUncheckedCreateInput['tipo'],
-          descricao: incident.descricao,
-          valor: new Prisma.Decimal(incident.valor ?? 0),
-          cobradoCliente: incident.cobradoCliente ?? true,
-          fotos: [],
-          data: now,
-        },
-      }),
-    );
+    await this.repo.applyClose(id, contract.vehicleId, {
+      dataDevReal: now,
+      kmDevolucao: dto.kmDevolucao,
+      combustivelChegada: dto.combustivelChegada,
+      valorTotalReal: valorRealFinal,
+      observacoes: dto.observacoes,
+      inspection:
+        dto.checklist || dto.fotos?.length
+          ? {
+              checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
+              fotos: dto.fotos ?? [],
+            }
+          : undefined,
+      incidents: incidents.map((incident) => ({
+        tipo: incident.tipo as Prisma.ContractIncidentUncheckedCreateInput['tipo'],
+        descricao: incident.descricao,
+        valor: new Prisma.Decimal(incident.valor ?? 0),
+        cobradoCliente: incident.cobradoCliente ?? true,
+        data: now,
+      })),
+    });
 
-    await this.prisma.$transaction([
-      this.prisma.rentalContract.update({
-        where: { id },
-        data: {
-          status: 'ENCERRADO',
-          dataDevReal: now,
-          kmDevolucao: dto.kmDevolucao,
-          combustivelChegada: dto.combustivelChegada,
-          valorTotalReal: valorRealFinal,
-          observacoes: dto.observacoes,
-        },
-      }),
-      this.prisma.vehicle.update({
-        where: { id: contract.vehicleId },
-        data: { status: 'DISPONIVEL', kmAtual: dto.kmDevolucao },
-      }),
-      ...(dto.checklist || dto.fotos?.length
-        ? [
-            this.prisma.inspection.create({
-              data: {
-                contractId: id,
-                tipo: 'CHEGADA',
-                checklist: (dto.checklist ?? {}) as Prisma.JsonObject,
-                fotos: dto.fotos ?? [],
-              },
-            }),
-          ]
-        : []),
-      ...incidentCreates,
-    ]);
-
-    // Auto-charge the outstanding balance on close (best-effort; failures here
-    // must not roll back the settled return).
-    try {
-      const balance = await this.payments.getBalance('RENTAL_CONTRACT', id);
-      if (balance.saldo > 0) {
-        await this.payments.startCharge({
-          refType: 'RENTAL_CONTRACT',
-          refId: id,
-          metodo: 'PIX',
-        });
-      }
-    } catch (err) {
-      this.logger.warn(
-        `Auto-cobrança do contrato ${id} falhou: ${(err as Error).message}`,
-      );
-    }
+    // The return is settled and committed. Auto-charging the outstanding
+    // balance is the Pagamento module's concern: emit a domain event so payment
+    // side effects (and any failures) live there, not swallowed here.
+    this.events.publish<ContratoFechadoEvent>(CONTRATO_FECHADO, {
+      contractId: id,
+    });
 
     return this.findOne(id);
   }
 
   async cancelContract(id: string) {
-    const contract = await this.prisma.rentalContract.findUnique({
-      where: { id },
-    });
+    const contract = await this.repo.findContract(id);
     if (!contract) throw new NotFoundException('Contrato não encontrado');
     if (contract.status === 'ATIVO')
       throw new BadRequestException(
         'Contratos ativos não podem ser cancelados direto; use devolução',
       );
 
-    await this.prisma.$transaction([
-      this.prisma.rentalContract.update({
-        where: { id },
-        data: { status: 'CANCELADO' },
-      }),
-      this.prisma.vehicle.update({
-        where: { id: contract.vehicleId },
-        data: { status: 'DISPONIVEL' },
-      }),
-    ]);
+    await this.repo.applyCancel(id, contract.vehicleId);
     return this.findOne(id);
   }
 
   async registerPayment(contractId: string, metodo: PaymentMethod) {
-    const contract = await this.prisma.rentalContract.findUnique({
-      where: { id: contractId },
-    });
+    const contract = await this.repo.findContract(contractId);
     if (!contract) throw new NotFoundException('Contrato não encontrado');
 
-    // D6: Idempotency — return existing payment if already registered (client retry safety)
-    const existing = await this.prisma.payment.findFirst({
-      where: { contractId, status: 'CONFIRMADO' },
-    });
+    // D6: Idempotency — return existing confirmed payment on retry.
+    const existing = await this.repo.findConfirmedContractPayment(contractId);
     if (existing) return existing;
 
-    return this.prisma.payment.create({
-      data: {
-        refType: 'RENTAL_CONTRACT',
-        contractId,
-        customerId: contract.customerId,
-        valor: contract.valorTotalReal ?? contract.valorTotal,
-        metodo,
-        status: 'CONFIRMADO',
-      },
+    return this.repo.createConfirmedPayment({
+      contractId,
+      customerId: contract.customerId,
+      valor: contract.valorTotalReal ?? contract.valorTotal,
+      metodo,
     });
   }
 }

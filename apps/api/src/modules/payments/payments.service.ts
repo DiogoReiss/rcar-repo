@@ -26,19 +26,12 @@ import {
   PaymentGateway,
   GatewayChargeMethod,
 } from './payment-gateway.js';
+import { PayableRegistry } from './payable-registry.js';
+import { PayableInfo } from './payable-strategy.js';
 
 interface ActingUser {
   id?: string;
   role?: string;
-}
-
-interface PayableInfo {
-  valor: number;
-  customerId: string | null;
-  customerName: string | null;
-  scheduleId?: string;
-  queueId?: string;
-  contractId?: string;
 }
 
 const WEBHOOK_SOURCE = 'PAYMENT';
@@ -58,57 +51,16 @@ export class PaymentsService {
     private readonly config: ConfigService,
     @Inject(PAYMENT_GATEWAY)
     private readonly gateway: PaymentGateway,
+    private readonly payables: PayableRegistry,
   ) {}
 
   // ─── Online charges (Pagar.me port) ──────────────────────────────────────
 
-  private async resolvePayable(
+  private resolvePayable(
     refType: PaymentRefType,
     refId: string,
   ): Promise<PayableInfo> {
-    if (refType === 'RENTAL_CONTRACT') {
-      const contract = await this.prisma.rentalContract.findUnique({
-        where: { id: refId },
-        include: { customer: { select: { id: true, nome: true } } },
-      });
-      if (!contract) throw new NotFoundException('Contrato não encontrado');
-      return {
-        valor: Number(contract.valorTotalReal ?? contract.valorTotal),
-        customerId: contract.customerId,
-        customerName: contract.customer?.nome ?? null,
-        contractId: contract.id,
-      };
-    }
-    if (refType === 'WASH_SCHEDULE') {
-      const schedule = await this.prisma.washSchedule.findUnique({
-        where: { id: refId },
-        include: {
-          service: { select: { preco: true } },
-          customer: { select: { id: true, nome: true } },
-        },
-      });
-      if (!schedule) throw new NotFoundException('Agendamento não encontrado');
-      return {
-        valor: Number(schedule.service.preco),
-        customerId: schedule.customerId,
-        customerName: schedule.customer?.nome ?? schedule.nomeAvulso ?? null,
-        scheduleId: schedule.id,
-      };
-    }
-    const queue = await this.prisma.washQueue.findUnique({
-      where: { id: refId },
-      include: {
-        service: { select: { preco: true } },
-        customer: { select: { id: true, nome: true } },
-      },
-    });
-    if (!queue) throw new NotFoundException('Item de fila não encontrado');
-    return {
-      valor: Number(queue.service.preco),
-      customerId: queue.customerId,
-      customerName: queue.customer?.nome ?? queue.nomeAvulso ?? null,
-      queueId: queue.id,
-    };
+    return this.payables.resolve(refType, refId);
   }
 
   /**

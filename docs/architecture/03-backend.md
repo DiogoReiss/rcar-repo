@@ -78,3 +78,28 @@ Padrão esperado:
 - `PATCH /rental/contracts/:id/open` e `PATCH /rental/contracts/:id/close` aceitam `fotos?: string[]` nas DTOs de operação.
 - `openContract` e `closeContract` persistem `Inspection.fotos` com os anexos enviados no payload.
 - `closeContract` mantém a regra de cálculo de `valorTotalReal` somando incidentes com `cobradoCliente !== false`.
+
+### Seam `RentalRepository` + evento de domínio `ContratoFechado`
+
+- Todo acesso Prisma do módulo Contrato foi centralizado no seam `RentalRepository` (`abstract class` provida por `PrismaRentalRepository`). O `RentalService` passou a orquestrar regras de negócio e falar apenas com essa interface — sem `prisma.*` nem `include` espalhados, e com um adaptador in-memory usado nos testes.
+- `closeContract` deixou de chamar `PaymentsService` diretamente dentro de um `try/catch` que engolia falhas de cobrança. Após a transação de devolução commitar, o serviço publica o evento de domínio `ContratoFechado` no `DomainEventsService` (barramento in-process global em `common/events`).
+- A Pagamento assina o evento via `ContractClosedListener` e executa a auto-cobrança do saldo em aberto. As falhas de pagamento agora vivem — e são logadas — no módulo Pagamento, não são silenciadas no Contrato.
+- O `DomainEventsService` é `@Global`, então nenhum módulo importa o outro para o evento (evita ciclos de DI); o `RentalModule` só importa `PaymentsModule` pelo `PayableRegistry`.
+
+---
+
+## Destaques recentes — Pagamentos (seam `PayableStrategy`)
+
+- A resolução de cobráveis deixou de ser uma cadeia `if (refType === …)` dentro do `PaymentsService`.
+- Cada módulo de domínio implementa sua própria `PayableStrategy` (`RentalPayableStrategy`, `WashSchedulePayableStrategy`, `WashQueuePayableStrategy`) e se registra no `PayableRegistry` no bootstrap.
+- `PaymentsService` apenas chama `PayableRegistry.resolve(refType, refId)`; adicionar um novo cobrável (ex.: incidente) é um novo arquivo em um único módulo, sem alterar o `PaymentsService`.
+- `ContractClosedListener` reage ao evento `ContratoFechado` do Contrato e dispara a auto-cobrança (`getBalance` + `startCharge`) sem que o Contrato conheça o `PaymentsService`.
+
+---
+
+## Destaques recentes — Atendimento/Estoque (evento `AtendimentoConcluido`)
+
+- A baixa automática de estoque deixou de ser um método privado escondido em `LavajatoService` (`debitStock`) chamado dentro de `updateScheduleStatus`/`advanceQueue`. Ao concluir o atendimento, o serviço publica o evento de domínio `AtendimentoConcluido` no `DomainEventsService` global.
+- O módulo de estoque assina o evento via `StockDeductionService` e executa a baixa. Bugs e falhas de baixa passam a viver — e ser logados — no módulo de inventário, não silenciados no fluxo do lavajato.
+- A regra de custo médio ponderado (ADR-005) foi isolada na função pura `calculateStockMovement` (`stock-movement-calculator.ts`), testável sem banco. A persistência foi movida para o seam `InventoryRepository` (`PrismaInventoryRepository`), que também mantém a baixa automática atômica (D1) em uma única transação, ignorando produtos que ficariam negativos.
+- `InventoryService.createMovement` passou a compor `calculateStockMovement` + `InventoryRepository`, separando cálculo de persistência.
