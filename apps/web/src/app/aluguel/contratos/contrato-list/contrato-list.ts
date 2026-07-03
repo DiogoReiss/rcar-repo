@@ -217,6 +217,13 @@ export default class ContratoListComponent implements OnInit {
         command: () => this.onSendSignature(c),
       });
     }
+    if (this.canWrite() && (c.status === 'RESERVADO' || c.status === 'ATIVO')) {
+      items.push({
+        label: 'Cobrar online (Pix)',
+        icon: 'pi pi-qrcode',
+        command: () => this.onStartPixCharge(c),
+      });
+    }
     if (c.status === 'ATIVO') {
       items.push(
         { label: 'Registrar devolução', icon: 'pi pi-undo',        command: () => this.openDevolucao(c.id) },
@@ -495,6 +502,40 @@ export default class ContratoListComponent implements OnInit {
       });
     } finally {
       this.signingId.set(null);
+    }
+  }
+
+  // ── Online charge (Pagar.me Pix) ──────────────────────────────────────────
+  readonly chargingId = signal<string | null>(null);
+
+  async onStartPixCharge(contract: RentalContract) {
+    if (!this.canWrite()) return;
+    this.chargingId.set(contract.id);
+    try {
+      const res = await firstValueFrom(
+        this.api.post<{ status: string; pixQrCode?: string }>(
+          '/payments/charges',
+          { refType: 'RENTAL_CONTRACT', refId: contract.id, metodo: 'PIX' },
+        ),
+      );
+      this.toast.add({
+        severity: 'success',
+        summary: 'Cobrança Pix iniciada',
+        detail: res.pixQrCode
+          ? `Status: ${res.status} — Pix: ${res.pixQrCode}`
+          : `Status: ${res.status}`,
+        life: 5000,
+      });
+      await this.load();
+    } catch (e: any) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Erro na cobrança',
+        detail: e?.error?.message ?? 'Não foi possível iniciar a cobrança.',
+        life: 4000,
+      });
+    } finally {
+      this.chargingId.set(null);
     }
   }
 

@@ -1,12 +1,159 @@
-import { Injectable } from '@nestjs/common';
-import { PaymentMethod, Prisma } from '@prisma/client';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { PaymentMethod, PaymentRefType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { QueryPaymentsDto } from './dto/query-payments.dto.js';
+import { CreateChargeDto } from './dto/create-charge.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { AuditService } from '../../common/audit/audit.service.js';
+import {
+  PAYMENT_GATEWAY,
+  PaymentGateway,
+  GatewayChargeMethod,
+} from './payment-gateway.js';
+
+interface ActingUser {
+  id?: string;
+  role?: string;
+}
+
+interface PayableInfo {
+  valor: number;
+  customerId: string | null;
+  customerName: string | null;
+  scheduleId?: string;
+  queueId?: string;
+  contractId?: string;
+}
 
 @Injectable()
 export class PaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+    @Inject(PAYMENT_GATEWAY)
+    private readonly gateway: PaymentGateway,
+  ) {}
+
+  // ─── Online charges (Pagar.me port) ──────────────────────────────────────
+
+  private async resolvePayable(
+    refType: PaymentRefType,
+    refId: string,
+  ): Promise<PayableInfo> {
+    if (refType === 'RENTAL_CONTRACT') {
+      const contract = await this.prisma.rentalContract.findUnique({
+        where: { id: refId },
+        include: { customer: { select: { id: true, nome: true } } },
+      });
+      if (!contract) throw new NotFoundException('Contrato não encontrado');
+      return {
+        valor: Number(contract.valorTotalReal ?? contract.valorTotal),
+        customerId: contract.customerId,
+        customerName: contract.customer?.nome ?? null,
+        contractId: contract.id,
+      };
+    }
+    if (refType === 'WASH_SCHEDULE') {
+      const schedule = await this.prisma.washSchedule.findUnique({
+        where: { id: refId },
+        include: {
+          service: { select: { preco: true } },
+          customer: { select: { id: true, nome: true } },
+        },
+      });
+      if (!schedule) throw new NotFoundException('Agendamento não encontrado');
+      return {
+        valor: Number(schedule.service.preco),
+        customerId: schedule.customerId,
+        customerName: schedule.customer?.nome ?? schedule.nomeAvulso ?? null,
+        scheduleId: schedule.id,
+      };
+    }
+    const queue = await this.prisma.washQueue.findUnique({
+      where: { id: refId },
+      include: {
+        service: { select: { preco: true } },
+        customer: { select: { id: true, nome: true } },
+      },
+    });
+    if (!queue) throw new NotFoundException('Item de fila não encontrado');
+    return {
+      valor: Number(queue.service.preco),
+      customerId: queue.customerId,
+      customerName: queue.customer?.nome ?? queue.nomeAvulso ?? null,
+      queueId: queue.id,
+    };
+  }
+
+  /**
+   * Starts an online charge for a payable resource through the
+   * {@link PaymentGateway} port, creating a PENDENTE Payment that records the
+   * external transaction id. Idempotent per payable + method.
+   */
+  async startCharge(dto: CreateChargeDto, user?: ActingUser) {
+    const method: GatewayChargeMethod = dto.metodo ?? 'PIX';
+    const payable = await this.resolvePayable(dto.refType, dto.refId);
+
+    const existing = await this.prisma.payment.findFirst({
+      where: {
+        refType: dto.refType,
+        status: 'PENDENTE',
+        ...(payable.contractId ? { contractId: payable.contractId } : {}),
+        ...(payable.scheduleId ? { scheduleId: payable.scheduleId } : {}),
+        ...(payable.queueId ? { queueId: payable.queueId } : {}),
+      },
+    });
+    if (existing) return existing;
+
+    const charge = await this.gateway.createCharge({
+      amount: payable.valor,
+      method,
+      description: `Cobrança ${dto.refType} ${dto.refId}`,
+      customerName: payable.customerName ?? undefined,
+      cardToken: dto.cardToken,
+      dueDate: dto.dueDate,
+    });
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        refType: dto.refType,
+        contractId: payable.contractId ?? null,
+        scheduleId: payable.scheduleId ?? null,
+        queueId: payable.queueId ?? null,
+        customerId: payable.customerId,
+        valor: new Prisma.Decimal(payable.valor),
+        metodo: method as PaymentMethod,
+        status: 'PENDENTE',
+        pagarmeTxId: charge.externalId,
+      },
+    });
+
+    await this.audit.record({
+      userId: user?.id ?? null,
+      acao: 'PAYMENT_CHARGE_STARTED',
+      entidade: 'Payment',
+      entidadeId: payment.id,
+      detalhes: {
+        refType: dto.refType,
+        refId: dto.refId,
+        metodo: method,
+        externalId: charge.externalId,
+        valor: payable.valor,
+      },
+    });
+
+    return {
+      ...payment,
+      pixQrCode: charge.pixQrCode,
+      boletoUrl: charge.boletoUrl,
+    };
+  }
+
+  async findCharge(id: string) {
+    const payment = await this.prisma.payment.findUnique({ where: { id } });
+    if (!payment) throw new NotFoundException('Pagamento não encontrado');
+    return payment;
+  }
 
   private periodWhere(
     from?: string,

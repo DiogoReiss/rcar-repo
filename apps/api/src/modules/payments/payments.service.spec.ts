@@ -13,7 +13,11 @@ describe('PaymentsService', () => {
   it('returns paginated payment list', async () => {
     prisma.payment.findMany.mockResolvedValue([{ id: 'p1' }]);
     prisma.payment.count.mockResolvedValue(1);
-    const service = new PaymentsService(prisma as never);
+    const service = new PaymentsService(
+      prisma as never,
+      { record: jest.fn() } as never,
+      {} as never,
+    );
 
     const result = await service.findAll({}, { page: 1, perPage: 20 });
 
@@ -27,7 +31,11 @@ describe('PaymentsService', () => {
       { metodo: 'PIX', valor: 20 },
       { metodo: 'DINHEIRO', valor: 5 },
     ]);
-    const service = new PaymentsService(prisma as never);
+    const service = new PaymentsService(
+      prisma as never,
+      { record: jest.fn() } as never,
+      {} as never,
+    );
 
     const result = await service.methodSummary({});
 

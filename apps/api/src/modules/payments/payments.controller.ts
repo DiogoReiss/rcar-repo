@@ -1,4 +1,15 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -8,19 +19,41 @@ import {
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { PaymentsService } from './payments.service.js';
 import { QueryPaymentsDto } from './dto/query-payments.dto.js';
+import { CreateChargeDto } from './dto/create-charge.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @ApiTags('Payments')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('GESTOR_GERAL')
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @Post('charges')
+  @Roles('GESTOR_GERAL', 'OPERADOR')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Inicia cobrança online (Pix) sobre um recurso pagável',
+  })
+  startCharge(
+    @Body() dto: CreateChargeDto,
+    @CurrentUser() user: { id?: string; role?: string },
+  ) {
+    return this.paymentsService.startCharge(dto, user);
+  }
+
+  @Get('charges/:id')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
+  @ApiOperation({ summary: 'Status de uma cobrança' })
+  findCharge(@Param('id', ParseUUIDPipe) id: string) {
+    return this.paymentsService.findCharge(id);
+  }
+
   @Get()
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({
     summary: 'Lista pagamentos com filtros globais (financeiro)',
   })
@@ -37,6 +70,7 @@ export class PaymentsController {
   }
 
   @Get('method-summary')
+  @Roles('GESTOR_GERAL')
   @ApiOperation({
     summary:
       'Resumo financeiro por método de pagamento (valor, quantidade, percentual)',
@@ -50,6 +84,7 @@ export class PaymentsController {
   }
 
   @Get('reconciliation')
+  @Roles('GESTOR_GERAL')
   @ApiOperation({
     summary: 'Reconciliação de pagamentos pendentes há mais de N dias',
   })
