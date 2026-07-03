@@ -340,6 +340,8 @@ model RentalContract {
   pdfUrl          String?        @map("pdf_url")
   d4signId        String?        @map("d4sign_id")
   d4signStatus    String?        @map("d4sign_status")
+  signedDocumentKey     String?  @map("signed_document_key")
+  assinaturaObrigatoria Boolean  @default(false) @map("assinatura_obrigatoria")
   unidadeId       String?        @map("unidade_id")
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
@@ -491,6 +493,20 @@ model AuditLog {
 
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+/// Idempotency ledger for inbound provider webhooks (signatures, payments).
+/// A (source, eventId) pair is processed at most once.
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  source    String
+  eventId   String   @map("event_id")
+  status    String?
+  detalhes  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([source, eventId])
+  @@map("webhook_events")
 }
 
 // S2: Password reset tokens (time-limited, single-use)

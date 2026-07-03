@@ -169,6 +169,12 @@ export class RentalService {
     if (contract.status !== 'RESERVADO')
       throw new BadRequestException('Contrato não está em status RESERVADO');
 
+    if (contract.assinaturaObrigatoria && contract.d4signStatus !== 'SIGNED') {
+      throw new BadRequestException(
+        'Contrato exige assinatura concluída antes da ativação.',
+      );
+    }
+
     await this.prisma.$transaction([
       this.prisma.rentalContract.update({
         where: { id },

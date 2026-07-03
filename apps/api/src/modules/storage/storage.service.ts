@@ -90,6 +90,41 @@ export class StorageService {
     };
   }
 
+  /**
+   * Stores an object directly (server-side) in the private bucket, e.g. a
+   * signed contract PDF fetched from the signature provider. Returns the key.
+   */
+  async putObject(
+    body: Buffer,
+    fileName: string,
+    contentType: string,
+    folder = 'signed-contracts',
+  ): Promise<string> {
+    const objectKey = this.buildObjectKey(fileName, folder);
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: objectKey,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+    return objectKey;
+  }
+
+  /** Signed, time-limited download URL for a stored object key. */
+  async getSignedUrlForKey(
+    objectKey: string,
+    downloadName?: string,
+    expiresInSeconds?: number,
+  ) {
+    return this.getSignedDownloadUrl({
+      objectKey,
+      downloadName,
+      expiresInSeconds,
+    });
+  }
+
   private buildObjectKey(fileName: string, folder?: string): string {
     const safeFolder =
       this.normalizeSegment(folder ?? 'documents') || 'documents';
