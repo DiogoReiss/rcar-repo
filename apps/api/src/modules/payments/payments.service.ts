@@ -1,10 +1,25 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentMethod, PaymentRefType, Prisma } from '@prisma/client';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  PaymentMethod,
+  PaymentRefType,
+  PaymentStatus,
+  Prisma,
+} from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { QueryPaymentsDto } from './dto/query-payments.dto.js';
 import { CreateChargeDto } from './dto/create-charge.dto.js';
+import { PaymentWebhookDto } from './dto/payment-webhook.dto.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 import { AuditService } from '../../common/audit/audit.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { verifyHmacSignature } from '../../common/webhooks/webhook-signature.util.js';
 import {
   PAYMENT_GATEWAY,
   PaymentGateway,
@@ -25,11 +40,17 @@ interface PayableInfo {
   contractId?: string;
 }
 
+const WEBHOOK_SOURCE = 'PAYMENT';
+
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
+    private readonly config: ConfigService,
     @Inject(PAYMENT_GATEWAY)
     private readonly gateway: PaymentGateway,
   ) {}
@@ -153,6 +174,138 @@ export class PaymentsService {
     const payment = await this.prisma.payment.findUnique({ where: { id } });
     if (!payment) throw new NotFoundException('Pagamento não encontrado');
     return payment;
+  }
+
+  /**
+   * Reconciles a Payment from an inbound gateway webhook. Authenticated via
+   * HMAC signature and idempotent: a repeated (source, eventId) is a no-op, so
+   * duplicated webhooks never count a payment twice. On CONFIRMED, emails the
+   * customer a receipt (comprovante).
+   */
+  async handleWebhook(dto: PaymentWebhookDto, signatureHeader?: string) {
+    const secret = this.config.get<string>(
+      'PAYMENT_WEBHOOK_SECRET',
+      'dev-payment-secret',
+    );
+    const authentic = verifyHmacSignature(
+      secret,
+      `${dto.eventId}.${dto.externalId}.${dto.status}`,
+      signatureHeader,
+    );
+    if (!authentic) {
+      throw new ForbiddenException('Assinatura do webhook inválida.');
+    }
+
+    try {
+      await this.prisma.webhookEvent.create({
+        data: {
+          source: WEBHOOK_SOURCE,
+          eventId: dto.eventId,
+          status: dto.status,
+          detalhes: { externalId: dto.externalId },
+        },
+      });
+    } catch {
+      this.logger.log(
+        `Webhook de pagamento duplicado ignorado (eventId=${dto.eventId})`,
+      );
+      return { received: true, duplicate: true };
+    }
+
+    const payment = await this.prisma.payment.findFirst({
+      where: { pagarmeTxId: dto.externalId },
+      include: {
+        customer: { select: { nome: true, email: true, telefone: true } },
+      },
+    });
+    if (!payment) {
+      this.logger.warn(
+        `Webhook de pagamento sem Payment correspondente (externalId=${dto.externalId})`,
+      );
+      return { received: true, matched: false };
+    }
+
+    const newStatus: PaymentStatus =
+      dto.status === 'CONFIRMED' ? 'CONFIRMADO' : 'CANCELADO';
+
+    // Idempotent at the domain level too: skip if already in a terminal state.
+    if (payment.status === newStatus) {
+      return { received: true, paymentId: payment.id, status: newStatus };
+    }
+
+    await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: newStatus },
+    });
+
+    await this.audit.record({
+      acao: `PAYMENT_WEBHOOK_${dto.status}`,
+      entidade: 'Payment',
+      entidadeId: payment.id,
+      detalhes: { eventId: dto.eventId, externalId: dto.externalId },
+    });
+
+    if (newStatus === 'CONFIRMADO') {
+      await this.sendReceiptEmail(payment);
+    }
+
+    return { received: true, paymentId: payment.id, status: newStatus };
+  }
+
+  /** Payment receipt (comprovante) — available once confirmed. */
+  async getReceipt(id: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      include: {
+        customer: { select: { nome: true, cpfCnpj: true } },
+      },
+    });
+    if (!payment) throw new NotFoundException('Pagamento não encontrado');
+    if (payment.status !== 'CONFIRMADO') {
+      throw new NotFoundException(
+        'Comprovante disponível apenas para pagamentos confirmados.',
+      );
+    }
+    return {
+      comprovante: payment.id,
+      valor: Number(payment.valor),
+      metodo: payment.metodo,
+      status: payment.status,
+      refType: payment.refType,
+      transacaoExterna: payment.pagarmeTxId,
+      cliente: payment.customer?.nome ?? null,
+      data: payment.updatedAt,
+    };
+  }
+
+  private async sendReceiptEmail(payment: {
+    id: string;
+    valor: Prisma.Decimal;
+    metodo: PaymentMethod;
+    customer?: {
+      nome: string;
+      email: string | null;
+      telefone: string | null;
+    } | null;
+  }) {
+    const customer = payment.customer;
+    if (!customer?.email && !customer?.telefone) return;
+    await this.notifications.notify('EMAIL', {
+      recipient: {
+        nome: customer.nome,
+        email: customer.email,
+        phone: customer.telefone,
+      },
+      subject: '✅ Pagamento confirmado — RCar',
+      text: `Olá ${customer.nome}, recebemos seu pagamento de R$ ${Number(
+        payment.valor,
+      ).toFixed(2)} (${payment.metodo}). Comprovante: ${payment.id}`,
+      html: `<p>Olá <strong>${customer.nome}</strong>,</p>
+             <p>Recebemos seu pagamento de <strong>R$ ${Number(
+               payment.valor,
+             ).toFixed(2)}</strong> (${payment.metodo}).</p>
+             <p>Comprovante: <code>${payment.id}</code></p>`,
+    });
   }
 
   private periodWhere(

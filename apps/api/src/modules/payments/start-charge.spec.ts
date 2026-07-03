@@ -33,6 +33,8 @@ describe('PaymentsService.startCharge', () => {
     const service = new PaymentsService(
       prisma as never,
       audit as never,
+      { notify: jest.fn() } as never,
+      { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
     );
 
@@ -59,6 +61,8 @@ describe('PaymentsService.startCharge', () => {
     const service = new PaymentsService(
       prisma as never,
       audit as never,
+      { notify: jest.fn() } as never,
+      { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
     );
 
@@ -82,6 +86,8 @@ describe('PaymentsService.startCharge', () => {
     const service = new PaymentsService(
       prisma as never,
       audit as never,
+      { notify: jest.fn() } as never,
+      { get: (_k: string, def: string) => def } as never,
       new FakePaymentGateway(),
     );
 

@@ -52,6 +52,13 @@ export class PaymentsController {
     return this.paymentsService.findCharge(id);
   }
 
+  @Get(':id/receipt')
+  @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA', 'CLIENTE')
+  @ApiOperation({ summary: 'Comprovante de um pagamento confirmado' })
+  receipt(@Param('id', ParseUUIDPipe) id: string) {
+    return this.paymentsService.getReceipt(id);
+  }
+
   @Get()
   @Roles('GESTOR_GERAL', 'OPERADOR', 'OPERADOR_LEITURA')
   @ApiOperation({
