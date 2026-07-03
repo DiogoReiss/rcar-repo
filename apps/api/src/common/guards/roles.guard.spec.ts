@@ -73,9 +73,7 @@ describe('RolesGuard', () => {
   });
 
   it('should deny OPERADOR_LEITURA when only OPERADOR is required', () => {
-    jest
-      .spyOn(reflector, 'getAllAndOverride')
-      .mockReturnValue(['OPERADOR']);
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['OPERADOR']);
     const ctx = createMockContext({ role: 'OPERADOR_LEITURA' });
     expect(guard.canActivate(ctx)).toBe(false);
   });

@@ -8,5 +8,6 @@ import { HtmlPdfRendererService } from './html-pdf-renderer.service.js';
   imports: [TemplatesModule],
   controllers: [DocumentsController],
   providers: [DocumentsService, HtmlPdfRendererService],
+  exports: [DocumentsService],
 })
 export class DocumentsModule {}

@@ -67,6 +67,29 @@ You are working in the Angular application `project-name`. Keep this file focuse
 - `*.browser.spec.ts` is for Vitest browser-mode integration tests.
 - `e2e/*.spec.ts` is for Playwright end-to-end tests.
 
+## Documentation Sync (update docs with every change)
+
+Treat documentation as part of the definition of done. Whenever a change affects behavior, structure, or scope, update the matching doc in the **same** change. Do not duplicate detail across docs — put it in the owning doc and link to it.
+
+| When you change... | Update this doc |
+|---|---|
+| Prisma schema, models, enums, or relations (`apps/api/prisma/schema.prisma`) | `docs/architecture/04-database.md` |
+| Backend modules or API endpoints (`apps/api/src/modules/**`) | `docs/architecture/03-backend.md` (Swagger is the live endpoint reference) |
+| Frontend feature areas, routing, or shared UI structure (`apps/web/src/app/**`) | `docs/architecture/02-frontend.md` |
+| Business rules, access roles/RBAC, or domain flows | `docs/architecture/01-business.md` |
+| Financial/reporting logic (COGS, pricing, DRE, stock valuation) | `docs/architecture/06-financeiro.md` |
+| Completing, starting, or reprioritizing work; feature ships or is deferred | `docs/architecture/05-todo.md` (canonical status/roadmap — keep its date current) |
+| Introducing a new domain term (ubiquitous language) | `docs/architecture/glossario.md` |
+| Making a notable architectural/tech decision | `docs/architecture/adr.md` (append a short ADR) |
+| Setup, scripts, env vars, prerequisites, or high-level overview | `README.md` (keep it quickstart + overview + links only) |
+
+Rules:
+- `docs/architecture/05-todo.md` is the single source of truth for project status/roadmap — never track status elsewhere.
+- Mark unimplemented-but-documented scope as `🔴 Planejado — não implementado`; never document planned work as if shipped.
+- Keep `README.md` slim: link out to the architecture docs instead of duplicating API tables, schema, or status.
+- Do not recreate a `docs/progress/` folder; historical status lives only in `05-todo.md`.
+- Docs are written in Portuguese — match the existing language and tone.
+
 ## Documentation Boundaries
 
 - Keep factual repository context in `AGENTS.md`.

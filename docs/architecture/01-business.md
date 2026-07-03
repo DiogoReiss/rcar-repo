@@ -2,195 +2,125 @@
 
 ## Visão Geral
 
-A RCar é uma holding familiar que opera dois negócios:
+A RCar opera dois negócios em uma única plataforma:
 
-1. **RCar Lavajato** — Serviços de lavagem automotiva (agendamento online + atendimento presencial)
-2. **RCar Renting** — Aluguel de veículos para pessoa física e jurídica
+1. **RCar Lavajato** — agendamento e atendimento presencial
+2. **RCar Renting** — aluguel de veículos (PF e PJ)
 
-Ambos são gerenciados por um painel administrativo unificado: **RCar Admin**.
+Administração centralizada no **RCar Admin**.
+
+> Linguagem de domínio consolidada em [`glossario.md`](./glossario.md).
 
 ---
 
 ## Perfis de Acesso
 
-| Perfil         | Descrição                                                        |
-|----------------|------------------------------------------------------------------|
-| `gestor_geral` | Sócios/gestores — acesso total a módulos, relatórios e configs   |
-| `operador`     | Funcionários — visualiza agendamentos, fila, contratos ativos    |
-| `operador_leitura` | Funcionários com acesso somente leitura — visualiza fluxos de serviços sem poder criar/editar/concluir |
-| `cliente`      | Cliente final — reserva, acompanha histórico, envia documentos   |
+| Perfil | Descrição |
+|---|---|
+| `GESTOR_GERAL` | Acesso total de operação, financeiro, administração e configurações |
+| `OPERADOR` | Operação diária com permissões de criação/edição/conclusão |
+| `OPERADOR_LEITURA` | Acesso somente leitura para fluxos operacionais (sem criação/edição/conclusão) |
+| `CLIENTE` | Acesso ao portal do cliente, limitado aos próprios dados |
 
-> Inicialmente 3 funcionários. A estrutura de permissões deve ser extensível via banco de dados.
+Regras de autorização devem permanecer em RBAC (backend + frontend), com separação clara entre leitura e escrita.
 
 ---
 
 ## Módulo: RCar Admin
 
-### Funcionalidades
+### Capacidades
 
-| Área              | Descrição                                                                 |
-|-------------------|---------------------------------------------------------------------------|
-| Dashboard         | KPIs diários: agendamentos, veículos alugados, receita estimada, alertas  |
-| Gestão de Usuários| CRUD de funcionários com atribuição de perfil                             |
-| Catálogo de Serviços | CRUD de serviços do lavajato (nome, preço, duração). Ativar/desativar sem perder histórico |
-| Gestão de Estoque | CRUD de produtos do lavajato (insumos). Controle de entradas/saídas e alertas de estoque baixo |
-| Gestão da Frota   | CRUD de veículos (5 inicialmente, com previsão de crescimento)            |
-| Gestão de Clientes| Clientes PF (CPF, CNH) e PJ (CNPJ, responsável)                          |
-| Templates         | CRUD de templates de documentos com variáveis. Geração de PDF             |
-| Relatórios        | Receita por período, por módulo, ticket médio, ocupação da frota          |
+- Dashboard operacional e financeiro
+- Gestão de usuários e perfis
+- Catálogo de serviços do lavajato
+- Gestão de estoque e movimentações
+- Gestão de frota e manutenções
+- Gestão de clientes PF/PJ
+- Templates de documentos
+- Relatórios e exportações
 
-### Regras Importantes
+### Regras importantes
 
-- Serviços desativados preservam referências no histórico de atendimentos.
-- Veículos em status `alugado` ou `manutenção` não aparecem como disponíveis para reserva.
-- Templates usam variáveis dinâmicas (`{{cliente.nome}}`, `{{veiculo.placa}}`, etc.) e geram PDF.
-- Relatórios exportáveis em CSV e PDF.
-- Produtos do estoque podem ser vinculados a serviços (relação N:N com quantidade por uso).
-- Alertas de estoque baixo exibidos no dashboard quando `quantidadeAtual <= estoqueMinimo`.
-- Movimentações de estoque registram: tipo (ENTRADA/SAIDA/AJUSTE), quantidade, motivo e quem fez.
+- Serviços desativados não perdem histórico.
+- Veículo em `ALUGADO`/`MANUTENCAO` não aparece como disponível.
+- Estoque baixo deve gerar alerta de operação.
+- Todo evento crítico deve ser auditável.
 
 ---
 
 ## Módulo: RCar Lavajato
 
-### Fluxo de Agendamento Online
+### Fluxo de agendamento
 
-```
-Cliente acessa portal → Seleciona serviço(s) → Escolhe data/hora disponível
-→ Identifica-se (login ou avulso) → Confirma → Recebe confirmação por e-mail
-```
+Cliente escolhe serviço e horário, confirma e recebe retorno por e-mail.
 
-### Fluxo de Atendimento Presencial (Fila)
+### Fluxo de fila presencial
 
-```
-Cliente chega → Operador adiciona à fila (avulso ou cadastrado)
-→ Serviço + placa registrados → Status: aguardando → em atendimento → concluído
-→ Pagamento registrado (método) → Recibo gerado via template
-```
+Operador registra atendimento na **fila** → evolução de status → pagamento registrado → emissão de recibo via template.
 
-### Regras Importantes
+### Regras
 
-- A lista de serviços é dinâmica e gerenciada pelo Admin.
-- Serviço inicial: _Lavagem Simples_.
-- Horários disponíveis calculados pela duração do serviço + slots configuráveis.
-- Cancelamento permitido com antecedência configurável (ex: 2h antes).
-- Pagamento apenas **registrado** no sistema (não processado online por enquanto).
-- Métodos aceitos: dinheiro, Pix, cartão crédito/débito.
+- Serviços são dinâmicos (admin).
+- Disponibilidade baseada em slot e duração.
+- Pagamento registrado no sistema (não processado online no estado atual).
 
 ---
 
 ## Módulo: RCar Renting
 
-### Fluxo de Reserva Online
+### Fluxo de reserva
 
-```
-Cliente acessa portal → Seleciona categoria → Define período (retirada/devolução)
-→ Vê valor estimado → Upload de CNH (se novo) → Confirma reserva → E-mail automático
-```
+Cliente consulta disponibilidade por período, envia documentos e confirma reserva.
 
-### Fluxo de Abertura de Contrato
+### Abertura de contrato
 
-```
-Operador vincula reserva a veículo → Vistoria de saída (checklist + fotos + combustível)
-→ Registra caução e seguro → Gera contrato PDF via template
-→ Assinatura digital (integração D4Sign) → Contrato ativo
-```
+Operador vincula veículo, executa vistoria de saída e gera documentação.
 
-### Fluxo de Devolução
+- Assinatura digital (integração D4Sign) — **🔴 Planejado — não implementado**
 
-```
-Cliente devolve → Vistoria de chegada (checklist + fotos)
-→ Comparativo entrada vs. saída → Cobrança de extras (se houver)
-→ Liberação de caução → Veículo volta para status 'disponível'
-```
+### Devolução
 
-### Regras Importantes
+Vistoria de chegada, apuração de extras e fechamento financeiro.
 
-- Frota inicial: 5 veículos. Estrutura preparada para crescimento.
-- Modalidades: diária, semanal, mensal.
-- Caução e seguro registrados no contrato (cobrança futura via Pagar.me).
-- Documentos obrigatórios para locação PF: CNH válida.
-- Documentos obrigatórios para locação PJ: contrato social + CNH do condutor.
-- Alertas de devolução: D-1, no dia, atrasado.
-- Extensão de prazo deve ser registrada com novo valor calculado.
-- Ocorrências (sinistro, multa, avaria) vinculadas ao contrato.
+### Regras
 
-### Operação em Lote e Cobrança Recorrente
+- Caução/seguro fazem parte do contrato.
+- Cobrança online via Pagar.me — **🔴 Planejado — não implementado**
+- Ocorrências/incidentes devem ficar vinculadas ao contrato.
 
-```
-Gestor cadastra acordo em lote → Seleciona cliente com múltiplos veículos
-→ Define veículos vinculados, modalidade e recorrência (mensal/anual)
-→ Sistema cria contrato-mestre + vínculos individuais por veículo
-→ A cada ciclo, gera cobrança recorrente consolidada
-→ Cliente pode solicitar troca de veículo dentro do pool disponível na renovação
-→ Gestor aprova ajustes, extensões e reemissão de cobrança quando necessário
-```
+### Operação em Lote e Cobrança Recorrente — **🔴 Planejado — não implementado**
 
-#### Regras de Negócio
-
-- Apenas `gestor_geral` pode criar, editar e encerrar acordos em lote.
-- O cliente final pode apenas consultar seus acordos ativos e solicitar troca de veículo na renovação.
-- Cada acordo em lote pertence a um único cliente e pode conter múltiplos veículos ativos ao mesmo tempo.
-- A cobrança é recorrente e consolidada por período, com geração de uma referência financeira por ciclo.
-- A operação deve suportar recorrência mensal e anual no primeiro momento; outras frequências ficam para expansão futura.
-- A troca de veículo só pode ocorrer com veículos disponíveis no momento da renovação e deve preservar histórico do acordo.
-- Vínculos, extensões e substituições devem manter rastreabilidade por veículo, período e usuário responsável.
-- Descontos por volume não entram na primeira versão; a precificação segue a tabela normal da locação, com possibilidade de extensão futura.
+Escopo previsto para acordos com múltiplos veículos, contrato-mestre e cobrança consolidada recorrente. Mantido como trilha futura de negócio.
 
 ---
 
 ## Módulo: RCar Financeiro
 
-> Detalhado em [`06-financeiro.md`](./06-financeiro.md)
+Detalhamento completo em [`06-financeiro.md`](./06-financeiro.md).
 
-### Demonstrativo Financeiro (DRE Simplificado)
+Pontos de domínio:
 
-O gestor deve visualizar um resumo mensal com:
-
-```
-RECEITA BRUTA
-  (+) Receita Lavajato .......... pagamentos confirmados (wash)
-  (+) Receita Aluguel ........... pagamentos confirmados (rental)
-  (+) Extras de Aluguel ......... incidentes cobrados do cliente
-  ────────────────────────────────────────────────────
-  = RECEITA TOTAL
-
-CUSTOS DIRETOS
-  (-) Insumos Lavajato .......... saídas de estoque × custo unitário
-  (-) Manutenção Frota .......... soma de vehicle_maintenances.custo
-  ────────────────────────────────────────────────────
-  = MARGEM BRUTA
-```
-
-### Regras Financeiras
-
-- **Estoque (COGS):** Ao concluir um serviço de lavagem, o sistema deve registrar automaticamente saídas de estoque para cada insumo vinculado (relação `ServiceProduct`), reduzindo `quantidadeAtual` e alimentando o cálculo de COGS.
-- **Custo médio ponderado:** O `custoUnitario` do produto é recalculado a cada entrada de estoque pela fórmula: `(qtyAnterior × custoAnterior + qtyEntrada × custoEntrada) / (qtyAnterior + qtyEntrada)`.
-- **Valoração do estoque:** O valor total em estoque = `Σ (quantidadeAtual × custoUnitario)`.
-- **Manutenção:** Cada manutenção registra custo, tipo (preventiva/corretiva/sinistro) e fornecedor. O sistema agrega custo por veículo e por período.
-- **Receita de aluguel:** Distingue `valorTotal` (previsto), `valorTotalReal` (com extras na devolução) e receita efetivamente recebida (soma de pagamentos confirmados).
-- **Contas a receber:** Contratos encerrados cuja soma de pagamentos confirmados seja menor que `valorTotalReal` geram alerta de inadimplência.
-- **Incidentes:** Registram `valor` e flag `cobradoCliente`. Tipos cobrados somam ao `valorTotalReal`.
-- **Rentabilidade por veículo:** `(Receita acumulada − Manutenção acumulada) / veículo`.
+- Receita por lavagem e aluguel
+- Custo de manutenção de frota
+- COGS por insumos do lavajato
+- Contas a receber e rentabilidade
 
 ---
 
 ## Integrações Externas
 
-| Serviço    | Finalidade                                      | Fase       |
-|------------|-------------------------------------------------|------------|
-| Pagar.me   | Gateway de pagamento (Pix, cartão, boleto)      | Fase 2     |
-| D4Sign     | Assinatura digital de contratos com validade jurídica | Fase 1 |
-| SMTP/SES   | Envio de e-mails (confirmações, lembretes)      | Fase 1     |
-| WhatsApp API| Notificações (lembrete devolução, status fila) | Fase 3     |
+| Serviço | Finalidade | Status |
+|---|---|---|
+| SMTP/SES | E-mails transacionais (confirmações, recuperação, notificações) | 🟢 Implementado |
+| D4Sign | Assinatura digital de documentos de aluguel | 🔴 Planejado — não implementado |
+| Pagar.me | Pagamentos online (Pix/cartão/boleto) | 🔴 Planejado — não implementado |
+| WhatsApp API | Notificações de operação e relacionamento | 🔴 Planejado — não implementado |
 
 ---
 
 ## Regras Transversais
 
-- Todo registro financeiro deve conter: valor, método, data, referência (lavagem ou aluguel) e **quem registrou** (usuário operador/gestor responsável).
-- Histórico de ações críticas (login, criação de contrato, alteração de status, **criação/edição de serviços e seus detalhes**) deve ser logado com identificação do usuário, timestamp e snapshot dos dados alterados.
-- Dados sensíveis (CNH, documentos) armazenados com acesso restrito (S3 privado com URLs assinadas).
-- O sistema deve funcionar 100% web, sem necessidade de instalação nativa.
-
-
+- Todo registro financeiro deve conter valor, método, data e usuário responsável.
+- Toda ação crítica deve ser auditável.
+- Documentos sensíveis devem usar armazenamento privado com URL assinada.
+- Sistema web-first, com operação administrativa e portal do cliente.

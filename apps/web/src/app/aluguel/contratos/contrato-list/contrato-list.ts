@@ -6,6 +6,7 @@ import { MessageService } from 'primeng/api';
 import { Dialog } from 'primeng/dialog';
 import type { RowMenuItem } from '@shared/components/row-menu/row-menu';
 import { ApiService } from '@core/services/api.service';
+import { AuthService } from '@core/auth/services/auth.service';
 import { firstValueFrom } from 'rxjs';
 import {
   RentalContract, PaginatedResponse, PaymentMethod, Vehicle, Customer,
@@ -44,6 +45,15 @@ interface TemplateRef {
 export default class ContratoListComponent implements OnInit {
   private readonly api    = inject(ApiService);
   private readonly toast  = inject(MessageService);
+  private readonly auth   = inject(AuthService);
+
+  /** Write actions (open, pay, send-for-signature) are restricted to managers/operators. */
+  readonly canWrite = computed(() => {
+    const role = this.auth.currentUser()?.role;
+    return role === 'GESTOR_GERAL' || role === 'OPERADOR';
+  });
+
+  readonly signingId = signal<string | null>(null);
 
   // ── List state ────────────────────────────────────────────────────────────
   readonly contracts = signal<RentalContract[]>([]);
@@ -199,6 +209,13 @@ export default class ContratoListComponent implements OnInit {
         { label: 'Abrir contrato', icon: 'pi pi-play',          command: () => this.openAbertura(c.id) },
         { label: 'Cancelar',       icon: 'pi pi-times-circle', danger: true, command: () => this.cancelTarget.set(c.id) },
       );
+    }
+    if (this.canWrite() && c.status !== 'CANCELADO' && c.d4signStatus !== 'SIGNED') {
+      items.push({
+        label: 'Enviar para assinatura',
+        icon: 'pi pi-pencil',
+        command: () => this.onSendSignature(c),
+      });
     }
     if (c.status === 'ATIVO') {
       items.push(
@@ -459,6 +476,28 @@ export default class ContratoListComponent implements OnInit {
     } finally { this.saving.set(false); }
   }
 
+  // ── Signature ─────────────────────────────────────────────────────────────
+  async onSendSignature(contract: RentalContract) {
+    if (!this.canWrite()) return;
+    this.signingId.set(contract.id);
+    try {
+      await firstValueFrom(
+        this.api.post(`/signatures/contracts/${contract.id}/send`, {}),
+      );
+      this.toast.add({ severity: 'success', summary: 'Contrato enviado para assinatura', life: 3000 });
+      await this.load();
+    } catch (e: any) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Erro ao enviar para assinatura',
+        detail: e?.error?.message ?? 'Não foi possível enviar o contrato.',
+        life: 4000,
+      });
+    } finally {
+      this.signingId.set(null);
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   catLabel(c: string) {
     return ({
@@ -470,5 +509,10 @@ export default class ContratoListComponent implements OnInit {
   formatDate(d: string) { return new Date(d).toLocaleDateString('pt-BR'); }
   formatDateTime(d: string) { return new Date(d).toLocaleString('pt-BR'); }
   formatPrice(v: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
-  d4signClass(s: string) { return s === 'SIGNED' ? 'badge--success' : s === 'PENDING' ? 'badge--warning' : 'badge--inactive'; }
+  d4signClass(s: string) {
+    if (s === 'SIGNED') return 'badge--success';
+    if (s === 'PENDING') return 'badge--warning';
+    if (s === 'CANCELLED' || s === 'EXPIRED') return 'badge--danger';
+    return 'badge--inactive';
+  }
 }
